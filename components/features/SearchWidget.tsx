@@ -69,7 +69,7 @@ export default function SearchWidget() {
   const labelClass = "block text-[0.72rem] font-bold tracking-[0.04em] uppercase text-[#9690a0] mb-[3px]";
 
   return (
-    <div className="relative -mt-18 mx-auto max-w-245 z-5 px-6">
+    <div className="relative -mt-18 mx-auto max-w-270 z-5 px-6">
       <div className="bg-white rounded-[20px] shadow-custom p-2.5 border border-line">
         <div className="flex gap-1 p-[4px_6px_12px] flex-wrap border-b border-line mb-2.5">
           {categories.map((cat) => (

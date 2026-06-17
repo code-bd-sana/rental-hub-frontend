@@ -28,7 +28,7 @@ export default async function Home() {
             />
           </div>
           <div className="absolute inset-0 bg-linear-to-b from-[rgba(26,10,46,0.6)] to-[rgba(26,10,46,0.92)]"></div>
-          <div className="relative pt-19.5 pb-32.5 text-center text-white max-w-300 mx-auto px-6">
+          <div className="relative pt-23.5 pb-40 text-center text-white max-w-300 mx-auto px-6">
             <div className="inline-flex gap-2 items-center mb-5.5 px-4 py-1.75 border border-[rgba(255,255,255,0.2)] rounded-full text-[0.8rem] tracking-[0.12em] uppercase">
               Suriname · for all your rental needs
             </div>

@@ -1,12 +1,12 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Service } from '../../lib/types';
-import { formatCurrency } from '../../lib/utils';
 
 export default function ServiceCard({ service }: { service: Service }) {
   return (
     <Link href={`/services/${service.id}`} className="scard">
-      <div className="ph">
-        <img src={service.image} alt={service.name} />
+      <div className="ph" style={{ position: 'relative', width: '100%', aspectRatio: '4/3' }}>
+        <Image src={service.image} alt={service.name} fill style={{ objectFit: 'cover' }} />
       </div>
       <div className="body">
         <div className="name">{service.name}</div>

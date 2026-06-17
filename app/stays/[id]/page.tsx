@@ -1,6 +1,7 @@
 import { getPropertyById } from "../../../lib/api/properties";
 import { formatCurrency } from "../../../lib/utils";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 export default async function StaysDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -28,7 +29,9 @@ export default async function StaysDetail({ params }: { params: Promise<{ id: st
         
         <div className="gallery" id="propGallery">
           {property.images.map((img, idx) => (
-            <img key={idx} src={img} alt={`${property.title} ${idx + 1}`} className={idx === 0 ? "main" : ""} />
+            <div key={idx} className={idx === 0 ? "main" : ""} style={{ position: 'relative', width: '100%', height: '100%', minHeight: '200px' }}>
+              <Image src={img} alt={`${property.title} ${idx + 1}`} fill style={{ objectFit: 'cover', borderRadius: '14px' }} />
+            </div>
           ))}
         </div>
 

@@ -1,6 +1,7 @@
 import { getCarById } from "../../../lib/api/cars";
 import { formatCurrency } from "../../../lib/utils";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 export default async function CarsDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -24,9 +25,9 @@ export default async function CarsDetail({ params }: { params: Promise<{ id: str
         </div>
         <div className="split">
           <div>
-            <div className="car-photo big">
+            <div className="car-photo big" style={{ position: 'relative', width: '100%', minHeight: '300px' }}>
               <span className="example-tag"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" /><path d="M12 8v5m0 3h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>Example photo</span>
-              <img src={car.images[0]} alt={car.model} />
+              <Image src={car.images[0]} alt={car.model} fill style={{ objectFit: 'contain' }} />
             </div>
             <h1>{car.brand} {car.model}</h1>
             <div className="text-muted mb-4">{car.model} <span style={{ fontWeight: 500 }}>or similar</span></div>

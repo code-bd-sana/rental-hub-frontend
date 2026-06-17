@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Car } from '../../lib/types';
 import { formatCurrency } from '../../lib/utils';
 
@@ -6,7 +7,7 @@ export default function CarCard({ car }: { car: Car }) {
   return (
     <Link href={`/cars/${car.id}`} className="scard">
       <div className="ph car-photo" style={{ aspectRatio: '4/3' }}>
-        <img src={car.images[0]} alt={car.model} />
+        <Image src={car.images[0]} alt={car.model} fill style={{ objectFit: 'cover' }} />
       </div>
       <div className="body">
         <div className="name">{car.model}</div>

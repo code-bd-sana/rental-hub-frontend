@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Property } from '../../lib/types';
 import { formatCurrency } from '../../lib/utils';
 
@@ -12,7 +13,7 @@ export default function PropertyCard({ property }: { property: Property }) {
         ) : (
           <span className="tag na-tag">Not available</span>
         )}
-        <img src={property.images[0]} alt={property.title} />
+        <Image src={property.images[0]} alt={property.title} fill style={{ objectFit: 'cover' }} />
         <span className="heart">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
             <path d="M12 20s-7-4.5-9.5-9C1 7 3 4 6 4c2 0 3 1.3 4 3 1-1.7 2-3 4-3 3 0 5 3 3.5 7C19 15.5 12 20 12 20Z" stroke="#555" strokeWidth="1.8" />

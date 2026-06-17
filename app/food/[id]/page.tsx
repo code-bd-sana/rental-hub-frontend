@@ -1,6 +1,7 @@
 import { getServiceById } from "../../../lib/api/services";
 import { formatCurrency } from "../../../lib/utils";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 export default async function FoodHost({ params }: { params: Promise<{ id: string }> }) {
@@ -13,9 +14,9 @@ export default async function FoodHost({ params }: { params: Promise<{ id: strin
 
   return (
     <div className="view active" id="view-host">
-      <div className="detail-hero">
-        <img src={service.image} alt={service.name} />
-        <div className="info">
+      <div className="detail-hero" style={{ position: 'relative', width: '100%', minHeight: '300px' }}>
+        <Image src={service.image} alt={service.name} fill style={{ objectFit: 'cover' }} />
+        <div className="info" style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
           <div className="wrap">
             <h1>{service.name}</h1>
             <div className="row">
@@ -28,7 +29,7 @@ export default async function FoodHost({ params }: { params: Promise<{ id: strin
           </div>
         </div>
       </div>
-      <div className="wrap">
+      <div className="wrap mt-6">
         <div className="crumbs">
           <Link href="/">Home</Link> › <Link href="/services">Services</Link> › <span>{service.name}</span>
         </div>

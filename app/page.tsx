@@ -15,7 +15,6 @@ export default async function Home() {
 
   return (
     <>
-      {/* ============ HOME ============ */}
       <div className="view active" id="view-home">
         <div className="hero" style={{ position: 'relative', overflow: 'hidden', background: '#1A0A2E' }}>
           <div className="hero-bg" style={{ position: 'absolute', inset: 0, opacity: 0.32 }}>

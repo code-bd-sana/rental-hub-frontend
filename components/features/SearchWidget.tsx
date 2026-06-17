@@ -84,7 +84,7 @@ export default function SearchWidget() {
         <div className="fields">
           <div className="field">
             <label id="loc-label">Destination</label>
-            <div className="val">Paramaribo, Suriname</div>
+            <div className="val">Anywhere</div>
           </div>
           <div className="field" id="ciField">
             <label>Check in</label>

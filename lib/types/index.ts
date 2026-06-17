@@ -8,6 +8,7 @@ export interface User {
 export interface Property {
   id: string;
   title: string;
+  description?: string;
   host: User;
   price: number;
   priceUnit: "night" | "month";
@@ -23,6 +24,7 @@ export interface Car {
   id: string;
   model: string;
   brand: string;
+  description?: string;
   host: User;
   pricePerDay: number;
   rating: number;

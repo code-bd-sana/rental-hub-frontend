@@ -38,7 +38,7 @@ export default async function StaysDetail({ params }: { params: Promise<{ id: st
         <div className="split">
           <div>
             <h3>About this stay</h3>
-            <p>A bright, modern space with full amenities, set in a well kept resort with pool access and on site dining. Perfect for both short city trips and longer stays.</p>
+            <p>{property.description || "Information about this property will be available soon."}</p>
             <div className="amenities">
               {property.amenities.map((amen, idx) => (
                 <span key={idx} className="amen">

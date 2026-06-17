@@ -60,7 +60,7 @@ export default function Header() {
             </Link>
           </nav>
           <button
-            className="max-[900px]:hidden rounded-2.75 font-bold text-[.92rem] px-4.5 py-2.5 transition-all duration-200 whitespace-nowrap bg-white border-[1.5px] border-(--line) text-(--ink) hover:border-(--purple) hover:text-(--purple) shadow-custom-sm"
+            className="max-[900px]:hidden rounded-xl font-bold text-[.92rem] px-4.5 py-2.5 transition-all duration-200 whitespace-nowrap bg-white border-[1.5px] border-(--line) text-(--ink) hover:border-(--purple) hover:text-(--purple) shadow-custom-sm"
             onClick={() => openModal("signin")}
           >
             Sign In

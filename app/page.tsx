@@ -48,7 +48,7 @@ export default async function Home() {
         <SearchWidget />
 
         {/* SHOWCASE ROWS (6 per category) */}
-        <section className="py-16 max-w-300 mx-auto px-6">
+        <section className="py-4 max-w-7xl mx-auto">
           <div className="flex items-end justify-between mb-6.5 gap-5 flex-wrap">
             <div>
               <div className="text-[#8b8693] font-bold text-[0.8rem] tracking-[0.14em] uppercase mb-1.5">
@@ -76,7 +76,7 @@ export default async function Home() {
             </Link>
           </div>
           <div
-            className="flex gap-4 overflow-x-auto pb-3.5 pt-1 px-0.5 snap-x snap-mandatory [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-[#f1eaf9] [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#d6c6ee] [&::-webkit-scrollbar-thumb]:rounded-full"
+            className="grid grid-flow-col auto-cols-[260px] gap-4 overflow-x-auto pb-3.5 pt-1 px-0.5 snap-x snap-mandatory [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-[#f1eaf9] [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#d6c6ee] [&::-webkit-scrollbar-thumb]:rounded-full"
             id="rowBeds"
           >
             {properties.map((p) => (
@@ -96,7 +96,7 @@ export default async function Home() {
             </Link>
           </div>
           <div
-            className="flex gap-4 overflow-x-auto pb-3.5 pt-1 px-0.5 snap-x snap-mandatory [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-[#f1eaf9] [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#d6c6ee] [&::-webkit-scrollbar-thumb]:rounded-full"
+            className="grid grid-flow-col auto-cols-[260px] gap-4 overflow-x-auto pb-3.5 pt-1 px-0.5 snap-x snap-mandatory [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-[#f1eaf9] [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#d6c6ee] [&::-webkit-scrollbar-thumb]:rounded-full"
             id="rowCars"
           >
             {cars.map((c) => (
@@ -116,7 +116,7 @@ export default async function Home() {
             </Link>
           </div>
           <div
-            className="flex gap-4 overflow-x-auto pb-3.5 pt-1 px-0.5 snap-x snap-mandatory [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-[#f1eaf9] [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#d6c6ee] [&::-webkit-scrollbar-thumb]:rounded-full"
+            className="grid grid-flow-col auto-cols-[260px] gap-4 overflow-x-auto pb-3.5 pt-1 px-0.5 snap-x snap-mandatory [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-[#f1eaf9] [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#d6c6ee] [&::-webkit-scrollbar-thumb]:rounded-full"
             id="rowServices"
           >
             {services.map((s) => (

@@ -14,24 +14,23 @@ export default function Header() {
   return (
     <>
       <header>
-        <div className="wrap bar">
-          <Link href="/" className="logo">
+        <div className="max-w-7xl mx-auto py-4 flex items-center justify-between gap-8">
+          <Link href="/">
             <Image 
               src="/logo/logo.png" 
               alt="Rentals Hub" 
-              width={140} 
-              height={40} 
-              className="logo-img"
-              style={{ objectFit: 'contain' }}
+              width={90} 
+              height={30} 
+              className="logo-img object-contain"
             />
           </Link>
           <nav>
-            <Link href="/" className={pathname === "/" ? "live" : ""}>Home</Link>
-            <Link href="/stays" className={pathname.startsWith("/stays") ? "live" : ""}>Stays</Link>
-            <Link href="/cars" className={pathname.startsWith("/cars") ? "live" : ""}>Cars</Link>
-            <Link href="/services" className={pathname.startsWith("/services") || pathname.startsWith("/food") ? "live" : ""}>Services</Link>
+            <Link href="/" className=" text-3xl">Home</Link>
+            <Link href="/stays" className="">Stays</Link>
+            <Link href="/cars" className="">Cars</Link>
+            <Link href="/services" className="">Services</Link>
             <button onClick={() => openModal("list")}>List Your Business</button>
-            <Link href="/host/dashboard" className={pathname.startsWith("/host") ? "live" : ""}>Host</Link>
+            <Link href="/host/dashboard" className="">Host</Link>
           </nav>
           <button className="btn ghost" onClick={() => openModal("signin")}>Sign In</button>
           <button className="menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Menu">

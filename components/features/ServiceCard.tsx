@@ -5,8 +5,14 @@ import { Service } from '../../lib/types';
 export default function ServiceCard({ service }: { service: Service }) {
   return (
     <Link href={`/services/${service.id}`} className="scard">
-      <div className="ph" style={{ position: 'relative', width: '100%', aspectRatio: '4/3' }}>
-        <Image src={service.image} alt={service.name} fill style={{ objectFit: 'cover' }} />
+      <div className="ph" style={{ position: 'relative', width: '100%', aspectRatio: '4/3', overflow: 'hidden' }}>
+        <Image 
+          src={service.image} 
+          alt={service.name} 
+          fill 
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          style={{ objectFit: 'cover' }} 
+        />
       </div>
       <div className="body">
         <div className="name">{service.name}</div>

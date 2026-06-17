@@ -6,8 +6,14 @@ import { formatCurrency } from '../../lib/utils';
 export default function CarCard({ car }: { car: Car }) {
   return (
     <Link href={`/cars/${car.id}`} className="scard">
-      <div className="ph car-photo" style={{ aspectRatio: '4/3' }}>
-        <Image src={car.images[0]} alt={car.model} fill style={{ objectFit: 'cover' }} />
+      <div className="ph car-photo" style={{ position: 'relative', width: '100%', aspectRatio: '4/3', overflow: 'hidden' }}>
+        <Image 
+          src={car.images[0]} 
+          alt={car.model} 
+          fill 
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          style={{ objectFit: 'cover' }} 
+        />
       </div>
       <div className="body">
         <div className="name">{car.model}</div>

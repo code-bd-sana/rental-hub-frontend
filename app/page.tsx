@@ -6,6 +6,7 @@ import CarCard from "../components/features/CarCard";
 import ServiceCard from "../components/features/ServiceCard";
 import SearchWidget from "../components/features/SearchWidget";
 import Link from "next/link";
+import Image from "next/image";
 
 export default async function Home() {
   const properties = (await getProperties()).slice(0, 6);
@@ -16,9 +17,19 @@ export default async function Home() {
     <>
       {/* ============ HOME ============ */}
       <div className="view active" id="view-home">
-        <div className="hero">
-          <div className="hero-bg"></div>
-          <div className="hero-inner wrap">
+        <div className="hero" style={{ position: 'relative', overflow: 'hidden', background: '#1A0A2E' }}>
+          <div className="hero-bg" style={{ position: 'absolute', inset: 0, opacity: 0.32 }}>
+            <Image 
+              src="/images/extracted_1.jpeg" 
+              alt="Hero Background" 
+              fill 
+              sizes="100vw"
+              style={{ objectFit: 'cover', objectPosition: 'center' }}
+              priority
+            />
+          </div>
+          <div style={{ content: '""', position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(26,10,46,.6), rgba(26,10,46,.92))' }}></div>
+          <div className="hero-inner wrap" style={{ position: 'relative', padding: '78px 0 130px', textAlign: 'center', color: '#fff' }}>
             <div className="tagband">Suriname · for all your rental needs</div>
             <h1>
               Book the <em>stay</em>, the <em>plate</em>,<br />

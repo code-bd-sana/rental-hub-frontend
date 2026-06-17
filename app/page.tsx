@@ -69,10 +69,10 @@ export default async function Home() {
               Rooms
             </h3>
             <Link
-              href="/stays"
+              href="/browse/rooms"
               className="text-(--purple) font-bold text-[0.92rem] inline-flex gap-1.5 items-center hover:underline"
             >
-              All stays →
+              All Rooms →
             </Link>
           </div>
           <div

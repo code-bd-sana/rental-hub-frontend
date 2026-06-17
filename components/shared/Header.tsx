@@ -35,8 +35,8 @@ export default function Header() {
               Home
             </Link>
             <Link
-              href="/stays"
-              className={navClass(pathname.startsWith("/stays"))}
+              href="/browse"
+              className={navClass(pathname.startsWith("/browse"))}
             >
               Browse
             </Link>
@@ -98,25 +98,11 @@ export default function Header() {
             Home
           </Link>
           <Link
-            href="/stays"
+            href="/browse"
             onClick={() => setMobileMenuOpen(false)}
             className={mobileNavClass}
           >
-            Stays
-          </Link>
-          <Link
-            href="/cars"
-            onClick={() => setMobileMenuOpen(false)}
-            className={mobileNavClass}
-          >
-            Cars
-          </Link>
-          <Link
-            href="/services"
-            onClick={() => setMobileMenuOpen(false)}
-            className={mobileNavClass}
-          >
-            Services
+            Browse
           </Link>
           <button
             onClick={() => {

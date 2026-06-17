@@ -9,7 +9,7 @@ export const MOCK_SERVICES: Service[] = [
     provider: MOCK_USERS["host3"],
     rating: 5.0,
     reviewsCount: 45,
-    image: "/images/extracted_2.jpeg"
+    image: "/images/extracted_3.jpeg"
   },
   {
     id: "srv2",
@@ -18,7 +18,7 @@ export const MOCK_SERVICES: Service[] = [
     provider: MOCK_USERS["host3"],
     rating: 4.8,
     reviewsCount: 88,
-    image: "/images/extracted_3.jpeg"
+    image: "/images/extracted_4.jpeg"
   },
   {
     id: "srv3",
@@ -27,7 +27,7 @@ export const MOCK_SERVICES: Service[] = [
     provider: MOCK_USERS["host2"],
     rating: 4.9,
     reviewsCount: 230,
-    image: "/images/extracted_4.jpeg"
+    image: "/images/extracted_5.jpeg"
   },
   {
     id: "srv4",
@@ -36,6 +36,6 @@ export const MOCK_SERVICES: Service[] = [
     provider: MOCK_USERS["host3"],
     rating: 5.0,
     reviewsCount: 312,
-    image: "/images/extracted_5.jpeg"
+    image: "/images/extracted_6.jpeg"
   }
 ];

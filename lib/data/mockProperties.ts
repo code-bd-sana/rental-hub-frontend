@@ -10,7 +10,7 @@ export const MOCK_PROPERTIES: Property[] = [
     priceUnit: "night",
     rating: 5.0,
     reviewsCount: 124,
-    images: ["/images/extracted_18.jpeg", "/images/extracted_19.jpeg"],
+    images: ["/images/extracted_15.jpeg", "/images/extracted_19.jpeg"],
     amenities: ["Free Wi-Fi", "Pool", "Air Conditioning", "Room Service"],
     location: "Paramaribo",
     isSuperhost: true
@@ -23,7 +23,7 @@ export const MOCK_PROPERTIES: Property[] = [
     priceUnit: "night",
     rating: 4.8,
     reviewsCount: 89,
-    images: ["/images/extracted_1.jpeg", "/images/extracted_21.jpeg"],
+    images: ["/images/extracted_16.jpeg", "/images/extracted_21.jpeg"],
     amenities: ["Free Wi-Fi", "Garden View", "Air Conditioning"],
     location: "Paramaribo",
     isSuperhost: true
@@ -36,7 +36,7 @@ export const MOCK_PROPERTIES: Property[] = [
     priceUnit: "night",
     rating: 5.0,
     reviewsCount: 210,
-    images: ["/images/extracted_6.jpeg"],
+    images: ["/images/extracted_17.jpeg"],
     amenities: ["Free Wi-Fi", "Pool View", "Air Conditioning", "Balcony"],
     location: "Paramaribo",
     isSuperhost: true
@@ -49,7 +49,7 @@ export const MOCK_PROPERTIES: Property[] = [
     priceUnit: "night",
     rating: 5.0,
     reviewsCount: 156,
-    images: ["/images/extracted_7.jpeg"],
+    images: ["/images/extracted_1.jpeg"],
     amenities: ["Free Wi-Fi", "Pool Access", "Kitchen", "Air Conditioning"],
     location: "Paramaribo",
     isSuperhost: true

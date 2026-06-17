@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useModal } from "./ModalProvider";
@@ -15,12 +16,14 @@ export default function Header() {
       <header>
         <div className="wrap bar">
           <Link href="/" className="logo">
-            <div className="mark">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L2 12H5V20H19V12H22L12 2Z" fill="white" />
-              </svg>
-            </div>
-            <b>Rentals <span>Hub</span></b>
+            <Image 
+              src="/logo/logo.png" 
+              alt="Rentals Hub" 
+              width={140} 
+              height={40} 
+              className="logo-img"
+              style={{ objectFit: 'contain' }}
+            />
           </Link>
           <nav>
             <Link href="/" className={pathname === "/" ? "live" : ""}>Home</Link>

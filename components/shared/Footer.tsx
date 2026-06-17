@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useModal } from "./ModalProvider";
 
 export default function Footer() {
@@ -12,7 +13,13 @@ export default function Footer() {
         <div className="f-top">
           <div className="f-about">
             <div className="f-logo-chip">
-              <span className="font-bold text-lg">Rentals Hub</span>
+              <Image 
+                src="/logo/logo.png" 
+                alt="Rentals Hub" 
+                width={120} 
+                height={34} 
+                style={{ objectFit: 'contain' }}
+              />
             </div>
             <p>For all your rental needs. Homes, cars, food, and services across Suriname, all in one place.</p>
             <div className="f-loc">

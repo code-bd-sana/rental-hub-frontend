@@ -2,7 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCars } from "../../../lib/api/cars";
 import { getProperties } from "../../../lib/api/properties";
-import { getServices } from "../../../lib/api/services";
+import { MOCK_FOOD } from "../../../lib/data/mockFood";
+import { MOCK_SALON } from "../../../lib/data/mockSalon";
+import { MOCK_BARBER } from "../../../lib/data/mockBarber";
+import { MOCK_SPA } from "../../../lib/data/mockSpa";
 import CarCard from "../../../components/features/CarCard";
 import PropertyCard from "../../../components/features/PropertyCard";
 import ServiceCard from "../../../components/features/ServiceCard";
@@ -39,11 +42,14 @@ export default async function BrowseCategoryPage({ params }: { params: { categor
   } else if (category.id === "cars") {
     const cars = await getCars();
     items = cars.map(c => <CarCard key={c.id} car={c} />);
-  } else {
-    // Food, Salon, Barber, Spa
-    const allServices = await getServices();
-    const services = allServices.filter(s => s.type.toLowerCase() === category.id);
-    items = services.map(s => <ServiceCard key={s.id} service={s} />);
+  } else if (category.id === "food") {
+    items = MOCK_FOOD.map(s => <ServiceCard key={s.id} service={s} />);
+  } else if (category.id === "salon") {
+    items = MOCK_SALON.map(s => <ServiceCard key={s.id} service={s} />);
+  } else if (category.id === "barber") {
+    items = MOCK_BARBER.map(s => <ServiceCard key={s.id} service={s} />);
+  } else if (category.id === "spa") {
+    items = MOCK_SPA.map(s => <ServiceCard key={s.id} service={s} />);
   }
 
   return (

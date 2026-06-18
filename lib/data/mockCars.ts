@@ -13,7 +13,7 @@ export const MOCK_CARS: Car[] = [
     provider: MOCK_USERS["host1"],
     rating: 4.8,
     reviewsCount: 124,
-    images: ["/images/extracted_1.jpeg"]
+    images: ["/images/extracted_65.jpeg"]
   },
   {
     id: "c2",
@@ -26,7 +26,7 @@ export const MOCK_CARS: Car[] = [
     provider: MOCK_USERS["host1"],
     rating: 4.7,
     reviewsCount: 89,
-    images: ["/images/extracted_2.png"]
+    images: ["/images/extracted_64.jpeg"]
   },
   {
     id: "c3",
@@ -39,7 +39,7 @@ export const MOCK_CARS: Car[] = [
     provider: MOCK_USERS["host1"],
     rating: 4.9,
     reviewsCount: 156,
-    images: ["/images/extracted_3.jpeg"]
+    images: ["/images/extracted_63.jpeg"]
   },
   {
     id: "c4",
@@ -52,7 +52,7 @@ export const MOCK_CARS: Car[] = [
     provider: MOCK_USERS["host1"],
     rating: 4.5,
     reviewsCount: 67,
-    images: ["/images/extracted_4.jpeg"]
+    images: ["/images/extracted_65.jpeg"]
   },
   {
     id: "c5",
@@ -65,7 +65,7 @@ export const MOCK_CARS: Car[] = [
     provider: MOCK_USERS["host1"],
     rating: 4.8,
     reviewsCount: 112,
-    images: ["/images/extracted_5.jpeg"]
+    images: ["/images/extracted_64.jpeg"]
   },
   {
     id: "c6",
@@ -78,7 +78,7 @@ export const MOCK_CARS: Car[] = [
     provider: MOCK_USERS["host1"],
     rating: 4.6,
     reviewsCount: 94,
-    images: ["/images/extracted_6.jpeg"]
+    images: ["/images/extracted_63.jpeg"]
   },
   {
     id: "c7",
@@ -91,7 +91,7 @@ export const MOCK_CARS: Car[] = [
     provider: MOCK_USERS["host1"],
     rating: 4.8,
     reviewsCount: 132,
-    images: ["/images/extracted_7.jpeg"]
+    images: ["/images/extracted_65.jpeg"]
   },
   {
     id: "c8",
@@ -104,6 +104,6 @@ export const MOCK_CARS: Car[] = [
     provider: MOCK_USERS["host1"],
     rating: 4.9,
     reviewsCount: 201,
-    images: ["/images/extracted_8.jpeg"]
+    images: ["/images/extracted_64.jpeg"]
   }
 ];

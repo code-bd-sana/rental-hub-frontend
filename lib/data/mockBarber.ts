@@ -9,7 +9,7 @@ export const MOCK_BARBER: Service[] = [
     provider: MOCK_USERS["host3"],
     rating: 4.9,
     reviewsCount: 312,
-    image: "/images/extracted_35.jpeg"
+    image: "/images/extracted_71.jpeg"
   },
   {
     id: "b2",
@@ -18,7 +18,7 @@ export const MOCK_BARBER: Service[] = [
     provider: MOCK_USERS["host3"],
     rating: 4.7,
     reviewsCount: 189,
-    image: "/images/extracted_36.jpeg"
+    image: "/images/extracted_70.jpeg"
   },
   {
     id: "b3",
@@ -27,7 +27,7 @@ export const MOCK_BARBER: Service[] = [
     provider: MOCK_USERS["host3"],
     rating: 4.8,
     reviewsCount: 245,
-    image: "/images/extracted_37.jpeg"
+    image: "/images/extracted_60.jpeg"
   },
   {
     id: "b4",
@@ -36,7 +36,7 @@ export const MOCK_BARBER: Service[] = [
     provider: MOCK_USERS["host3"],
     rating: 4.6,
     reviewsCount: 76,
-    image: "/images/extracted_38.jpeg"
+    image: "/images/extracted_59.jpeg"
   },
   {
     id: "b5",
@@ -45,7 +45,7 @@ export const MOCK_BARBER: Service[] = [
     provider: MOCK_USERS["host3"],
     rating: 4.5,
     reviewsCount: 45,
-    image: "/images/extracted_39.jpeg"
+    image: "/images/extracted_54.jpeg"
   },
   {
     id: "b6",
@@ -54,7 +54,7 @@ export const MOCK_BARBER: Service[] = [
     provider: MOCK_USERS["host3"],
     rating: 4.9,
     reviewsCount: 156,
-    image: "/images/extracted_40.jpeg"
+    image: "/images/extracted_71.jpeg"
   },
   {
     id: "b7",
@@ -63,6 +63,6 @@ export const MOCK_BARBER: Service[] = [
     provider: MOCK_USERS["host3"],
     rating: 4.8,
     reviewsCount: 112,
-    image: "/images/extracted_41.jpeg"
+    image: "/images/extracted_70.jpeg"
   }
 ];

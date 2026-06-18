@@ -16,7 +16,7 @@ export const MOCK_PROPERTIES: Property[] = [
     bedrooms: 1,
     beds: 1,
     baths: 1,
-    images: ["/images/extracted_10.png", "/images/extracted_11.jpeg", "/images/extracted_12.jpeg", "/images/extracted_13.jpeg"]
+    images: ["/images/extracted_1.jpeg", "/images/extracted_11.jpeg", "/images/extracted_12.jpeg", "/images/extracted_13.jpeg"]
   },
   {
     id: "p2",
@@ -32,7 +32,7 @@ export const MOCK_PROPERTIES: Property[] = [
     bedrooms: 1,
     beds: 1,
     baths: 1,
-    images: ["/images/extracted_14.jpeg", "/images/extracted_15.jpeg", "/images/extracted_16.jpeg", "/images/extracted_17.jpeg"]
+    images: ["/images/extracted_6.jpeg", "/images/extracted_15.jpeg", "/images/extracted_16.jpeg", "/images/extracted_17.jpeg"]
   },
   {
     id: "p3",
@@ -48,7 +48,7 @@ export const MOCK_PROPERTIES: Property[] = [
     bedrooms: 2,
     beds: 2,
     baths: 2,
-    images: ["/images/extracted_18.jpeg", "/images/extracted_19.jpeg", "/images/extracted_1.jpeg", "/images/extracted_2.png"]
+    images: ["/images/extracted_7.jpeg", "/images/extracted_19.jpeg", "/images/extracted_1.jpeg", "/images/extracted_2.png"]
   },
   {
     id: "p4",
@@ -64,7 +64,7 @@ export const MOCK_PROPERTIES: Property[] = [
     bedrooms: 2,
     beds: 2,
     baths: 1,
-    images: ["/images/extracted_3.jpeg", "/images/extracted_4.jpeg", "/images/extracted_5.jpeg", "/images/extracted_6.jpeg"]
+    images: ["/images/extracted_8.jpeg", "/images/extracted_4.jpeg", "/images/extracted_5.jpeg", "/images/extracted_6.jpeg"]
   },
   {
     id: "p5",
@@ -80,7 +80,7 @@ export const MOCK_PROPERTIES: Property[] = [
     bedrooms: 1,
     beds: 1,
     baths: 1,
-    images: ["/images/extracted_7.jpeg", "/images/extracted_8.jpeg", "/images/extracted_9.jpeg", "/images/extracted_10.png"]
+    images: ["/images/extracted_1.jpeg", "/images/extracted_8.jpeg", "/images/extracted_9.jpeg", "/images/extracted_10.png"]
   },
   {
     id: "p6",
@@ -96,6 +96,6 @@ export const MOCK_PROPERTIES: Property[] = [
     bedrooms: 0,
     beds: 0,
     baths: 1,
-    images: ["/images/extracted_11.jpeg", "/images/extracted_12.jpeg", "/images/extracted_13.jpeg", "/images/extracted_14.jpeg"]
+    images: ["/images/extracted_6.jpeg", "/images/extracted_12.jpeg", "/images/extracted_13.jpeg", "/images/extracted_14.jpeg"]
   }
 ];

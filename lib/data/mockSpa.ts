@@ -9,7 +9,7 @@ export const MOCK_SPA: Service[] = [
     provider: MOCK_USERS["host3"],
     rating: 5.0,
     reviewsCount: 345,
-    image: "/images/extracted_42.jpeg"
+    image: "/images/extracted_66.jpeg"
   },
   {
     id: "sp2",
@@ -18,7 +18,7 @@ export const MOCK_SPA: Service[] = [
     provider: MOCK_USERS["host3"],
     rating: 4.9,
     reviewsCount: 212,
-    image: "/images/extracted_43.jpeg"
+    image: "/images/extracted_67.jpeg"
   },
   {
     id: "sp3",
@@ -27,7 +27,7 @@ export const MOCK_SPA: Service[] = [
     provider: MOCK_USERS["host3"],
     rating: 4.8,
     reviewsCount: 178,
-    image: "/images/extracted_44.jpeg"
+    image: "/images/extracted_68.jpeg"
   },
   {
     id: "sp4",
@@ -36,7 +36,7 @@ export const MOCK_SPA: Service[] = [
     provider: MOCK_USERS["host3"],
     rating: 4.7,
     reviewsCount: 134,
-    image: "/images/extracted_45.jpeg"
+    image: "/images/extracted_69.jpeg"
   },
   {
     id: "sp5",
@@ -45,7 +45,7 @@ export const MOCK_SPA: Service[] = [
     provider: MOCK_USERS["host3"],
     rating: 4.9,
     reviewsCount: 267,
-    image: "/images/extracted_46.jpeg"
+    image: "/images/extracted_66.jpeg"
   },
   {
     id: "sp6",
@@ -54,6 +54,6 @@ export const MOCK_SPA: Service[] = [
     provider: MOCK_USERS["host3"],
     rating: 5.0,
     reviewsCount: 412,
-    image: "/images/extracted_47.jpeg"
+    image: "/images/extracted_67.jpeg"
   }
 ];

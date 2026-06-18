@@ -7,7 +7,7 @@ export default function PropertyCard({ property }: { property: Property }) {
   const ok = true; // Could be based on availability logic
   return (
     <Link 
-      href={`/stays/${property.id}`} 
+      href={`/browse/rooms/${property.id}`} 
       className={`block bg-card rounded-[18px] overflow-hidden shadow-custom-sm transition-all duration-220 cursor-pointer border border-line hover:-translate-y-1 hover:shadow-custom group ${ok ? '' : 'opacity-[0.62] grayscale-[0.25]'}`}
     >
       <div className="relative w-full aspect-4/3 overflow-hidden">

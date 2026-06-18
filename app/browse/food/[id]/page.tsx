@@ -20,7 +20,7 @@ export default async function FoodDetailsPage({ params }: { params: { id: string
   return (
     <div className="bg-[#fcfcff] min-h-[calc(100vh-80px)] pb-10">
       {/* Hero Section */}
-      <div className="relative h-75 overflow-hidden">
+      <div className="relative h-84 overflow-hidden">
         <div className="absolute inset-0 bg-linear-to-b from-[#1a0a2e1a] to-[#1a0a2ec7] z-10 pointer-events-none" />
         <Image
           src={food.image}
@@ -30,11 +30,11 @@ export default async function FoodDetailsPage({ params }: { params: { id: string
           sizes="100vw"
         />
         <div className="absolute left-0 right-0 bottom-0 text-white py-7.5 z-20">
-          <div className="max-w-300 mx-auto px-6">
+          <div className="max-w-7xl mx-auto">
             <h1 className="text-[2.4rem] font-bold leading-tight">{food.name}</h1>
             <div className="flex gap-4.5 items-center mt-2 text-[#e7dcf5] text-[0.95rem] flex-wrap">
               <span className="flex items-center gap-1 font-bold">
-                <svg className="w-4.5 h-4.5 text-orange" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .6-5.3 4.6L18.5 21 12 17.3 5.5 21l1.8-7.3L2 9.1l7-.6L12 2z"/></svg> 
+                <svg className="w-4.5 h-4.5 text-yellow-300" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .6-5.3 4.6L18.5 21 12 17.3 5.5 21l1.8-7.3L2 9.1l7-.6L12 2z"/></svg> 
                 {food.rating.toFixed(1)}
               </span>
               <span>{food.provider?.name || "Restaurant"} · {food.reviewsCount} reviews</span>
@@ -44,14 +44,14 @@ export default async function FoodDetailsPage({ params }: { params: { id: string
       </div>
       
       {/* Page Content */}
-      <div className="max-w-300 mx-auto px-6">
-        <div className="py-4 text-muted text-[0.9rem] font-medium">
-          <Link href="/" className="text-purple font-bold hover:underline cursor-pointer">Home</Link> › <Link href="/browse/food" className="text-purple font-bold hover:underline cursor-pointer">Food</Link> › {food.name}
+      <div className="max-w-7xl mx-auto">
+        <div className="py-4 text-[1rem] font-medium">
+          <Link href="/" className="text-purple font-bold hover:underline cursor-pointer">Home</Link> › <Link href="/browse/food" className="text-purple font-bold hover:underline cursor-pointer">Food</Link> › <span className="text-muted">{food.name}</span>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8.5 items-start pb-17.5 mt-2.5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8.5 items-start pb-17.5 mt-2.5">
           {/* Left Column: Menu/Food Details */}
-          <div>
+          <div className="col-span-2">
             <h3 className="text-[1.5rem] font-bold mb-4">Menu</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4.5">
               {/* Dish Card */}
@@ -77,7 +77,7 @@ export default async function FoodDetailsPage({ params }: { params: { id: string
           </div>
           
           {/* Right Column: Aside */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 col-span-1">
             {/* Cart Panel */}
             <div className="bg-white border border-line rounded-[20px] overflow-hidden shadow-custom-sm">
               <div className="px-5 py-4 border-b border-line flex justify-between items-center bg-[#fdfcff]">

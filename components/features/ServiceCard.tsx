@@ -3,9 +3,11 @@ import Image from 'next/image';
 import { Service } from '../../lib/types';
 
 export default function ServiceCard({ service }: { service: Service }) {
+  const href = service.type === "Food" ? `/browse/food/${service.id}` : `/services/${service.id}`;
+  
   return (
     <Link 
-      href={`/services/${service.id}`} 
+      href={href} 
       className="block bg-white border border-line rounded-2xl overflow-hidden shadow-custom-sm cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-custom"
     >
       <div className="relative w-full aspect-4/3 overflow-hidden">

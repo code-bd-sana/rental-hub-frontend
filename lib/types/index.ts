@@ -23,18 +23,16 @@ export interface Property {
 export interface Car {
   id: string;
   model: string;
-  brand: string;
+  type: string;
+  year: number;
+  seats: number;
+  transmission: "Manual" | "Automatic";
   description?: string;
   host: User;
   pricePerDay: number;
   rating: number;
   reviewsCount: number;
   images: string[];
-  specs: {
-    seats: number;
-    transmission: "Manual" | "Automatic";
-    fuel: "Petrol" | "Diesel" | "Electric" | "Hybrid";
-  };
   location: string;
 }
 

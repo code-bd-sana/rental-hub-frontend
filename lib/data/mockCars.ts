@@ -10,10 +10,11 @@ export const MOCK_CARS: Car[] = [
     seats: 7,
     transmission: "Automatic",
     pricePerDay: 54, // Converted from 600 SRD
-    provider: MOCK_USERS["host1"],
+    host: MOCK_USERS["host1"],
     rating: 4.8,
     reviewsCount: 124,
-    images: ["/images/extracted_65.jpeg"]
+    images: ["/images/extracted_1.jpeg"],
+    location: "Paramaribo, Suriname"
   },
   {
     id: "c2",
@@ -23,10 +24,11 @@ export const MOCK_CARS: Car[] = [
     seats: 5,
     transmission: "Automatic",
     pricePerDay: 41, // Converted from 450 SRD
-    provider: MOCK_USERS["host1"],
+    host: MOCK_USERS["host1"],
     rating: 4.7,
     reviewsCount: 89,
-    images: ["/images/extracted_64.jpeg"]
+    images: ["/images/extracted_2.png"],
+    location: "Paramaribo, Suriname"
   },
   {
     id: "c3",
@@ -36,10 +38,11 @@ export const MOCK_CARS: Car[] = [
     seats: 7,
     transmission: "Automatic",
     pricePerDay: 54, // Converted from 600 SRD
-    provider: MOCK_USERS["host1"],
+    host: MOCK_USERS["host1"],
     rating: 4.9,
     reviewsCount: 156,
-    images: ["/images/extracted_63.jpeg"]
+    images: ["/images/extracted_3.jpeg"],
+    location: "Paramaribo, Suriname"
   },
   {
     id: "c4",
@@ -49,10 +52,11 @@ export const MOCK_CARS: Car[] = [
     seats: 5,
     transmission: "Automatic",
     pricePerDay: 41, // Converted from 450 SRD
-    provider: MOCK_USERS["host1"],
+    host: MOCK_USERS["host1"],
     rating: 4.5,
     reviewsCount: 67,
-    images: ["/images/extracted_65.jpeg"]
+    images: ["/images/extracted_4.jpeg"],
+    location: "Paramaribo, Suriname"
   },
   {
     id: "c5",
@@ -62,10 +66,11 @@ export const MOCK_CARS: Car[] = [
     seats: 5,
     transmission: "Automatic",
     pricePerDay: 54, // Converted from 600 SRD
-    provider: MOCK_USERS["host1"],
+    host: MOCK_USERS["host1"],
     rating: 4.8,
     reviewsCount: 112,
-    images: ["/images/extracted_64.jpeg"]
+    images: ["/images/extracted_5.jpeg"],
+    location: "Paramaribo, Suriname"
   },
   {
     id: "c6",
@@ -75,10 +80,11 @@ export const MOCK_CARS: Car[] = [
     seats: 5,
     transmission: "Automatic",
     pricePerDay: 45,
-    provider: MOCK_USERS["host1"],
+    host: MOCK_USERS["host1"],
     rating: 4.6,
     reviewsCount: 94,
-    images: ["/images/extracted_63.jpeg"]
+    images: ["/images/extracted_6.jpeg"],
+    location: "Paramaribo, Suriname"
   },
   {
     id: "c7",
@@ -88,10 +94,11 @@ export const MOCK_CARS: Car[] = [
     seats: 5,
     transmission: "Automatic",
     pricePerDay: 48,
-    provider: MOCK_USERS["host1"],
+    host: MOCK_USERS["host1"],
     rating: 4.8,
     reviewsCount: 132,
-    images: ["/images/extracted_65.jpeg"]
+    images: ["/images/extracted_7.jpeg"],
+    location: "Paramaribo, Suriname"
   },
   {
     id: "c8",
@@ -101,9 +108,10 @@ export const MOCK_CARS: Car[] = [
     seats: 7,
     transmission: "Automatic",
     pricePerDay: 60,
-    provider: MOCK_USERS["host1"],
+    host: MOCK_USERS["host1"],
     rating: 4.9,
     reviewsCount: 201,
-    images: ["/images/extracted_64.jpeg"]
+    images: ["/images/extracted_8.jpeg"],
+    location: "Paramaribo, Suriname"
   }
 ];

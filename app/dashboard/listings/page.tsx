@@ -1,6 +1,7 @@
 "use client";
 
 import { HostListings } from "@/components/dashboard/HostDashboard";
+import { AdminListings } from "@/components/dashboard/AdminDashboard";
 
 export default function DashboardListingsPage() {
   const authData = typeof window !== "undefined" ? localStorage.getItem("roamly_auth") : null;
@@ -8,6 +9,10 @@ export default function DashboardListingsPage() {
 
   if (role === "Host") {
     return <HostListings />;
+  }
+  
+  if (role === "Super Admin") {
+    return <AdminListings />;
   }
 
   return (

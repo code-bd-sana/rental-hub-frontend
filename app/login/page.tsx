@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 
 const DEMO_ACCOUNTS = [
   { role: "Guest", email: "guest@roamly.com", password: "password123", redirect: "/browse" },
-  { role: "Host", email: "host@roamly.com", password: "password123", redirect: "/host" },
-  { role: "Agent", email: "agent@roamly.com", password: "password123", redirect: "/agent" },
-  { role: "Super Admin", email: "admin@roamly.com", password: "password123", redirect: "/admin" },
+  { role: "Host", email: "host@roamly.com", password: "password123", redirect: "/dashboard" },
+  { role: "Agent", email: "agent@roamly.com", password: "password123", redirect: "/dashboard" },
+  { role: "Super Admin", email: "admin@roamly.com", password: "password123", redirect: "/dashboard" },
 ];
 
 export default function LoginPage() {

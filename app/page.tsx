@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { getProperties } from "../lib/api/properties";
 import { getCars } from "../lib/api/cars";
 import { getServices } from "../lib/api/services";
@@ -126,5 +127,10 @@ export default async function Home() {
         </section>
       </div>
     </>
+=======
+export default function Home() {
+  return (
+    <h1>Rental Hub</h1>
+>>>>>>> beb2f229c489876d8f33f7f7a97528dd10ed94c6
   );
 }

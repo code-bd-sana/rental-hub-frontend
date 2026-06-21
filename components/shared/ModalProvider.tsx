@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 
-type ModalType = "signin" | "list" | "info" | "payment" | null;
+type ModalType = "list" | "info" | "payment" | null;
 
 interface ModalContextType {
   openModal: (type: ModalType, payload?: any) => void;
@@ -28,26 +28,6 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   return (
     <ModalContext.Provider value={{ openModal, closeModal }}>
       {children}
-      {activeModal === "signin" && (
-        <div className="overlay open">
-          <div className="modal">
-            <div className="m-head">
-              <div>
-                <h3>Welcome back</h3>
-                <p>Sign in to book, order, and chat.</p>
-              </div>
-              <button className="x" onClick={closeModal}>✕</button>
-            </div>
-            <div className="m-body">
-              <input className="inp" placeholder="Email or phone" />
-              <input className="inp" type="password" placeholder="Password" />
-              <button className="btn primary lg" style={{ width: "100%" }} onClick={() => { alert("Signed in!"); closeModal(); }}>Sign in</button>
-              <div className="divider">new to Rentals Hub</div>
-              <button className="btn ghost" style={{ width: "100%" }} onClick={closeModal}>Create an account</button>
-            </div>
-          </div>
-        </div>
-      )}
       
       {activeModal === "list" && (
         <div className="overlay open">

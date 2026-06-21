@@ -1,0 +1,3392 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Roamly Prototype</title>
+    <style>
+      :root {
+        --teal: #1e40af;
+        --teal-deep: #172554;
+        --coral: #2563eb;
+        --coral-soft: #dbeafe;
+        --sand: #f8fafc;
+        --ink: #15201f;
+        --muted: #6b7b79;
+        --line: #e7e1d6;
+        --white: #ffffff;
+        --ok: #1e9e72;
+        --radius: 18px;
+        --shadow: 0 10px 30px rgba(11, 79, 74, 0.1);
+        --font-disp: "Georgia", "Times New Roman", serif;
+        --font-body:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: var(--font-body);
+        color: var(--ink);
+        background: var(--sand);
+        line-height: 1.5;
+      }
+      img {
+        display: block;
+        max-width: 100%;
+      }
+      button {
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+      }
+      input,
+      textarea,
+      select {
+        font-family: inherit;
+        font-size: 15px;
+      }
+      .hidden {
+        display: none !important;
+      }
+
+      /* Demo control bar */
+      #demobar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        background: var(--teal-deep);
+        color: #fff;
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        padding: 8px 12px;
+        flex-wrap: wrap;
+        font-size: 12px;
+      }
+      #demobar strong {
+        font-size: 12px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        opacity: 0.8;
+        margin-right: 6px;
+      }
+      #demobar button {
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        border-radius: 20px;
+        padding: 5px 11px;
+        font-size: 12px;
+      }
+      #demobar button.active {
+        background: var(--coral);
+      }
+      #demobar .state {
+        margin-left: auto;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 4px 10px;
+        border-radius: 20px;
+      }
+
+      .wrap {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 0 18px;
+      }
+      .screen {
+        padding-top: 64px;
+        min-height: 100vh;
+        padding-bottom: 60px;
+      }
+
+      /* Brand */
+      .brandmark {
+        font-family: var(--font-disp);
+        font-weight: 700;
+        font-size: 22px;
+        letter-spacing: 0.5px;
+        color: var(--teal-deep);
+      }
+      .brandmark b {
+        color: var(--coral);
+      }
+      .placeholder-note {
+        background: var(--coral-soft);
+        color: #1e40af;
+        font-size: 12px;
+        text-align: center;
+        padding: 7px;
+      }
+
+      /* Top app nav */
+      .appnav {
+        position: sticky;
+        top: 48px;
+        background: var(--sand);
+        border-bottom: 1px solid var(--line);
+        z-index: 50;
+      }
+      .appnav .wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 12px;
+        padding-bottom: 12px;
+      }
+      .appnav nav {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+      }
+      .linkbtn {
+        background: none;
+        color: var(--teal-deep);
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .pill {
+        background: var(--teal);
+        color: #fff;
+        border-radius: 24px;
+        padding: 9px 16px;
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .pill.coral {
+        background: var(--coral);
+      }
+
+      /* Hero */
+      .hero {
+        background: linear-gradient(160deg, var(--teal-deep), var(--teal));
+        color: #fff;
+        border-radius: 0 0 30px 30px;
+        padding: 46px 0 54px;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero:after {
+        content: "";
+        position: absolute;
+        right: -60px;
+        top: -60px;
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+        background: rgba(255, 107, 92, 0.25);
+      }
+      .hero .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 12px;
+        opacity: 0.85;
+        margin-bottom: 14px;
+      }
+      .hero h1 {
+        font-family: var(--font-disp);
+        font-size: 40px;
+        line-height: 1.06;
+        max-width: 620px;
+        margin-bottom: 16px;
+      }
+      .hero p {
+        font-size: 17px;
+        max-width: 520px;
+        opacity: 0.92;
+        margin-bottom: 24px;
+      }
+      .hero .cta-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .btn-primary {
+        background: var(--coral);
+        color: #fff;
+        border-radius: 30px;
+        padding: 14px 26px;
+        font-weight: 700;
+        font-size: 16px;
+      }
+      .btn-ghost {
+        background: rgba(255, 255, 255, 0.14);
+        color: #fff;
+        border-radius: 30px;
+        padding: 14px 26px;
+        font-weight: 600;
+        font-size: 16px;
+      }
+
+      /* Category strip */
+      .cats {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding: 18px 0 6px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .cat {
+        flex: 0 0 auto;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 12px 14px;
+        text-align: center;
+        min-width: 92px;
+        box-shadow: var(--shadow);
+      }
+      .cat .ico {
+        font-size: 24px;
+      }
+      .cat .lbl {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 6px;
+        font-weight: 600;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin: 26px 0 14px;
+      }
+      .section-head h2 {
+        font-family: var(--font-disp);
+        font-size: 24px;
+      }
+      .country-select {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 6px;
+      }
+      .chip {
+        flex: 0 0 auto;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 24px;
+        padding: 8px 14px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .chip.active {
+        background: var(--teal);
+        color: #fff;
+        border-color: var(--teal);
+      }
+
+      /* Directory grid */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 16px;
+        margin-top: 16px;
+      }
+      .card {
+        background: #fff;
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        position: relative;
+      }
+      .card .photo {
+        aspect-ratio: 4/3;
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        position: relative;
+      }
+      .card .photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .card .photo .ico {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 38px;
+        opacity: 0.5;
+      }
+      .card .body {
+        padding: 13px 14px;
+      }
+      .card .tag {
+        display: inline-block;
+        background: var(--coral-soft);
+        color: #1e40af;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .card h3 {
+        font-size: 16px;
+        margin: 8px 0 4px;
+      }
+      .card .meta {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .card .lockline {
+        filter: blur(5px);
+        user-select: none;
+        color: var(--muted);
+      }
+      .card .actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 11px;
+      }
+      .card .actions button {
+        flex: 1;
+        border-radius: 12px;
+        padding: 9px;
+        font-weight: 600;
+        font-size: 13px;
+        background: var(--teal);
+        color: #fff;
+      }
+      .card .actions .secondary {
+        background: #fff;
+        border: 1px solid var(--line);
+        color: var(--teal-deep);
+      }
+      .locked-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(21, 32, 31, 0.78);
+        color: #fff;
+        font-size: 11px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        display: flex;
+        gap: 5px;
+        align-items: center;
+      }
+
+      /* Paywall banner */
+      .paywall {
+        background: var(--teal-deep);
+        color: #fff;
+        border-radius: var(--radius);
+        padding: 22px;
+        margin: 22px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .paywall h3 {
+        font-family: var(--font-disp);
+        font-size: 22px;
+        margin-bottom: 4px;
+      }
+      .paywall p {
+        opacity: 0.9;
+        font-size: 14px;
+        max-width: 430px;
+      }
+      .price {
+        font-size: 28px;
+        font-weight: 800;
+      }
+      .price small {
+        font-size: 13px;
+        font-weight: 600;
+        opacity: 0.8;
+      }
+
+      /* Generic panels */
+      .panel {
+        background: #fff;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 24px;
+        margin-top: 18px;
+      }
+      .panel h2 {
+        font-family: var(--font-disp);
+        font-size: 26px;
+        margin-bottom: 6px;
+      }
+      .panel .sub {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 18px;
+      }
+      .field {
+        margin-bottom: 16px;
+      }
+      .field label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .field input,
+      .field textarea,
+      .field select {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px 13px;
+        background: var(--sand);
+      }
+      .field textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+      .chips-pick {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .pick {
+        border: 1px solid var(--line);
+        background: var(--sand);
+        border-radius: 22px;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .pick.on {
+        background: var(--teal);
+        color: #fff;
+        border-color: var(--teal);
+      }
+      .submit {
+        background: var(--coral);
+        color: #fff;
+        border-radius: 30px;
+        padding: 14px 26px;
+        font-weight: 700;
+        font-size: 16px;
+        width: 100%;
+      }
+      .small {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+      .two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      @media (max-width: 560px) {
+        .two {
+          grid-template-columns: 1fr;
+        }
+        .hero h1 {
+          font-size: 30px;
+        }
+      }
+
+      /* AI assistant */
+      .assistant {
+        max-width: 640px;
+        margin: 0 auto;
+      }
+      .bot-head {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+      .bot-avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--teal), var(--coral));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 22px;
+      }
+      .chatbox {
+        background: #fff;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 16px;
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .msg {
+        max-width: 84%;
+        padding: 11px 14px;
+        border-radius: 16px;
+        font-size: 14px;
+        line-height: 1.45;
+      }
+      .msg.bot {
+        background: var(--sand);
+        align-self: flex-start;
+        border-bottom-left-radius: 4px;
+      }
+      .msg.me {
+        background: var(--teal);
+        color: #fff;
+        align-self: flex-end;
+        border-bottom-right-radius: 4px;
+      }
+      .reco {
+        display: flex;
+        gap: 10px;
+        background: var(--sand);
+        border-radius: 12px;
+        padding: 10px;
+        margin-top: 6px;
+        align-items: center;
+      }
+      .reco .rphoto {
+        width: 54px;
+        height: 54px;
+        border-radius: 10px;
+        background: #dbeafe;
+        flex: 0 0 auto;
+        overflow: hidden;
+      }
+      .reco .rphoto img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .chatinput {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .chatinput input {
+        flex: 1;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 12px 16px;
+        background: #fff;
+      }
+      .chatinput button {
+        background: var(--teal);
+        color: #fff;
+        border-radius: 24px;
+        padding: 0 20px;
+        font-weight: 700;
+      }
+
+      /* Director */
+      .countbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+      .progress {
+        flex: 1;
+        height: 8px;
+        background: var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .progress i {
+        display: block;
+        height: 100%;
+        background: var(--teal);
+        width: 6%;
+      }
+      .uploadbox {
+        border: 2px dashed var(--line);
+        border-radius: 14px;
+        padding: 18px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 13px;
+        background: var(--sand);
+      }
+      .thumbrow {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .thumb {
+        width: 64px;
+        height: 64px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 1px solid var(--line);
+      }
+
+      .info-banner {
+        background: var(--coral-soft);
+        color: #1e40af;
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 13px;
+        margin-top: 14px;
+      }
+      .footer-note {
+        text-align: center;
+        color: var(--muted);
+        font-size: 12px;
+        padding: 30px 0;
+      }
+      .ok-badge {
+        background: var(--ok);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 5px 11px;
+        border-radius: 20px;
+        display: inline-block;
+      }
+
+      /* Dashboard shell */
+      .dash {
+        display: flex;
+        gap: 0;
+        min-height: calc(100vh - 92px);
+      }
+      .side {
+        flex: 0 0 220px;
+        background: var(--teal-deep);
+        color: #fff;
+        padding: 20px 14px;
+        border-radius: 0 22px 22px 0;
+      }
+      .side .brandmark {
+        color: #fff;
+        font-size: 20px;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .side .brandmark b {
+        color: var(--coral);
+      }
+      .side .role {
+        font-size: 12px;
+        opacity: 0.7;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 18px;
+      }
+      .side nav {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .side .navitem {
+        background: none;
+        color: #fff;
+        text-align: left;
+        padding: 11px 13px;
+        border-radius: 11px;
+        font-size: 14px;
+        font-weight: 600;
+        opacity: 0.8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .side .navitem.on {
+        background: rgba(255, 255, 255, 0.14);
+        opacity: 1;
+      }
+      .side .navitem .n {
+        background: var(--coral);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 20px;
+        padding: 1px 8px;
+      }
+      .dashbody {
+        flex: 1;
+        padding: 22px 26px;
+        min-width: 0;
+      }
+      .dashbody h2 {
+        font-family: var(--font-disp);
+        font-size: 26px;
+        margin-bottom: 4px;
+      }
+      .dashbody .sub {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 18px;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 14px;
+        margin-bottom: 8px;
+      }
+      .stat {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: var(--shadow);
+      }
+      .stat .v {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--teal-deep);
+      }
+      .stat .l {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .tablecard {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        margin-top: 16px;
+      }
+      .tablecard .th {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--line);
+      }
+      .tablecard .th h3 {
+        font-family: var(--font-disp);
+        font-size: 18px;
+      }
+      table.dt {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      table.dt th {
+        text-align: left;
+        color: var(--muted);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--line);
+      }
+      table.dt td {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--line);
+      }
+      table.dt tr:last-child td {
+        border-bottom: none;
+      }
+      .st {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .st.live {
+        background: #dff3ec;
+        color: #1e9e72;
+      }
+      .st.pending {
+        background: var(--coral-soft);
+        color: #1e40af;
+      }
+      .st.new {
+        background: #e6eefb;
+        color: #2a5db0;
+      }
+      .st.done {
+        background: #eee;
+        color: #666;
+      }
+      .tbtn {
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--teal-deep);
+        border-radius: 9px;
+        padding: 6px 11px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-right: 6px;
+      }
+      .tbtn.primary {
+        background: var(--teal);
+        color: #fff;
+        border-color: var(--teal);
+      }
+      .tbtn.coral {
+        background: var(--coral);
+        color: #fff;
+        border-color: var(--coral);
+      }
+      .dashsub {
+        display: none;
+      }
+      .dashsub.on {
+        display: block;
+      }
+      @media (max-width: 680px) {
+        .dash {
+          flex-direction: column;
+        }
+        .side {
+          flex: 0 0 auto;
+          border-radius: 0;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          padding: 12px;
+        }
+        .side .brandmark,
+        .side .role {
+          width: 100%;
+        }
+        .side nav {
+          flex-direction: row;
+          flex-wrap: wrap;
+          gap: 6px;
+        }
+        .side .navitem {
+          padding: 8px 11px;
+        }
+        .dashbody {
+          padding: 16px;
+        }
+        table.dt {
+          font-size: 13px;
+        }
+        table.dt th:nth-child(3),
+        table.dt td:nth-child(3) {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- DEMO CONTROL BAR (prototype only, remove for production) -->
+    <div id="demobar">
+      <strong>Demo</strong>
+      <button data-go="landing" class="active">Landing</button>
+      <button data-go="guest-signup">Guest signup</button>
+      <button data-go="country-browser">Countries</button>
+      <button data-go="directory">Directory</button>
+      <button data-go="assistant">AI assistant</button>
+      <button data-go="host-claim">Claim page</button>
+      <button data-go="host-editor">Booking page</button>
+      <button data-go="host-dashboard">Host dashboard</button>
+      <button data-role="super">Super admin</button>
+      <button data-role="agent">Agent</button>
+      <button data-go="director">Loader</button>
+      <span class="state" id="stateLabel">Guest: visitor</span>
+    </div>
+
+    <div class="placeholder-note">
+      Working name <b>Roamly</b> is a placeholder. The colors are now blue and
+      white, clean and minimal. Send the final name and any color change and
+      they swap in one pass.
+    </div>
+
+    <!-- ============ LANDING ============ -->
+    <section id="landing" class="screen">
+      <div class="appnav">
+        <div class="wrap">
+          <span class="brandmark">Roam<b>ly</b></span>
+          <nav>
+            <button class="linkbtn" data-go="host-claim">Own a listing</button>
+            <button class="pill" data-go="guest-signup">Become a guest</button>
+          </nav>
+        </div>
+      </div>
+
+      <div class="hero">
+        <div class="wrap">
+          <div class="eyebrow">One directory for your whole trip</div>
+          <h1>
+            Find every place worth visiting in one country, then book it all in
+            one place.
+          </h1>
+          <p>
+            Stays, cars, taxis, tour guides, barbers, salons, spas, restaurants
+            and flight agents. Verified and ready to book.
+          </p>
+          <div class="cta-row">
+            <button class="btn-primary" data-go="guest-signup">
+              Become a guest
+            </button>
+            <button class="btn-ghost" data-go="host-claim">
+              Claim your page
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wrap">
+        <div class="cats" id="catStrip"></div>
+
+        <div class="section-head">
+          <h2>Browse the directory</h2>
+          <span
+            class="small"
+            data-go="country-browser"
+            style="cursor: pointer; color: var(--teal); font-weight: 700"
+            >See all countries</span
+          >
+        </div>
+        <div class="country-select" id="countrySelect"></div>
+
+        <div class="info-banner" id="visitorNote">
+          You are browsing as a visitor. You can see photos only. Become a guest
+          and unlock names, hours, contacts and booking for every host in every
+          country.
+        </div>
+
+        <div class="grid" id="landingGrid"></div>
+
+        <div class="paywall">
+          <div>
+            <h3>Unlock the full directory</h3>
+            <p>
+              See every host in every country, get contacts and hours, and book
+              your full trip from one place.
+            </p>
+          </div>
+          <div style="text-align: right">
+            <div class="price">$9.99 <small>/ month</small></div>
+            <button
+              class="btn-primary"
+              style="margin-top: 8px"
+              data-go="guest-signup"
+            >
+              Start now
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="footer-note">
+        Roamly directory. Prototype build for review.
+      </div>
+    </section>
+
+    <!-- ============ GUEST SIGNUP + ONBOARDING ============ -->
+    <section id="guest-signup" class="screen hidden">
+      <div class="wrap">
+        <div class="panel assistant">
+          <div id="signupStep1">
+            <h2>Become a guest</h2>
+            <p class="sub">
+              Two quick fields to start. We unlock the directory after a short
+              setup.
+            </p>
+            <div class="field">
+              <label>Your name</label
+              ><input id="gName" placeholder="First name" />
+            </div>
+            <div class="field">
+              <label>Email</label
+              ><input id="gEmail" placeholder="you@email.com" />
+            </div>
+            <button class="submit" id="toStep2">Continue</button>
+            <div class="small">
+              No payment yet. You set up your travel profile next.
+            </div>
+          </div>
+
+          <div id="signupStep2" class="hidden">
+            <h2>Tell us about your trip</h2>
+            <p class="sub">
+              This builds your profile so the assistant can help you right away
+              and remember you next time.
+            </p>
+
+            <div class="field">
+              <label>Which countries do you want to visit?</label>
+              <div class="chips-pick" id="pickCountries"></div>
+            </div>
+            <div class="field">
+              <label>What are you into?</label>
+              <div class="chips-pick" id="pickInterests"></div>
+            </div>
+            <div class="field">
+              <label>Any allergies or dietary needs?</label>
+              <div class="chips-pick" id="pickDiet"></div>
+              <input
+                id="gDietNote"
+                placeholder="Anything else we should know"
+                style="margin-top: 8px"
+              />
+            </div>
+            <button class="submit" id="finishSignup">Build my profile</button>
+          </div>
+
+          <div id="signupStep3" class="hidden">
+            <span class="ok-badge">Profile saved</span>
+            <h2 style="margin-top: 12px" id="welcomeName">Welcome</h2>
+            <div class="chatbox" style="margin-top: 14px">
+              <div class="msg bot" id="welcomeMsg"></div>
+            </div>
+            <div class="paywall" style="margin-top: 18px">
+              <div>
+                <h3>Unlock everything</h3>
+                <p>
+                  Your profile is ready. Subscribe to open the full directory
+                  and let the assistant book your trip.
+                </p>
+              </div>
+              <div style="text-align: right">
+                <div class="price">$9.99 <small>/ month</small></div>
+                <button
+                  class="btn-primary"
+                  style="margin-top: 8px"
+                  id="payGuest"
+                >
+                  Unlock now (demo)
+                </button>
+              </div>
+            </div>
+            <button class="linkbtn" data-go="assistant">
+              Skip to assistant
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ COUNTRY BROWSER ============ -->
+    <section id="country-browser" class="screen hidden">
+      <div class="appnav">
+        <div class="wrap">
+          <span class="brandmark">Roam<b>ly</b></span>
+          <nav>
+            <button class="linkbtn" data-go="assistant">Assistant</button>
+            <button class="pill" data-go="guest-signup">Become a guest</button>
+          </nav>
+        </div>
+      </div>
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Where do you want to go?</h2>
+          <span class="small" id="cbCountText"></span>
+        </div>
+        <div class="field" style="margin-bottom: 10px">
+          <input id="cbSearch" placeholder="Search a country" />
+        </div>
+        <div class="info-banner">
+          Countries marked available are live now. The rest are being loaded
+          during our rollout. Tap an available country to browse its directory.
+        </div>
+        <div
+          class="grid"
+          id="cbGrid"
+          style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr))"
+        ></div>
+      </div>
+      <div class="footer-note">
+        Roamly is loading up to 150 hosts in each country.
+      </div>
+    </section>
+
+    <!-- ============ DIRECTORY (locked / unlocked) ============ -->
+    <section id="directory" class="screen hidden">
+      <div class="appnav">
+        <div class="wrap">
+          <span class="brandmark">Roam<b>ly</b></span>
+          <nav>
+            <button class="linkbtn" data-go="assistant">Assistant</button>
+            <button class="pill coral" id="dirStatusPill">Visitor</button>
+          </nav>
+        </div>
+      </div>
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Directory</h2>
+          <span class="small" id="dirCountryLabel"></span>
+        </div>
+        <div class="country-select" id="dirCountrySelect"></div>
+        <div id="dirLockNote" class="info-banner">
+          Visitor view. Showing photos only, limited to 10 hosts per country.
+          Unlock to see names, hours, contacts and to book.
+        </div>
+        <div class="grid" id="dirGrid"></div>
+        <div class="paywall" id="dirPaywall">
+          <div>
+            <h3>You are seeing a preview</h3>
+            <p>
+              Unlock every host in every country and book your whole trip in one
+              place.
+            </p>
+          </div>
+          <div style="text-align: right">
+            <div class="price">$9.99 <small>/ month</small></div>
+            <button class="btn-primary" style="margin-top: 8px" id="payGuest2">
+              Unlock now (demo)
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ AI ASSISTANT ============ -->
+    <section id="assistant" class="screen hidden">
+      <div class="wrap">
+        <div class="assistant" style="padding-top: 18px">
+          <div class="bot-head">
+            <div class="bot-avatar">R</div>
+            <div>
+              <div style="font-weight: 700">Roamly assistant</div>
+              <div class="small" id="botProfileLine">No profile yet</div>
+            </div>
+          </div>
+          <div class="chatbox" id="chatbox"></div>
+          <div class="chatinput">
+            <input
+              id="chatInput"
+              placeholder="Ask about food, stays, cars or your trip"
+            />
+            <button id="chatSend">Send</button>
+          </div>
+          <div class="small">
+            The assistant uses your saved profile. In production this connects
+            to the booking engine and remembers you between visits.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HOST CLAIM ============ -->
+    <section id="host-claim" class="screen hidden">
+      <div class="wrap">
+        <div class="panel">
+          <div id="claimStep1">
+            <h2>Claim your page</h2>
+            <p class="sub">
+              Find your business in the directory, prove it is yours, then take
+              bookings straight to your page and email.
+            </p>
+            <div class="field">
+              <label>Search your business</label
+              ><input id="claimSearch" placeholder="Type your business name" />
+            </div>
+            <div class="grid" id="claimResults"></div>
+          </div>
+
+          <div id="claimStep2" class="hidden">
+            <h2 id="claimBizName">Claim this listing</h2>
+            <p class="sub">
+              Confirm ownership. We review claims before granting the booking
+              page.
+            </p>
+            <div class="two">
+              <div class="field">
+                <label>Your full name</label
+                ><input id="cName" placeholder="Owner or manager" />
+              </div>
+              <div class="field">
+                <label>Role</label
+                ><input id="cRole" placeholder="Owner, manager" />
+              </div>
+            </div>
+            <div class="field">
+              <label>Email to receive bookings</label
+              ><input id="cEmail" placeholder="bookings@business.com" />
+            </div>
+            <div class="field">
+              <label>Proof of ownership</label>
+              <label class="uploadbox" style="display: block; cursor: pointer">
+                Tap to upload a business document or photo
+                <input
+                  type="file"
+                  id="cProof"
+                  accept="image/*"
+                  class="hidden"
+                />
+              </label>
+              <div class="thumbrow" id="cProofThumb"></div>
+            </div>
+            <button class="submit" id="submitClaim">Submit claim</button>
+          </div>
+
+          <div id="claimStep3" class="hidden">
+            <span class="ok-badge">Claim submitted</span>
+            <h2 style="margin-top: 12px">You are almost set</h2>
+            <p class="sub">
+              Once approved, your booking page activates. Subscribe to start
+              taking real bookings.
+            </p>
+            <div class="paywall">
+              <div>
+                <h3>Activate your booking page</h3>
+                <p>
+                  Load your real food, items, services, hours and taxes. Receive
+                  bookings to your page and email.
+                </p>
+              </div>
+              <div style="text-align: right">
+                <div class="price">$39.99 <small>/ month</small></div>
+                <button
+                  class="btn-primary"
+                  style="margin-top: 8px"
+                  data-go="host-editor"
+                >
+                  Open my booking page (demo)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HOST BOOKING PAGE EDITOR ============ -->
+    <section id="host-editor" class="screen hidden">
+      <div class="wrap">
+        <div class="panel">
+          <span class="ok-badge">Booking page active</span>
+          <h2 style="margin-top: 12px">Your booking page</h2>
+          <p class="sub">
+            Load everything guests see and book. This is what a paying guest
+            opens from the directory.
+          </p>
+
+          <div class="two">
+            <div class="field">
+              <label>Business name</label
+              ><input id="hbName" value="Sample Bistro" />
+            </div>
+            <div class="field">
+              <label>Category</label>
+              <select id="hbCat">
+                <option>Restaurant</option>
+                <option>Stay</option>
+                <option>Car rental</option>
+                <option>Barbershop</option>
+                <option>Salon</option>
+                <option>Spa</option>
+                <option>Taxi</option>
+                <option>Tour guide</option>
+                <option>Flight agent</option>
+              </select>
+            </div>
+          </div>
+          <div class="two">
+            <div class="field">
+              <label>Open hours</label
+              ><input id="hbHours" value="Mon to Sun, 9am to 10pm" />
+            </div>
+            <div class="field">
+              <label>Booking email</label
+              ><input id="hbEmail" value="bookings@business.com" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Photos</label>
+            <label class="uploadbox" style="display: block; cursor: pointer">
+              Tap to upload photos of your place, food or services
+              <input
+                type="file"
+                id="hbPhotos"
+                accept="image/*"
+                multiple
+                class="hidden"
+              />
+            </label>
+            <div class="thumbrow" id="hbThumbs"></div>
+          </div>
+
+          <div class="field">
+            <label>Items and services</label>
+            <div id="hbItems"></div>
+            <div class="two" style="margin-top: 8px">
+              <input id="hbItemName" placeholder="Item or service name" />
+              <input
+                id="hbItemPrice"
+                placeholder="Price in USD"
+                inputmode="decimal"
+              />
+            </div>
+            <button class="pick" id="hbAddItem" style="margin-top: 8px">
+              Add item
+            </button>
+          </div>
+
+          <div class="field">
+            <label>Tax (optional)</label>
+            <div class="two">
+              <input id="hbTaxLabel" placeholder="Tax label, for example BTW" />
+              <input
+                id="hbTaxRate"
+                placeholder="Rate percent"
+                inputmode="decimal"
+              />
+            </div>
+          </div>
+
+          <button class="submit" id="hbSave">Save and preview</button>
+          <div class="info-banner hidden" id="hbSaved">
+            Saved. This page is now bookable by paying guests.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DIRECTOR LOADING PANEL ============ -->
+    <section id="director" class="screen hidden">
+      <div class="wrap">
+        <div class="panel">
+          <h2 id="dirTitle">Loader</h2>
+          <p class="sub" id="dirSub">
+            Load photos and hosts into a country, up to 150 hosts per country.
+          </p>
+          <div class="info-banner" id="dirRoleBanner"></div>
+
+          <div class="field">
+            <label>Country</label>
+            <div class="country-select" id="dirAdminCountries"></div>
+            <div class="two" style="margin-top: 8px" id="dirSuperOnly">
+              <input id="newCountryName" placeholder="Add a new country" />
+              <button class="pick" id="addCountryBtn">Add country</button>
+            </div>
+          </div>
+
+          <div class="countbar">
+            <span id="countText">0 of 150 loaded</span>
+            <div class="progress"><i id="countBar"></i></div>
+          </div>
+
+          <div
+            class="panel"
+            style="
+              box-shadow: none;
+              border: 1px solid var(--line);
+              margin-top: 16px;
+            "
+          >
+            <h3
+              style="
+                font-family: var(--font-disp);
+                font-size: 18px;
+                margin-bottom: 12px;
+              "
+            >
+              Add a host
+            </h3>
+            <div class="field">
+              <label>Photo</label>
+              <label class="uploadbox" style="display: block; cursor: pointer">
+                Tap to upload a host photo
+                <input
+                  type="file"
+                  id="dirPhoto"
+                  accept="image/*"
+                  class="hidden"
+                />
+              </label>
+              <div class="thumbrow" id="dirPhotoThumb"></div>
+            </div>
+            <div class="two">
+              <div class="field">
+                <label>Host name</label
+                ><input id="dirName" placeholder="Business name" />
+              </div>
+              <div class="field">
+                <label>Category</label>
+                <select id="dirCat">
+                  <option>Stay</option>
+                  <option>Car rental</option>
+                  <option>Barbershop</option>
+                  <option>Salon</option>
+                  <option>Spa</option>
+                  <option>Taxi</option>
+                  <option>Tour guide</option>
+                  <option>Restaurant</option>
+                  <option>Flight agent</option>
+                </select>
+              </div>
+            </div>
+            <div class="two">
+              <div class="field">
+                <label>Open hours</label
+                ><input id="dirHours" placeholder="Mon to Sun, hours" />
+              </div>
+              <div class="field">
+                <label>Phone</label
+                ><input id="dirPhone" placeholder="+000 000 0000" />
+              </div>
+            </div>
+            <button class="submit" id="dirAddHost">Add host to country</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HOST DASHBOARD ============ -->
+    <section id="host-dashboard" class="screen hidden">
+      <div class="dash">
+        <aside class="side">
+          <span class="brandmark">Roam<b>ly</b></span>
+          <div class="role">Host dashboard</div>
+          <nav id="hostNav">
+            <button class="navitem on" data-hsub="hOverview">Overview</button>
+            <button class="navitem" data-hsub="hListings">
+              My listings <span class="n" id="hListingCount">2</span>
+            </button>
+            <button class="navitem" data-hsub="hOrders">
+              Bookings <span class="n" id="hOrderCount">3</span>
+            </button>
+            <button class="navitem" data-hsub="hPayouts">Payouts</button>
+            <button class="navitem" data-hsub="hSettings">Settings</button>
+          </nav>
+        </aside>
+        <div class="dashbody">
+          <div id="hOverview" class="dashsub on">
+            <h2>Welcome back, Sample Bistro</h2>
+            <p class="sub">Here is how your listings are doing this month.</p>
+            <div class="stats">
+              <div class="stat">
+                <div class="v">2</div>
+                <div class="l">Active listings</div>
+              </div>
+              <div class="stat">
+                <div class="v">3</div>
+                <div class="l">New bookings</div>
+              </div>
+              <div class="stat">
+                <div class="v">28</div>
+                <div class="l">Page views</div>
+              </div>
+              <div class="stat">
+                <div class="v">$420</div>
+                <div class="l">Earned this month</div>
+              </div>
+            </div>
+            <div class="tablecard">
+              <div class="th"><h3>Recent activity</h3></div>
+              <table class="dt">
+                <tbody>
+                  <tr>
+                    <td>New booking from a guest in Jamaica</td>
+                    <td>Today</td>
+                    <td><span class="st new">New</span></td>
+                  </tr>
+                  <tr>
+                    <td>Reservation confirmed for 2 guests</td>
+                    <td>Yesterday</td>
+                    <td><span class="st live">Confirmed</span></td>
+                  </tr>
+                  <tr>
+                    <td>Booking completed</td>
+                    <td>3 days ago</td>
+                    <td><span class="st done">Done</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="hListings" class="dashsub">
+            <h2>My listings</h2>
+            <p class="sub">
+              Manage your pages, edit details and add new listings.
+            </p>
+            <div class="tablecard">
+              <div class="th">
+                <h3>Listings</h3>
+                <button class="tbtn coral" data-go="host-editor">
+                  Add a listing
+                </button>
+              </div>
+              <table class="dt">
+                <thead>
+                  <tr>
+                    <th>Listing</th>
+                    <th>Category</th>
+                    <th>Country</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Ocho Rios Grill</td>
+                    <td>Restaurant</td>
+                    <td>Jamaica</td>
+                    <td><span class="st live">Live</span></td>
+                    <td>
+                      <button class="tbtn" data-go="host-editor">Edit</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Ocho Rios Grill Catering</td>
+                    <td>Restaurant</td>
+                    <td>Jamaica</td>
+                    <td><span class="st pending">Pending review</span></td>
+                    <td>
+                      <button class="tbtn" data-go="host-editor">Edit</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="hOrders" class="dashsub">
+            <h2>Bookings and requests</h2>
+            <p class="sub">
+              Accept or decline incoming bookings and reservation requests.
+            </p>
+            <div class="tablecard">
+              <div class="th"><h3>Incoming</h3></div>
+              <table class="dt">
+                <thead>
+                  <tr>
+                    <th>Guest</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="hOrdersBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="hPayouts" class="dashsub">
+            <h2>Payouts</h2>
+            <p class="sub">
+              Earnings from bookings that took payment online. Service
+              reservations are paid to you directly.
+            </p>
+            <div class="stats">
+              <div class="stat">
+                <div class="v">$420</div>
+                <div class="l">This month</div>
+              </div>
+              <div class="stat">
+                <div class="v">$1,180</div>
+                <div class="l">Last 90 days</div>
+              </div>
+              <div class="stat">
+                <div class="v">$95</div>
+                <div class="l">Pending</div>
+              </div>
+            </div>
+            <div class="tablecard">
+              <div class="th"><h3>Payout history</h3></div>
+              <table class="dt">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Reference</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>June 1</td>
+                    <td>PO-1042</td>
+                    <td>$420.00</td>
+                    <td><span class="st live">Paid</span></td>
+                  </tr>
+                  <tr>
+                    <td>May 1</td>
+                    <td>PO-0991</td>
+                    <td>$385.00</td>
+                    <td><span class="st live">Paid</span></td>
+                  </tr>
+                  <tr>
+                    <td>Next cycle</td>
+                    <td>PO-1077</td>
+                    <td>$95.00</td>
+                    <td><span class="st pending">Pending</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="hSettings" class="dashsub">
+            <h2>Settings</h2>
+            <p class="sub">
+              Your subscription, payout account and contact details.
+            </p>
+            <div
+              class="panel"
+              style="box-shadow: none; border: 1px solid var(--line)"
+            >
+              <div class="field">
+                <label>Plan</label
+                ><input value="Listing owner, $39.99 per month" readonly />
+              </div>
+              <div class="field">
+                <label>Payout account</label
+                ><input placeholder="Bank or account for payouts" />
+              </div>
+              <div class="field">
+                <label>Booking email</label
+                ><input value="bookings@business.com" />
+              </div>
+              <button class="submit">Save settings</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ADMIN DASHBOARD ============ -->
+    <section id="admin-dashboard" class="screen hidden">
+      <div class="dash">
+        <aside class="side">
+          <span class="brandmark">Roam<b>ly</b></span>
+          <div class="role">Admin</div>
+          <nav id="adminNav">
+            <button class="navitem on" data-asub="aOverview">Overview</button>
+            <button class="navitem" data-asub="aClaims">
+              Claims <span class="n" id="aClaimCount">3</span>
+            </button>
+            <button class="navitem" data-asub="aHosts">Listings</button>
+            <button class="navitem" data-asub="aCountries">Countries</button>
+            <button class="navitem" data-asub="aGuests">Guests</button>
+          </nav>
+        </aside>
+        <div class="dashbody">
+          <div id="aOverview" class="dashsub on">
+            <h2>Platform overview</h2>
+            <p class="sub">Load progress and revenue at a glance.</p>
+            <div class="stats">
+              <div class="stat">
+                <div class="v" id="aCountryStat">2</div>
+                <div class="l">Countries</div>
+              </div>
+              <div class="stat">
+                <div class="v" id="aHostStat">17</div>
+                <div class="l">Listings loaded</div>
+              </div>
+              <div class="stat">
+                <div class="v">3</div>
+                <div class="l">Claims pending</div>
+              </div>
+              <div class="stat">
+                <div class="v">214</div>
+                <div class="l">Paid guests</div>
+              </div>
+              <div class="stat">
+                <div class="v">9</div>
+                <div class="l">Paid listing owners</div>
+              </div>
+              <div class="stat">
+                <div class="v">$2,491</div>
+                <div class="l">Monthly revenue</div>
+              </div>
+            </div>
+            <div class="tablecard">
+              <div class="th"><h3>Load progress by country</h3></div>
+              <table class="dt">
+                <tbody id="aProgressBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="aClaims" class="dashsub">
+            <h2>Ownership claims</h2>
+            <p class="sub">
+              Approve or reject hosts who claim a listing before their booking
+              page activates.
+            </p>
+            <div class="tablecard">
+              <div class="th"><h3>Pending claims</h3></div>
+              <table class="dt">
+                <thead>
+                  <tr>
+                    <th>Business</th>
+                    <th>Claimed by</th>
+                    <th>Country</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="aClaimsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="aHosts" class="dashsub">
+            <h2>All listings</h2>
+            <p class="sub">
+              Every listing across countries, with status and quick actions.
+            </p>
+            <div class="tablecard">
+              <div class="th"><h3>Listings</h3></div>
+              <table class="dt">
+                <thead>
+                  <tr>
+                    <th>Listing</th>
+                    <th>Category</th>
+                    <th>Country</th>
+                    <th>State</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="aHostsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="aCountries" class="dashsub">
+            <h2>Countries and loading</h2>
+            <p class="sub">
+              Add countries and load hosts. Open the full director loader for
+              photo uploads.
+            </p>
+            <div class="tablecard">
+              <div class="th">
+                <h3>Countries</h3>
+                <button class="tbtn coral" data-go="director">
+                  Open director loader
+                </button>
+              </div>
+              <table class="dt">
+                <thead>
+                  <tr>
+                    <th>Country</th>
+                    <th>Loaded</th>
+                    <th>Target</th>
+                    <th>Progress</th>
+                  </tr>
+                </thead>
+                <tbody id="aCountriesBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="aGuests" class="dashsub">
+            <h2>Guests</h2>
+            <p class="sub">Guest accounts and subscription status.</p>
+            <div class="tablecard">
+              <div class="th"><h3>Recent guests</h3></div>
+              <table class="dt">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Countries of interest</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Aisha</td>
+                    <td>Jamaica, Barbados</td>
+                    <td><span class="st live">Subscribed</span></td>
+                  </tr>
+                  <tr>
+                    <td>Marco</td>
+                    <td>United States</td>
+                    <td><span class="st new">Free</span></td>
+                  </tr>
+                  <tr>
+                    <td>Priya</td>
+                    <td>Bahamas</td>
+                    <td><span class="st live">Subscribed</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="aTeam" class="dashsub">
+            <h2>Team and access</h2>
+            <p class="sub">
+              Only the super admin or director can manage this. Agents can load
+              the directory for the countries you assign them. The director can
+              do everything.
+            </p>
+            <div class="tablecard">
+              <div class="th"><h3>Admins and agents</h3></div>
+              <table class="dt">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Assigned countries</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="aTeamBody"></tbody>
+              </table>
+            </div>
+            <div
+              class="panel"
+              style="
+                box-shadow: none;
+                border: 1px solid var(--line);
+                margin-top: 16px;
+              "
+            >
+              <h3
+                style="
+                  font-family: var(--font-disp);
+                  font-size: 18px;
+                  margin-bottom: 12px;
+                "
+              >
+                Add an agent
+              </h3>
+              <div class="two">
+                <div class="field">
+                  <label>Name</label
+                  ><input id="newAdminName" placeholder="Agent name" />
+                </div>
+                <div class="field">
+                  <label>Role</label>
+                  <select id="newAdminRole">
+                    <option>Agent</option>
+                    <option>Super admin</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label>Assign countries</label
+                ><input
+                  id="newAdminCountries"
+                  placeholder="For example Jamaica, Barbados"
+                />
+              </div>
+              <div class="field">
+                <label>Permissions</label>
+                <div class="chips-pick">
+                  <button class="pick on" data-perm>Load directory</button>
+                  <button class="pick" data-perm>Approve claims</button>
+                  <button class="pick" data-perm>Manage guests</button>
+                  <button class="pick" data-perm>Manage team</button>
+                  <button class="pick" data-perm>View revenue</button>
+                </div>
+                <div class="small">
+                  Agents are usually given Load directory only. The director
+                  keeps every permission.
+                </div>
+              </div>
+              <button class="submit" id="addAdminBtn">Add agent</button>
+            </div>
+          </div>
+
+          <div id="aAgentHome" class="dashsub">
+            <h2 id="agentHello">Agent workspace</h2>
+            <p class="sub">
+              You can load and update the directory for the countries assigned
+              to you. You do not see claims, guests, revenue or team settings.
+            </p>
+            <div class="stats">
+              <div class="stat">
+                <div class="v" id="agentCountriesStat">1</div>
+                <div class="l">Countries assigned</div>
+              </div>
+              <div class="stat">
+                <div class="v" id="agentLoadedStat">11</div>
+                <div class="l">Hosts you loaded</div>
+              </div>
+              <div class="stat">
+                <div class="v" id="agentTargetStat">150</div>
+                <div class="l">Target per country</div>
+              </div>
+            </div>
+            <div class="tablecard">
+              <div class="th">
+                <h3>Your countries</h3>
+                <button class="tbtn coral" data-go="director">
+                  Open the loader
+                </button>
+              </div>
+              <table class="dt">
+                <tbody id="agentCountriesBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      /* ---------- helpers ---------- */
+      function usd(n) {
+        return "$" + Number(n || 0).toFixed(2);
+      }
+      function $(id) {
+        return document.getElementById(id);
+      }
+      function photoHTML(h) {
+        if (h.img) {
+          return '<img src="' + h.img + '" alt="">';
+        }
+        if (h.seed) {
+          return (
+            '<img src="https://picsum.photos/seed/' +
+            h.seed +
+            '/400/300" alt="" onerror="this.style.display=\'none\'"><span class="ico">' +
+            catIcon(h.cat) +
+            "</span>"
+          );
+        }
+        return '<span class="ico">' + catIcon(h.cat) + "</span>";
+      }
+      function catIcon(c) {
+        var m = {
+          Stay: "\u{1F3E0}",
+          "Car rental": "\u{1F697}",
+          Barbershop: "\u{1F488}",
+          Salon: "\u{1F485}",
+          Spa: "\u{1F486}",
+          Taxi: "\u{1F695}",
+          "Tour guide": "\u{1F5FA}",
+          Restaurant: "\u{1F37D}",
+          "Flight agent": "\u2708\uFE0F",
+        };
+        return m[c] || "\u{1F4CD}";
+      }
+
+      /* ---------- categories ---------- */
+      var CATS = [
+        { lbl: "Stays", cat: "Stay" },
+        { lbl: "Cars", cat: "Car rental" },
+        { lbl: "Taxis", cat: "Taxi" },
+        { lbl: "Tour guides", cat: "Tour guide" },
+        { lbl: "Barbers", cat: "Barbershop" },
+        { lbl: "Salons", cat: "Salon" },
+        { lbl: "Spas", cat: "Spa" },
+        { lbl: "Restaurants", cat: "Restaurant" },
+        { lbl: "Flight agents", cat: "Flight agent" },
+      ];
+
+      /* ---------- seed directory data ---------- */
+      var DIR = {
+        Jamaica: [
+          {
+            name: "Blue Mountain Villa",
+            cat: "Stay",
+            hours: "Check in 3pm",
+            phone: "+1 876 000 0001",
+            seed: "jm1",
+          },
+          {
+            name: "Kingston Car Hire",
+            cat: "Car rental",
+            hours: "Daily 8am to 7pm",
+            phone: "+1 876 000 0002",
+            seed: "jm2",
+          },
+          {
+            name: "Negril Beach Spa",
+            cat: "Spa",
+            hours: "Daily 9am to 8pm",
+            phone: "+1 876 000 0003",
+            seed: "jm3",
+          },
+          {
+            name: "Ocho Rios Grill",
+            cat: "Restaurant",
+            hours: "Daily 12pm to 11pm",
+            phone: "+1 876 000 0004",
+            seed: "jm4",
+          },
+          {
+            name: "Fresh Fade Barbers",
+            cat: "Barbershop",
+            hours: "Mon to Sat 9am to 7pm",
+            phone: "+1 876 000 0005",
+            seed: "jm5",
+          },
+          {
+            name: "Dunn's River Tours",
+            cat: "Tour guide",
+            hours: "By appointment",
+            phone: "+1 876 000 0006",
+            seed: "jm6",
+          },
+          {
+            name: "Island Taxi Co",
+            cat: "Taxi",
+            hours: "24 hours",
+            phone: "+1 876 000 0007",
+            seed: "jm7",
+          },
+          {
+            name: "Bliss Nail Salon",
+            cat: "Salon",
+            hours: "Daily 10am to 7pm",
+            phone: "+1 876 000 0008",
+            seed: "jm8",
+          },
+          {
+            name: "SkyJamaica Flights",
+            cat: "Flight agent",
+            hours: "Mon to Fri 9am to 5pm",
+            phone: "+1 876 000 0009",
+            seed: "jm9",
+          },
+          {
+            name: "Montego Bay Suites",
+            cat: "Stay",
+            hours: "Check in 2pm",
+            phone: "+1 876 000 0010",
+            seed: "jm10",
+          },
+          {
+            name: "Rooftop Reggae Lounge",
+            cat: "Restaurant",
+            hours: "Daily 6pm to 1am",
+            phone: "+1 876 000 0011",
+            seed: "jm11",
+          },
+        ],
+        Barbados: [
+          {
+            name: "Crane Coast Stay",
+            cat: "Stay",
+            hours: "Check in 3pm",
+            phone: "+1 246 000 0001",
+            seed: "bb1",
+          },
+          {
+            name: "Bridgetown Rentals",
+            cat: "Car rental",
+            hours: "Daily 8am to 6pm",
+            phone: "+1 246 000 0002",
+            seed: "bb2",
+          },
+          {
+            name: "Coral Reef Spa",
+            cat: "Spa",
+            hours: "Daily 9am to 8pm",
+            phone: "+1 246 000 0003",
+            seed: "bb3",
+          },
+          {
+            name: "Oistins Fish Shack",
+            cat: "Restaurant",
+            hours: "Tue to Sun 12pm to 10pm",
+            phone: "+1 246 000 0004",
+            seed: "bb4",
+          },
+          {
+            name: "Platinum Cuts",
+            cat: "Barbershop",
+            hours: "Mon to Sat 9am to 7pm",
+            phone: "+1 246 000 0005",
+            seed: "bb5",
+          },
+          {
+            name: "Harrison Cave Tours",
+            cat: "Tour guide",
+            hours: "By appointment",
+            phone: "+1 246 000 0006",
+            seed: "bb6",
+          },
+          {
+            name: "Bajan Taxi Service",
+            cat: "Taxi",
+            hours: "24 hours",
+            phone: "+1 246 000 0007",
+            seed: "bb7",
+          },
+        ],
+        Bahamas: [
+          {
+            name: "Nassau Ocean Villa",
+            cat: "Stay",
+            hours: "Check in 3pm",
+            phone: "+1 242 000 0001",
+            seed: "bs1",
+          },
+          {
+            name: "Paradise Car Rental",
+            cat: "Car rental",
+            hours: "Daily 8am to 7pm",
+            phone: "+1 242 000 0002",
+            seed: "bs2",
+          },
+          {
+            name: "Atlantis Day Spa",
+            cat: "Spa",
+            hours: "Daily 9am to 9pm",
+            phone: "+1 242 000 0003",
+            seed: "bs3",
+          },
+          {
+            name: "Conch Republic Kitchen",
+            cat: "Restaurant",
+            hours: "Daily 11am to 11pm",
+            phone: "+1 242 000 0004",
+            seed: "bs4",
+          },
+          {
+            name: "Exuma Island Tours",
+            cat: "Tour guide",
+            hours: "By appointment",
+            phone: "+1 242 000 0005",
+            seed: "bs5",
+          },
+          {
+            name: "IslandHopper Flights",
+            cat: "Flight agent",
+            hours: "Mon to Fri 9am to 5pm",
+            phone: "+1 242 000 0006",
+            seed: "bs6",
+          },
+        ],
+        "Trinidad and Tobago": [
+          {
+            name: "Maracas Bay Lodge",
+            cat: "Stay",
+            hours: "Check in 2pm",
+            phone: "+1 868 000 0001",
+            seed: "tt1",
+          },
+          {
+            name: "Port of Spain Rentals",
+            cat: "Car rental",
+            hours: "Daily 8am to 7pm",
+            phone: "+1 868 000 0002",
+            seed: "tt2",
+          },
+          {
+            name: "Carnival Glow Spa",
+            cat: "Spa",
+            hours: "Daily 9am to 8pm",
+            phone: "+1 868 000 0003",
+            seed: "tt3",
+          },
+          {
+            name: "Doubles and Roti House",
+            cat: "Restaurant",
+            hours: "Daily 7am to 9pm",
+            phone: "+1 868 000 0004",
+            seed: "tt4",
+          },
+          {
+            name: "Pitch Lake Tours",
+            cat: "Tour guide",
+            hours: "By appointment",
+            phone: "+1 868 000 0005",
+            seed: "tt5",
+          },
+          {
+            name: "Sharp Line Barbers",
+            cat: "Barbershop",
+            hours: "Mon to Sat 9am to 7pm",
+            phone: "+1 868 000 0006",
+            seed: "tt6",
+          },
+        ],
+        "United States": [
+          {
+            name: "South Beach Loft",
+            cat: "Stay",
+            hours: "Check in 4pm",
+            phone: "+1 305 000 0001",
+            seed: "us1",
+          },
+          {
+            name: "Miami Drive Rentals",
+            cat: "Car rental",
+            hours: "Daily 7am to 9pm",
+            phone: "+1 305 000 0002",
+            seed: "us2",
+          },
+          {
+            name: "Ocean Drive Day Spa",
+            cat: "Spa",
+            hours: "Daily 9am to 9pm",
+            phone: "+1 305 000 0003",
+            seed: "us3",
+          },
+          {
+            name: "Little Havana Cafe",
+            cat: "Restaurant",
+            hours: "Daily 8am to 11pm",
+            phone: "+1 305 000 0004",
+            seed: "us4",
+          },
+          {
+            name: "Wynwood Fades",
+            cat: "Barbershop",
+            hours: "Mon to Sat 10am to 8pm",
+            phone: "+1 305 000 0005",
+            seed: "us5",
+          },
+          {
+            name: "Everglades Eco Tours",
+            cat: "Tour guide",
+            hours: "By appointment",
+            phone: "+1 305 000 0006",
+            seed: "us6",
+          },
+          {
+            name: "SunCoast Flights",
+            cat: "Flight agent",
+            hours: "Mon to Fri 9am to 6pm",
+            phone: "+1 305 000 0007",
+            seed: "us7",
+          },
+        ],
+      };
+      var COUNTRIES = Object.keys(DIR);
+
+      /* ---------- full country list for the browser ---------- */
+      var COUNTRIES_ALL = [
+        "Guyana",
+        "Trinidad and Tobago",
+        "Barbados",
+        "Jamaica",
+        "Saint Lucia",
+        "Grenada",
+        "Dominica",
+        "Antigua and Barbuda",
+        "Saint Vincent and the Grenadines",
+        "Saint Kitts and Nevis",
+        "Bahamas",
+        "Dominican Republic",
+        "Haiti",
+        "Cuba",
+        "Belize",
+        "Curacao",
+        "Aruba",
+        "Bermuda",
+        "Cayman Islands",
+        "Puerto Rico",
+        "Brazil",
+        "Argentina",
+        "Chile",
+        "Peru",
+        "Colombia",
+        "Venezuela",
+        "Ecuador",
+        "Bolivia",
+        "Paraguay",
+        "Uruguay",
+        "Mexico",
+        "Panama",
+        "Costa Rica",
+        "Nicaragua",
+        "Honduras",
+        "Guatemala",
+        "El Salvador",
+        "United States",
+        "Canada",
+        "Greenland",
+        "United Kingdom",
+        "Ireland",
+        "France",
+        "Germany",
+        "Netherlands",
+        "Belgium",
+        "Luxembourg",
+        "Spain",
+        "Portugal",
+        "Italy",
+        "Switzerland",
+        "Austria",
+        "Denmark",
+        "Norway",
+        "Sweden",
+        "Finland",
+        "Iceland",
+        "Poland",
+        "Czechia",
+        "Slovakia",
+        "Hungary",
+        "Romania",
+        "Bulgaria",
+        "Greece",
+        "Croatia",
+        "Serbia",
+        "Slovenia",
+        "Estonia",
+        "Latvia",
+        "Lithuania",
+        "Ukraine",
+        "Russia",
+        "Turkey",
+        "Cyprus",
+        "Malta",
+        "Monaco",
+        "Andorra",
+        "Liechtenstein",
+        "San Marino",
+        "Montenegro",
+        "North Macedonia",
+        "Bosnia and Herzegovina",
+        "Albania",
+        "Moldova",
+        "Georgia",
+        "Armenia",
+        "Azerbaijan",
+        "Morocco",
+        "Algeria",
+        "Tunisia",
+        "Egypt",
+        "Nigeria",
+        "Ghana",
+        "Kenya",
+        "Tanzania",
+        "Uganda",
+        "Rwanda",
+        "Ethiopia",
+        "South Africa",
+        "Namibia",
+        "Botswana",
+        "Zambia",
+        "Zimbabwe",
+        "Mozambique",
+        "Senegal",
+        "Ivory Coast",
+        "Cameroon",
+        "Mauritius",
+        "Seychelles",
+        "Cape Verde",
+        "United Arab Emirates",
+        "Saudi Arabia",
+        "Qatar",
+        "Bahrain",
+        "Kuwait",
+        "Oman",
+        "Jordan",
+        "Lebanon",
+        "Israel",
+        "India",
+        "Pakistan",
+        "Bangladesh",
+        "Sri Lanka",
+        "Nepal",
+        "China",
+        "Japan",
+        "South Korea",
+        "Taiwan",
+        "Hong Kong",
+        "Thailand",
+        "Vietnam",
+        "Cambodia",
+        "Laos",
+        "Myanmar",
+        "Malaysia",
+        "Singapore",
+        "Indonesia",
+        "Philippines",
+        "Brunei",
+        "Mongolia",
+        "Kazakhstan",
+        "Uzbekistan",
+        "Maldives",
+        "Australia",
+        "New Zealand",
+        "Fiji",
+        "Papua New Guinea",
+        "Samoa",
+        "Tonga",
+        "Vanuatu",
+      ];
+
+      /* ---------- onboarding options ---------- */
+      var INTERESTS = [
+        "Food",
+        "Adventure",
+        "Relax",
+        "Nightlife",
+        "Culture",
+        "Beaches",
+        "Nature",
+        "Shopping",
+      ];
+      var DIET = [
+        "None",
+        "Vegetarian",
+        "Vegan",
+        "Halal",
+        "Nut allergy",
+        "Gluten free",
+        "Seafood allergy",
+      ];
+
+      /* ---------- team / roles ---------- */
+      var ADMINS = [
+        {
+          name: "Director",
+          role: "Super admin",
+          countries: "All countries",
+          status: "active",
+        },
+        {
+          name: "Agent A",
+          role: "Agent",
+          countries: "Jamaica",
+          status: "active",
+        },
+        {
+          name: "Agent B",
+          role: "Agent",
+          countries: "Barbados",
+          status: "active",
+        },
+        {
+          name: "Agent C",
+          role: "Agent",
+          countries: "Trinidad and Tobago",
+          status: "invited",
+        },
+      ];
+
+      /* ---------- state ---------- */
+      var state = {
+        guestPaid: false,
+        hostActive: false,
+        profile: null,
+        currentCountry: COUNTRIES[0],
+        dirCountry: COUNTRIES[0],
+        adminCountry: COUNTRIES[0],
+        pickC: [],
+        pickI: [],
+        pickD: [],
+        items: [],
+        adminRole: "super",
+        agentName: "Agent A",
+        agentCountries: ["Jamaica"],
+      };
+
+      /* ---------- navigation ---------- */
+      function go(id) {
+        document.querySelectorAll(".screen").forEach(function (s) {
+          s.classList.add("hidden");
+        });
+        $(id).classList.remove("hidden");
+        document.querySelectorAll("#demobar button").forEach(function (b) {
+          b.classList.toggle("active", b.getAttribute("data-go") === id);
+        });
+        window.scrollTo(0, 0);
+        if (id === "directory") renderDirectory();
+        if (id === "assistant") openAssistant();
+        if (id === "landing") renderLanding();
+        if (id === "director") renderDirector();
+        if (id === "host-claim") resetClaim();
+        if (id === "host-dashboard") renderHostDash();
+        if (id === "admin-dashboard") renderAdminDash();
+        if (id === "country-browser") renderCountryBrowser();
+      }
+      document.body.addEventListener("click", function (e) {
+        var t = e.target.closest("[data-go]");
+        if (t) {
+          go(t.getAttribute("data-go"));
+          return;
+        }
+        var r = e.target.closest("[data-role]");
+        if (r) {
+          state.adminRole = r.getAttribute("data-role");
+          go("admin-dashboard");
+        }
+      });
+
+      /* ---------- country browser ---------- */
+      function renderCountryBrowser(q) {
+        q = (q || "").toLowerCase();
+        var list = COUNTRIES_ALL.filter(function (c) {
+          return !q || c.toLowerCase().indexOf(q) >= 0;
+        });
+        $("cbCountText").textContent = COUNTRIES_ALL.length + " countries";
+        $("cbGrid").innerHTML = list
+          .map(function (c) {
+            var avail = COUNTRIES.indexOf(c) >= 0;
+            var n = avail ? (DIR[c] || []).length : 0;
+            var badge = avail
+              ? '<span class="st live">Available</span>'
+              : '<span class="st pending">Coming soon</span>';
+            var meta = avail ? n + " hosts listed" : "Being loaded";
+            return (
+              '<div class="card" ' +
+              (avail ? 'data-cb="' + c + '"' : "") +
+              ' style="cursor:' +
+              (avail ? "pointer" : "default") +
+              '">' +
+              '<div class="body"><div style="font-size:26px">' +
+              flagDot(c) +
+              "</div>" +
+              '<h3 style="margin:6px 0 4px">' +
+              c +
+              "</h3>" +
+              '<div class="meta">' +
+              meta +
+              '</div><div style="margin-top:8px">' +
+              badge +
+              "</div></div></div>"
+            );
+          })
+          .join("");
+      }
+      function flagDot(c) {
+        return "\u{1F30D}";
+      }
+      $("cbSearch") &&
+        $("cbSearch").addEventListener("input", function () {
+          renderCountryBrowser(this.value);
+        });
+      document.body.addEventListener("click", function (e) {
+        var c = e.target.closest("[data-cb]");
+        if (c) {
+          state.dirCountry = c.getAttribute("data-cb");
+          state.currentCountry = state.dirCountry;
+          go("directory");
+        }
+      });
+
+      /* ---------- state label ---------- */
+      function updateState() {
+        $("stateLabel").textContent =
+          "Guest: " +
+          (state.guestPaid ? "subscribed" : "visitor") +
+          " | Host: " +
+          (state.hostActive ? "active" : "none");
+        $("dirStatusPill").textContent = state.guestPaid
+          ? "Subscribed"
+          : "Visitor";
+      }
+
+      /* ---------- category strip + country chips ---------- */
+      function renderLanding() {
+        $("catStrip").innerHTML = CATS.map(function (c) {
+          return (
+            '<div class="cat"><div class="ico">' +
+            catIcon(c.cat) +
+            '</div><div class="lbl">' +
+            c.lbl +
+            "</div></div>"
+          );
+        }).join("");
+        $("countrySelect").innerHTML = COUNTRIES.map(function (c) {
+          return (
+            '<button class="chip ' +
+            (c === state.currentCountry ? "active" : "") +
+            '" data-country="' +
+            c +
+            '">' +
+            c +
+            "</button>"
+          );
+        }).join("");
+        renderLandingGrid();
+        $("visitorNote").classList.toggle("hidden", state.guestPaid);
+      }
+      function renderLandingGrid() {
+        var hosts = (DIR[state.currentCountry] || []).slice(0, 10);
+        $("landingGrid").innerHTML = hosts
+          .map(function (h) {
+            return cardHTML(h, false);
+          })
+          .join("");
+      }
+
+      /* ---------- card renderer ---------- */
+      function cardHTML(h, unlocked) {
+        var locked = !unlocked && !state.guestPaid;
+        var name = locked
+          ? '<span class="lockline">Hidden host name</span>'
+          : h.name;
+        var meta = locked
+          ? '<div class="meta lockline">Hours hidden, contact hidden</div>'
+          : '<div class="meta">' +
+            h.hours +
+            "<br>" +
+            (h.phone || "") +
+            "</div>";
+        var lockBadge = locked
+          ? '<div class="locked-badge">\u{1F512} Locked</div>'
+          : "";
+        var actions = locked
+          ? '<div class="actions"><button data-go="guest-signup">Unlock to book</button></div>'
+          : '<div class="actions"><button data-go="host-editor">View page</button><button class="secondary">Book</button></div>';
+        return (
+          '<div class="card"><div class="photo">' +
+          photoHTML(h) +
+          lockBadge +
+          "</div>" +
+          '<div class="body"><span class="tag">' +
+          h.cat +
+          "</span><h3>" +
+          name +
+          "</h3>" +
+          meta +
+          actions +
+          "</div></div>"
+        );
+      }
+
+      /* ---------- directory screen ---------- */
+      function renderDirectory() {
+        $("dirCountrySelect").innerHTML = COUNTRIES.map(function (c) {
+          return (
+            '<button class="chip ' +
+            (c === state.dirCountry ? "active" : "") +
+            '" data-dircountry="' +
+            c +
+            '">' +
+            c +
+            "</button>"
+          );
+        }).join("");
+        $("dirCountryLabel").textContent = state.dirCountry;
+        var all = DIR[state.dirCountry] || [];
+        var hosts = state.guestPaid ? all : all.slice(0, 10);
+        $("dirGrid").innerHTML = hosts
+          .map(function (h) {
+            return cardHTML(h, false);
+          })
+          .join("");
+        $("dirLockNote").classList.toggle("hidden", state.guestPaid);
+        $("dirPaywall").classList.toggle("hidden", state.guestPaid);
+        updateState();
+      }
+
+      /* ---------- chip clicks ---------- */
+      document.body.addEventListener("click", function (e) {
+        var c = e.target.closest("[data-country]");
+        if (c) {
+          state.currentCountry = c.getAttribute("data-country");
+          renderLanding();
+        }
+        var d = e.target.closest("[data-dircountry]");
+        if (d) {
+          state.dirCountry = d.getAttribute("data-dircountry");
+          renderDirectory();
+        }
+        var a = e.target.closest("[data-admincountry]");
+        if (a) {
+          state.adminCountry = a.getAttribute("data-admincountry");
+          renderDirector();
+        }
+      });
+
+      /* ---------- guest signup ---------- */
+      $("toStep2").addEventListener("click", function () {
+        if (!$("gName").value.trim()) {
+          $("gName").focus();
+          return;
+        }
+        buildPicks();
+        $("signupStep1").classList.add("hidden");
+        $("signupStep2").classList.remove("hidden");
+      });
+      function buildPicks() {
+        $("pickCountries").innerHTML = COUNTRIES.map(function (c) {
+          return '<button class="pick" data-pc="' + c + '">' + c + "</button>";
+        }).join("");
+        $("pickInterests").innerHTML = INTERESTS.map(function (c) {
+          return '<button class="pick" data-pi="' + c + '">' + c + "</button>";
+        }).join("");
+        $("pickDiet").innerHTML = DIET.map(function (c) {
+          return '<button class="pick" data-pd="' + c + '">' + c + "</button>";
+        }).join("");
+      }
+      document.body.addEventListener("click", function (e) {
+        var pc = e.target.closest("[data-pc]");
+        if (pc) {
+          toggle(pc, "pc", state.pickC);
+        }
+        var pi = e.target.closest("[data-pi]");
+        if (pi) {
+          toggle(pi, "pi", state.pickI);
+        }
+        var pd = e.target.closest("[data-pd]");
+        if (pd) {
+          toggle(pd, "pd", state.pickD);
+        }
+      });
+      function toggle(el, attr, arr) {
+        var v = el.getAttribute("data-" + attr);
+        var i = arr.indexOf(v);
+        if (i >= 0) {
+          arr.splice(i, 1);
+          el.classList.remove("on");
+        } else {
+          arr.push(v);
+          el.classList.add("on");
+        }
+      }
+      $("finishSignup").addEventListener("click", function () {
+        state.profile = {
+          name: $("gName").value.trim() || "traveler",
+          email: $("gEmail").value.trim(),
+          countries: state.pickC.slice(),
+          interests: state.pickI.slice(),
+          diet: state.pickD.slice(),
+          dietNote: $("gDietNote").value.trim(),
+        };
+        $("welcomeName").textContent = "Welcome, " + state.profile.name;
+        $("welcomeMsg").innerHTML = buildWelcome();
+        $("signupStep2").classList.add("hidden");
+        $("signupStep3").classList.remove("hidden");
+        updateBotProfileLine();
+      });
+      function buildWelcome() {
+        var p = state.profile;
+        var parts = [
+          "Hi " +
+            p.name +
+            ". Your profile is saved so I can help right away and remember you next time.",
+        ];
+        if (p.countries.length)
+          parts.push(
+            "I see you want to visit " + p.countries.join(" and ") + ".",
+          );
+        if (p.interests.length)
+          parts.push(
+            "I will focus on " + p.interests.join(", ").toLowerCase() + ".",
+          );
+        var diet = p.diet.filter(function (d) {
+          return d !== "None";
+        });
+        if (diet.length || p.dietNote)
+          parts.push(
+            "I will keep your dietary needs in mind: " +
+              diet.concat(p.dietNote ? [p.dietNote] : []).join(", ") +
+              ".",
+          );
+        parts.push("Unlock the directory and I will start building your trip.");
+        return parts.join(" ");
+      }
+      $("payGuest").addEventListener("click", payNow);
+      $("payGuest2").addEventListener("click", payNow);
+      function payNow() {
+        state.guestPaid = true;
+        updateState();
+        go("directory");
+      }
+
+      /* ---------- AI assistant ---------- */
+      function updateBotProfileLine() {
+        if (!state.profile) {
+          $("botProfileLine").textContent =
+            "No profile yet. Sign up so I can help.";
+          return;
+        }
+        var p = state.profile;
+        $("botProfileLine").textContent =
+          (p.countries.join(", ") || "any country") +
+          " | " +
+          (p.interests.join(", ") || "open to anything");
+      }
+      function openAssistant() {
+        updateBotProfileLine();
+        var box = $("chatbox");
+        box.innerHTML = "";
+        if (!state.profile) {
+          addMsg(
+            "bot",
+            "Hi. I am the Roamly assistant. Sign up and tell me about your trip, then I can recommend and book for you.",
+          );
+          return;
+        }
+        addMsg("bot", buildWelcome());
+        var recos = matchRecos();
+        if (recos.length) {
+          addMsg("bot", "Here are a few places that fit your profile:");
+          recos.forEach(function (h) {
+            addReco(h);
+          });
+        }
+      }
+      function addMsg(who, text) {
+        var d = document.createElement("div");
+        d.className = "msg " + who;
+        d.textContent = text;
+        $("chatbox").appendChild(d);
+        $("chatbox").scrollTop = $("chatbox").scrollHeight;
+      }
+      function addReco(h) {
+        var d = document.createElement("div");
+        d.className = "reco";
+        d.innerHTML =
+          '<div class="rphoto">' +
+          photoHTML(h) +
+          '</div><div><div style="font-weight:700;font-size:14px">' +
+          (state.guestPaid ? h.name : "Unlock to see name") +
+          '</div><div class="small">' +
+          h.cat +
+          " in " +
+          h.country +
+          "</div></div>";
+        $("chatbox").appendChild(d);
+        $("chatbox").scrollTop = $("chatbox").scrollHeight;
+      }
+      function matchRecos() {
+        if (!state.profile) return [];
+        var cts = state.profile.countries.length
+          ? state.profile.countries
+          : COUNTRIES;
+        var wantFood = state.profile.interests.indexOf("Food") >= 0;
+        var out = [];
+        cts.forEach(function (ct) {
+          (DIR[ct] || []).forEach(function (h) {
+            var hh = Object.assign({ country: ct }, h);
+            if (wantFood && h.cat === "Restaurant") out.push(hh);
+            else if (h.cat === "Stay") out.push(hh);
+          });
+        });
+        return out.slice(0, 3);
+      }
+      $("chatSend").addEventListener("click", sendChat);
+      $("chatInput").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") sendChat();
+      });
+      function sendChat() {
+        var v = $("chatInput").value.trim();
+        if (!v) return;
+        addMsg("me", v);
+        $("chatInput").value = "";
+        setTimeout(function () {
+          addMsg("bot", botReply(v));
+          var r = matchRecos();
+          if (r.length) addReco(r[0]);
+        }, 250);
+      }
+      function botReply(q) {
+        q = q.toLowerCase();
+        var p = state.profile;
+        if (!p) return "Sign up first so I can use your profile.";
+        if (
+          q.indexOf("food") >= 0 ||
+          q.indexOf("eat") >= 0 ||
+          q.indexOf("restaurant") >= 0
+        ) {
+          var diet = p.diet.filter(function (d) {
+            return d !== "None";
+          });
+          return (
+            "Looking for food" +
+            (diet.length ? " that fits " + diet.join(" and ") : "") +
+            " in " +
+            (p.countries.join(" and ") || "your countries") +
+            ". Here is a match."
+          );
+        }
+        if (
+          q.indexOf("stay") >= 0 ||
+          q.indexOf("hotel") >= 0 ||
+          q.indexOf("sleep") >= 0
+        )
+          return "Here is a stay that fits your trip.";
+        if (
+          q.indexOf("car") >= 0 ||
+          q.indexOf("taxi") >= 0 ||
+          q.indexOf("drive") >= 0
+        )
+          return "I can line up a car rental or taxi for your dates.";
+        return (
+          "I remember your profile, " +
+          p.name +
+          ". Tell me food, stay, car or tours and I will pull matches."
+        );
+      }
+
+      /* ---------- host claim ---------- */
+      function resetClaim() {
+        $("claimStep1").classList.remove("hidden");
+        $("claimStep2").classList.add("hidden");
+        $("claimStep3").classList.add("hidden");
+        $("claimSearch").value = "";
+        renderClaimResults("");
+      }
+      $("claimSearch").addEventListener("input", function () {
+        renderClaimResults(this.value);
+      });
+      function renderClaimResults(q) {
+        q = (q || "").toLowerCase();
+        var all = [];
+        COUNTRIES.forEach(function (ct) {
+          (DIR[ct] || []).forEach(function (h) {
+            all.push(Object.assign({ country: ct }, h));
+          });
+        });
+        var hits = all
+          .filter(function (h) {
+            return !q || h.name.toLowerCase().indexOf(q) >= 0;
+          })
+          .slice(0, 6);
+        $("claimResults").innerHTML = hits
+          .map(function (h) {
+            return (
+              '<div class="card"><div class="photo">' +
+              photoHTML(h) +
+              '</div><div class="body"><span class="tag">' +
+              h.cat +
+              "</span><h3>" +
+              h.name +
+              '</h3><div class="meta">' +
+              h.country +
+              "</div>" +
+              '<div class="actions"><button data-claim="' +
+              h.name +
+              '">This is mine</button></div></div></div>'
+            );
+          })
+          .join("");
+      }
+      document.body.addEventListener("click", function (e) {
+        var c = e.target.closest("[data-claim]");
+        if (c) {
+          $("claimBizName").textContent =
+            "Claim " + c.getAttribute("data-claim");
+          $("claimStep1").classList.add("hidden");
+          $("claimStep2").classList.remove("hidden");
+        }
+      });
+      $("cProof").addEventListener("change", function (e) {
+        showThumbs(e.target.files, "cProofThumb");
+      });
+      $("submitClaim").addEventListener("click", function () {
+        $("claimStep2").classList.add("hidden");
+        $("claimStep3").classList.remove("hidden");
+      });
+
+      /* ---------- host booking editor ---------- */
+      $("hbPhotos").addEventListener("change", function (e) {
+        showThumbs(e.target.files, "hbThumbs");
+      });
+      $("hbAddItem").addEventListener("click", function () {
+        var n = $("hbItemName").value.trim();
+        var pr = $("hbItemPrice").value.trim();
+        if (!n) return;
+        state.items.push({ n: n, p: pr });
+        $("hbItemName").value = "";
+        $("hbItemPrice").value = "";
+        renderItems();
+      });
+      function renderItems() {
+        $("hbItems").innerHTML = state.items
+          .map(function (it) {
+            return (
+              '<div class="reco"><div style="flex:1"><b>' +
+              it.n +
+              "</b></div><div>" +
+              (it.p ? usd(it.p) : "") +
+              "</div></div>"
+            );
+          })
+          .join("");
+      }
+      $("hbSave").addEventListener("click", function () {
+        state.hostActive = true;
+        updateState();
+        $("hbSaved").classList.remove("hidden");
+      });
+
+      /* ---------- director panel ---------- */
+      function renderDirector() {
+        var agent = state.adminRole === "agent";
+        var listCountries = agent ? state.agentCountries : COUNTRIES;
+        if (agent && listCountries.indexOf(state.adminCountry) < 0)
+          state.adminCountry = listCountries[0];
+        $("dirTitle").textContent = agent
+          ? "Loader (Agent)"
+          : "Loader (Super admin)";
+        $("dirSub").textContent = agent
+          ? "Load photos and hosts into the countries assigned to you, up to 150 per country."
+          : "Load photos and hosts into any country, add new countries, up to 150 per country.";
+        $("dirRoleBanner").textContent = agent
+          ? "Agent mode. You can load and edit hosts for your assigned countries only. You cannot add new countries or change anything else."
+          : "Super admin mode. You can load any country, add countries and manage everything in the team area.";
+        $("dirSuperOnly").style.display = agent ? "none" : "";
+        $("dirAdminCountries").innerHTML = listCountries
+          .map(function (c) {
+            return (
+              '<button class="chip ' +
+              (c === state.adminCountry ? "active" : "") +
+              '" data-admincountry="' +
+              c +
+              '">' +
+              c +
+              "</button>"
+            );
+          })
+          .join("");
+        var n = (DIR[state.adminCountry] || []).length;
+        $("countText").textContent = n + " of 150 loaded";
+        $("countBar").style.width = Math.min(100, (n / 150) * 100) + "%";
+      }
+      $("addCountryBtn").addEventListener("click", function () {
+        if (state.adminRole === "agent") return;
+        var n = $("newCountryName").value.trim();
+        if (!n) return;
+        if (!DIR[n]) {
+          DIR[n] = [];
+          COUNTRIES = Object.keys(DIR);
+        }
+        state.adminCountry = n;
+        $("newCountryName").value = "";
+        renderDirector();
+      });
+      var dirPhotoData = null;
+      $("dirPhoto").addEventListener("change", function (e) {
+        var f = e.target.files[0];
+        if (!f) return;
+        var r = new FileReader();
+        r.onload = function () {
+          dirPhotoData = r.result;
+          $("dirPhotoThumb").innerHTML =
+            '<img class="thumb" src="' + dirPhotoData + '">';
+        };
+        r.readAsDataURL(f);
+      });
+      $("dirAddHost").addEventListener("click", function () {
+        var name = $("dirName").value.trim();
+        if (!name) return;
+        DIR[state.adminCountry].push({
+          name: name,
+          cat: $("dirCat").value,
+          hours: $("dirHours").value.trim() || "Hours not set",
+          phone: $("dirPhone").value.trim(),
+          img: dirPhotoData,
+        });
+        dirPhotoData = null;
+        $("dirPhotoThumb").innerHTML = "";
+        $("dirName").value = "";
+        $("dirHours").value = "";
+        $("dirPhone").value = "";
+        renderDirector();
+      });
+
+      /* ---------- shared thumbs ---------- */
+      function showThumbs(files, targetId) {
+        var t = $(targetId);
+        t.innerHTML = "";
+        Array.prototype.forEach.call(files, function (f) {
+          var r = new FileReader();
+          r.onload = function () {
+            var img = document.createElement("img");
+            img.className = "thumb";
+            img.src = r.result;
+            t.appendChild(img);
+          };
+          r.readAsDataURL(f);
+        });
+      }
+
+      /* ---------- dashboards ---------- */
+      var hostOrders = [
+        {
+          guest: "Aisha",
+          type: "Property booking",
+          date: "Jun 18",
+          status: "new",
+        },
+        {
+          guest: "Marco",
+          type: "Restaurant reservation",
+          date: "Jun 19",
+          status: "new",
+        },
+        {
+          guest: "Priya",
+          type: "Car rental",
+          date: "Jun 21",
+          status: "confirmed",
+        },
+      ];
+      function renderHostDash() {
+        $("hOrdersBody").innerHTML = hostOrders
+          .map(function (o, i) {
+            var cls =
+              o.status === "new"
+                ? "new"
+                : o.status === "confirmed"
+                  ? "live"
+                  : "done";
+            var act =
+              o.status === "new"
+                ? '<button class="tbtn primary" data-horder="acc-' +
+                  i +
+                  '">Accept</button><button class="tbtn" data-horder="dec-' +
+                  i +
+                  '">Decline</button>'
+                : '<span class="small">No action needed</span>';
+            return (
+              "<tr><td>" +
+              o.guest +
+              "</td><td>" +
+              o.type +
+              "</td><td>" +
+              o.date +
+              '</td><td><span class="st ' +
+              cls +
+              '">' +
+              (o.status.charAt(0).toUpperCase() + o.status.slice(1)) +
+              "</span></td><td>" +
+              act +
+              "</td></tr>"
+            );
+          })
+          .join("");
+      }
+      function dashSub(group, id) {
+        var nav = group === "host" ? "hostNav" : "adminNav";
+        var attr = group === "host" ? "hsub" : "asub";
+        document
+          .querySelectorAll("#" + nav + " .navitem")
+          .forEach(function (b) {
+            b.classList.toggle("on", b.getAttribute("data-" + attr) === id);
+          });
+        var scope = group === "host" ? "host-dashboard" : "admin-dashboard";
+        document
+          .querySelectorAll("#" + scope + " .dashsub")
+          .forEach(function (s) {
+            s.classList.toggle("on", s.id === id);
+          });
+      }
+      function renderAdminDash() {
+        var agent = state.adminRole === "agent";
+        // role label
+        var roleEl = document.querySelector("#admin-dashboard .side .role");
+        if (roleEl)
+          roleEl.textContent = agent ? "Agent" : "Super admin / Director";
+        // build sidebar by role
+        var nav = agent
+          ? [
+              ["aAgentHome", "My workspace"],
+              ["__loader", "Load directory"],
+            ]
+          : [
+              ["aOverview", "Overview"],
+              ["aClaims", "Claims"],
+              ["aHosts", "Listings"],
+              ["aCountries", "Countries"],
+              ["aGuests", "Guests"],
+              ["aTeam", "Team and access"],
+              ["__loader", "Load directory"],
+            ];
+        $("adminNav").innerHTML = nav
+          .map(function (it, idx) {
+            if (it[0] === "__loader")
+              return (
+                '<button class="navitem" data-go="director">' +
+                it[1] +
+                "</button>"
+              );
+            return (
+              '<button class="navitem' +
+              (idx === 0 ? " on" : "") +
+              '" data-asub="' +
+              it[0] +
+              '">' +
+              it[1] +
+              "</button>"
+            );
+          })
+          .join("");
+        // default sub
+        dashSub("admin", agent ? "aAgentHome" : "aOverview");
+
+        // overview stats
+        $("aCountryStat").textContent = COUNTRIES.length;
+        var total = 0;
+        COUNTRIES.forEach(function (c) {
+          total += (DIR[c] || []).length;
+        });
+        $("aHostStat").textContent = total;
+        $("aProgressBody").innerHTML = COUNTRIES.map(function (c) {
+          var n = (DIR[c] || []).length;
+          var pct = Math.min(100, Math.round((n / 150) * 100));
+          return (
+            "<tr><td>" +
+            c +
+            "</td><td>" +
+            n +
+            ' of 150</td><td style="width:160px"><div class="progress"><i style="width:' +
+            pct +
+            '%"></i></div></td></tr>'
+          );
+        }).join("");
+        $("aCountriesBody").innerHTML = COUNTRIES.map(function (c) {
+          var n = (DIR[c] || []).length;
+          var pct = Math.min(100, Math.round((n / 150) * 100));
+          return (
+            "<tr><td>" +
+            c +
+            "</td><td>" +
+            n +
+            '</td><td>150</td><td style="width:160px"><div class="progress"><i style="width:' +
+            pct +
+            '%"></i></div></td></tr>'
+          );
+        }).join("");
+        // claims
+        var claims = [
+          {
+            biz: (DIR[COUNTRIES[0]] || [{ name: "Listing" }])[0].name,
+            by: "Owner one",
+            ct: COUNTRIES[0],
+          },
+          {
+            biz: (DIR[COUNTRIES[0]] || [{}, { name: "Listing" }])[1]
+              ? DIR[COUNTRIES[0]][1].name
+              : "Listing",
+            by: "Owner two",
+            ct: COUNTRIES[0],
+          },
+          {
+            biz: (DIR[COUNTRIES[1]] ||
+              DIR[COUNTRIES[0]] || [{ name: "Listing" }])[0].name,
+            by: "Owner three",
+            ct: COUNTRIES[1] || COUNTRIES[0],
+          },
+        ];
+        $("aClaimsBody").innerHTML = claims
+          .map(function (c, i) {
+            return (
+              "<tr><td>" +
+              c.biz +
+              "</td><td>" +
+              c.by +
+              "</td><td>" +
+              c.ct +
+              "</td><td>" +
+              '<button class="tbtn primary" data-claimact="ok-' +
+              i +
+              '">Approve</button>' +
+              '<button class="tbtn" data-claimact="no-' +
+              i +
+              '">Reject</button></td></tr>'
+            );
+          })
+          .join("");
+        var rows = [];
+        COUNTRIES.forEach(function (c) {
+          (DIR[c] || []).forEach(function (h) {
+            rows.push(
+              "<tr><td>" +
+                h.name +
+                "</td><td>" +
+                h.cat +
+                "</td><td>" +
+                c +
+                '</td><td><span class="st live">Live</span></td>' +
+                '<td><button class="tbtn">View</button></td></tr>',
+            );
+          });
+        });
+        $("aHostsBody").innerHTML = rows.join("");
+
+        // team table
+        $("aTeamBody").innerHTML = ADMINS.map(function (m) {
+          var stcls = m.status === "active" ? "live" : "pending";
+          var act =
+            m.role === "Super admin"
+              ? '<span class="small">Full access</span>'
+              : '<button class="tbtn">Edit access</button><button class="tbtn">Remove</button>';
+          return (
+            "<tr><td>" +
+            m.name +
+            "</td><td>" +
+            m.role +
+            "</td><td>" +
+            m.countries +
+            "</td>" +
+            '<td><span class="st ' +
+            stcls +
+            '">' +
+            m.status +
+            "</span></td><td>" +
+            act +
+            "</td></tr>"
+          );
+        }).join("");
+
+        // agent workspace
+        $("agentHello").textContent = "Welcome, " + state.agentName;
+        $("agentCountriesStat").textContent = state.agentCountries.length;
+        var loaded = 0;
+        state.agentCountries.forEach(function (c) {
+          loaded += (DIR[c] || []).length;
+        });
+        $("agentLoadedStat").textContent = loaded;
+        $("agentCountriesBody").innerHTML = state.agentCountries
+          .map(function (c) {
+            var n = (DIR[c] || []).length;
+            var pct = Math.min(100, Math.round((n / 150) * 100));
+            return (
+              "<tr><td>" +
+              c +
+              "</td><td>" +
+              n +
+              ' of 150</td><td style="width:160px"><div class="progress"><i style="width:' +
+              pct +
+              '%"></i></div></td></tr>'
+            );
+          })
+          .join("");
+      }
+      /* dashboard interactions */
+      document.body.addEventListener("click", function (e) {
+        var hs = e.target.closest("[data-hsub]");
+        if (hs) {
+          dashSub("host", hs.getAttribute("data-hsub"));
+        }
+        var as = e.target.closest("[data-asub]");
+        if (as) {
+          dashSub("admin", as.getAttribute("data-asub"));
+        }
+        var ho = e.target.closest("[data-horder]");
+        if (ho) {
+          var p = ho.getAttribute("data-horder").split("-");
+          var i = +p[1];
+          hostOrders[i].status = p[0] === "acc" ? "confirmed" : "done";
+          renderHostDash();
+        }
+        var ca = e.target.closest("[data-claimact]");
+        if (ca) {
+          var tr = ca.closest("tr");
+          tr.querySelector("td:last-child").innerHTML =
+            ca.getAttribute("data-claimact").indexOf("ok") === 0
+              ? '<span class="st live">Approved</span>'
+              : '<span class="st done">Rejected</span>';
+        }
+        var pm = e.target.closest("[data-perm]");
+        if (pm) {
+          pm.classList.toggle("on");
+        }
+      });
+      $("addAdminBtn").addEventListener("click", function () {
+        var name = $("newAdminName").value.trim();
+        if (!name) return;
+        ADMINS.push({
+          name: name,
+          role: $("newAdminRole").value,
+          countries: $("newAdminCountries").value.trim() || "None yet",
+          status: "invited",
+        });
+        $("newAdminName").value = "";
+        $("newAdminCountries").value = "";
+        renderAdminDash();
+        dashSub("admin", "aTeam");
+      });
+
+      /* ---------- init ---------- */
+      renderLanding();
+      updateState();
+    </script>
+  </body>
+</html>

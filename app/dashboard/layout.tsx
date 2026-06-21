@@ -32,7 +32,7 @@ function SidebarNav({ role, displayRole }: { role: string; displayRole: string }
       <nav className="flex flex-col flex-1">
         <div className="flex flex-col gap-1">
           <Link href="/dashboard" className={navClass("/dashboard")}>
-            Overview
+            {role === "Agent" ? "My workspace" : "Overview"}
           </Link>
           {role === "Host" && (
             <>
@@ -54,9 +54,9 @@ function SidebarNav({ role, displayRole }: { role: string; displayRole: string }
             </>
           )}
           {role === "Agent" && (
-            <Link href="/dashboard/clients" className={navClass("/dashboard/clients")}>
-              My Clients
-            </Link>
+            <button className="bg-transparent text-white text-left w-full px-3.25 py-2.75 rounded-[11px] text-[14px] font-semibold opacity-80 flex justify-between items-center hover:bg-[rgba(255,255,255,0.14)] hover:opacity-100 transition-colors">
+              Load directory
+            </button>
           )}
           {role === "Super Admin" && (
             <>
@@ -77,9 +77,11 @@ function SidebarNav({ role, displayRole }: { role: string; displayRole: string }
               </Link>
             </>
           )}
-          <Link href="/dashboard/settings" className={navClass("/dashboard/settings")}>
-            Settings
-          </Link>
+          {role !== "Agent" && (
+            <Link href="/dashboard/settings" className={navClass("/dashboard/settings")}>
+              Settings
+            </Link>
+          )}
         </div>
 
         <div className="mt-auto border-t border-[rgba(255,255,255,0.1)] pt-4">

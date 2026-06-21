@@ -2,6 +2,7 @@
 
 import { HostOverview } from "@/components/dashboard/HostDashboard";
 import { AdminOverview } from "@/components/dashboard/AdminDashboard";
+import { AgentOverview } from "@/components/dashboard/AgentDashboard";
 
 export default function DashboardPage() {
   const authData = typeof window !== "undefined" ? localStorage.getItem("roamly_auth") : null;
@@ -13,6 +14,10 @@ export default function DashboardPage() {
   
   if (role === "Super Admin") {
     return <AdminOverview />;
+  }
+
+  if (role === "Agent") {
+    return <AgentOverview />;
   }
 
   // Fallbacks for other roles

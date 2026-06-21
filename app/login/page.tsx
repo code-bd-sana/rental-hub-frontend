@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 const DEMO_ACCOUNTS = [
@@ -15,6 +15,20 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+
+  useEffect(() => {
+    const authData = localStorage.getItem("roamly_auth");
+    if (authData) {
+      try {
+        const parsed = JSON.parse(authData);
+        if (parsed?.isAuthenticated) {
+          router.replace("/dashboard");
+        }
+      } catch (e) {
+        console.warn("Failed to parse auth data from localStorage", e);
+      }
+    }
+  }, [router]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();

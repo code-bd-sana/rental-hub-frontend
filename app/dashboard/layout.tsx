@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function DashboardLayout({
@@ -8,19 +8,38 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [role] = useState<string | null>(() => {
+  const [role, setRole] = useState<string | null>(null);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    const authData = localStorage.getItem("roamly_auth");
+    if (!authData) {
+      router.replace("/login");
+      return;
+    }
+
     try {
-      if (typeof window === "undefined") return null;
-      const authData = localStorage.getItem("roamly_auth");
-      if (!authData) return null;
       const parsed = JSON.parse(authData);
-      return parsed?.role ?? null;
+      if (!parsed?.isAuthenticated) {
+        router.replace("/login");
+        return;
+      }
+      setRole(parsed.role);
+      setIsAuthChecking(false);
     } catch (e) {
       console.warn("Failed to parse auth data:", e);
-      return null;
+      router.replace("/login");
     }
-  });
-  const router = useRouter();
+  }, [router]);
+
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#2563eb] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   const displayRole = role ? `${role} dashboard` : "Dashboard";
 

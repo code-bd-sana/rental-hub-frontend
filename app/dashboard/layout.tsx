@@ -26,7 +26,7 @@ export default function DashboardLayout({
 
   return (
     <div className="flex gap-0 min-h-screen font-sans bg-[#f8fafc]">
-      <aside className="flex-none w-55 bg-[#172554] text-white p-5 rounded-r-[22px]">
+      <aside className="flex flex-col flex-none w-55 bg-[#172554] text-white p-5 rounded-r-[22px]">
         <span
           className="block text-white text-[20px] mb-1 font-bold"
           style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
@@ -37,8 +37,8 @@ export default function DashboardLayout({
           {displayRole}
         </div>
 
-        <nav className="flex flex-col">
-          <div className="flex-1">
+        <nav className="flex flex-col flex-1">
+          <div className="flex flex-col gap-1">
             <button className="bg-[rgba(255,255,255,0.14)] text-white text-left px-3.25 py-2.75 rounded-[11px] text-[14px] font-semibold opacity-100 flex justify-between items-center transition-colors">
               Overview
             </button>
@@ -76,7 +76,7 @@ export default function DashboardLayout({
             </button>
           </div>
 
-          <div className="flex-1">
+          <div className="mt-auto border-t border-[rgba(255,255,255,0.1)] pt-4">
             <button
               onClick={() => {
                 localStorage.removeItem("roamly_auth");

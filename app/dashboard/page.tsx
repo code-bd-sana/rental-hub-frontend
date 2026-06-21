@@ -1,36 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { HostDashboard } from "@/components/dashboard/HostDashboard";
+import { HostOverview } from "@/components/dashboard/HostDashboard";
 
 export default function DashboardPage() {
-  // Initialize role from localStorage to avoid setting state synchronously inside an effect
-  const [role] = useState<string | null>(() => {
-    try {
-      const authData = typeof window !== "undefined" ? localStorage.getItem("roamly_auth") : null;
-      if (!authData) return null;
-      const parsed = JSON.parse(authData);
-      return parsed?.role ?? null;
-    } catch (e) {
-      console.warn("Failed to parse auth data:", e);
-      return null;
-    }
-  });
-
-  const router = useRouter();
-
-  // Only handle navigation (side-effect) here; do not call setState inside the effect
-  useEffect(() => {
-    if (!role) {
-      router.push("/login");
-    }
-  }, [role, router]);
-
-  if (!role) return null; // loading state
+  const authData = typeof window !== "undefined" ? localStorage.getItem("roamly_auth") : null;
+  const role = authData ? JSON.parse(authData).role : null;
 
   if (role === "Host") {
-    return <HostDashboard />;
+    return <HostOverview />;
   }
 
   // Fallbacks for other roles

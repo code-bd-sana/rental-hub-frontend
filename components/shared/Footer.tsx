@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useModal } from "./ModalProvider";
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (pathname.startsWith("/dashboard")) return null;
+
   const { openModal } = useModal();
 
   const linkClass = "block py-1.25 text-[.9rem] text-[#b9a8d4] hover:text-white hover:translate-x-0.5 transition-all duration-200 cursor-pointer text-left w-full";

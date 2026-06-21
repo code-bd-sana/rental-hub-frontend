@@ -7,6 +7,7 @@ import { useState } from "react";
 
 export default function Header() {
   const pathname = usePathname();
+  if (pathname.startsWith("/dashboard")) return null;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navClass = (isActive: boolean) =>

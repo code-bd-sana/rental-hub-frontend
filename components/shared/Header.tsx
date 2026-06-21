@@ -4,12 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { useModal } from "./ModalProvider";
 
 export default function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { openModal } = useModal();
 
   const navClass = (isActive: boolean) =>
     `px-3.5 py-2.25 rounded-2.5 font-semibold text-[1.05rem] transition-colors duration-200 cursor-pointer bg-transparent border-none text-left font-inherit ${isActive ? "text-(--purple)" : "text-(--ink) hover:bg-[#f1eaf9] hover:text-(--purple)"}`;
@@ -40,7 +38,7 @@ export default function Header() {
             >
               Browse
             </Link>
-            <Link
+            {/* <Link
               href="/cars"
               className={navClass(pathname.startsWith("/cars"))}
             >
@@ -51,13 +49,7 @@ export default function Header() {
               className={navClass(false)}
             >
               List Your Business
-            </button>
-            <Link
-              href="/host/dashboard"
-              className={navClass(pathname.startsWith("/host"))}
-            >
-              Host
-            </Link>
+            </button> */}
           </nav>
           <Link
             href="/login"
@@ -104,7 +96,7 @@ export default function Header() {
           >
             Browse
           </Link>
-          <button
+          {/* <button
             onClick={() => {
               setMobileMenuOpen(false);
               openModal("list");
@@ -112,14 +104,7 @@ export default function Header() {
             className={mobileNavClass}
           >
             List Your Business
-          </button>
-          <Link
-            href="/host/dashboard"
-            onClick={() => setMobileMenuOpen(false)}
-            className={mobileNavClass}
-          >
-            Host
-          </Link>
+          </button> */}
           <Link
             href="/login"
             onClick={() => setMobileMenuOpen(false)}

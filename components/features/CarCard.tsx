@@ -6,7 +6,7 @@ import { formatCurrency } from '../../lib/utils';
 export default function CarCard({ car }: { car: Car }) {
   return (
     <Link 
-      href={`/browse/cars/${car.id}`} 
+      href="#"
       className="block bg-white border border-line rounded-2xl overflow-hidden shadow-custom-sm cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-custom"
     >
       <div className="relative w-full aspect-4/3 overflow-hidden bg-[#0c0a11]">

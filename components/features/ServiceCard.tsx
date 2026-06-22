@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Service } from '../../lib/types';
 
 export default function ServiceCard({ service }: { service: Service }) {
-  const href = `/browse/${service.type.toLowerCase()}/${service.id}`;
+  const href = "#";
   
   return (
     <Link 

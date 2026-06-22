@@ -39,12 +39,7 @@ export default function Header() {
             >
               Countries
             </Link>
-            <Link
-              href="/browse"
-              className={navClass(pathname.startsWith("/browse"))}
-            >
-              Browse
-            </Link>
+
             {/* <Link
               href="/cars"
               className={navClass(pathname.startsWith("/cars"))}
@@ -103,13 +98,7 @@ export default function Header() {
           >
             Countries
           </Link>
-          <Link
-            href="/browse"
-            onClick={() => setMobileMenuOpen(false)}
-            className={mobileNavClass}
-          >
-            Browse
-          </Link>
+
           {/* <button
             onClick={() => {
               setMobileMenuOpen(false);

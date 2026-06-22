@@ -69,7 +69,7 @@ export default async function Home() {
               Rooms
             </h3>
             <Link
-              href="/browse/rooms"
+              href="#"
               className="text-(--purple) font-bold text-[0.92rem] inline-flex gap-1.5 items-center hover:underline"
             >
               All Rooms →

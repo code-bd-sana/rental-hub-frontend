@@ -55,7 +55,7 @@ export default function Footer() {
               <button onClick={() => openModal("list")} className={linkClass}>List your business</button>
               <Link href="/host/dashboard" className={linkClass}>Host back office</Link>
               <Link href="/discover" className={linkClass}>Discover</Link>
-              <button onClick={() => openModal("signin")} className={linkClass}>Sign in</button>
+              <Link href="/login" className={linkClass}>Sign in</Link>
             </div>
             <div>
               <h4 className={colTitleClass}>Policies</h4>

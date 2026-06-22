@@ -39,6 +39,12 @@ export default function Header() {
             >
               Countries
             </Link>
+            <Link
+              href="/directory"
+              className={navClass(pathname.startsWith("/directory"))}
+            >
+              Directory
+            </Link>
 
             {/* <Link
               href="/cars"
@@ -97,6 +103,13 @@ export default function Header() {
             className={mobileNavClass}
           >
             Countries
+          </Link>
+          <Link
+            href="/directory"
+            onClick={() => setMobileMenuOpen(false)}
+            className={mobileNavClass}
+          >
+            Directory
           </Link>
 
           {/* <button

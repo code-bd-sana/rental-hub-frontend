@@ -59,7 +59,7 @@ export default function CountriesPage() {
             return (
               <Wrapper
                 key={c}
-                href={isAvail ? "#" : undefined}
+                href={isAvail ? `/directory?country=${encodeURIComponent(c)}` : undefined}
                 className={`bg-white rounded-[18px] p-4 shadow-[0_10px_30px_rgba(11,79,74,0.06)] block
                   ${isAvail ? 'cursor-pointer hover:shadow-[0_10px_30px_rgba(11,79,74,0.12)] hover:-translate-y-0.5 transition-all' : 'cursor-default opacity-90'}
                 `}

@@ -91,6 +91,7 @@ export default function DirectoryPage() {
               hours={item.hours}
               phone={item.phone}
               locked={!isLoggedIn}
+              seed={item.seed}
             />
           ))}
           {items.length === 0 && (

@@ -71,6 +71,7 @@ export default function DirectorySection() {
             hours={item.hours}
             phone={item.phone}
             locked={!isLoggedIn}
+            seed={item.seed}
           />
         ))}
         {items.length === 0 && (

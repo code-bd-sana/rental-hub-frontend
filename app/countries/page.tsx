@@ -54,29 +54,35 @@ export default function CountriesPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {filtered.map(c => {
             const isAvail = AVAILABLE_COUNTRIES.includes(c);
-            const Wrapper = isAvail ? Link : "div";
-            
+            if (isAvail) {
+              return (
+                <Link
+                  key={c}
+                  href={`/directory?country=${encodeURIComponent(c)}`}
+                  className={`bg-white rounded-[18px] p-4 shadow-[0_10px_30px_rgba(11,79,74,0.06)] block cursor-pointer hover:shadow-[0_10px_30px_rgba(11,79,74,0.12)] hover:-translate-y-0.5 transition-all`}
+                >
+                  <div className="text-[32px] mb-2 leading-none">🌍</div>
+                  <h3 className="font-bold text-[#15201f] text-[16px] mb-1 line-clamp-1">{c}</h3>
+                  <div className="text-[13px] text-[#6b7b79] mb-3">10 hosts listed</div>
+                  <div>
+                    <span className="text-[10px] font-bold text-[#1e9e72] border border-[#1e9e72] px-2 py-0.5 rounded-full uppercase tracking-wider inline-block bg-[#f0fdf4]">Available</span>
+                  </div>
+                </Link>
+              );
+            }
+
             return (
-              <Wrapper
+              <div
                 key={c}
-                href={isAvail ? `/directory?country=${encodeURIComponent(c)}` : undefined}
-                className={`bg-white rounded-[18px] p-4 shadow-[0_10px_30px_rgba(11,79,74,0.06)] block
-                  ${isAvail ? 'cursor-pointer hover:shadow-[0_10px_30px_rgba(11,79,74,0.12)] hover:-translate-y-0.5 transition-all' : 'cursor-default opacity-90'}
-                `}
+                className={`bg-white rounded-[18px] p-4 shadow-[0_10px_30px_rgba(11,79,74,0.06)] block cursor-default opacity-90`}
               >
                 <div className="text-[32px] mb-2 leading-none">🌍</div>
                 <h3 className="font-bold text-[#15201f] text-[16px] mb-1 line-clamp-1">{c}</h3>
-                <div className="text-[13px] text-[#6b7b79] mb-3">
-                  {isAvail ? "10 hosts listed" : "Being loaded"}
-                </div>
+                <div className="text-[13px] text-[#6b7b79] mb-3">Being loaded</div>
                 <div>
-                  {isAvail ? (
-                    <span className="text-[10px] font-bold text-[#1e9e72] border border-[#1e9e72] px-2 py-0.5 rounded-full uppercase tracking-wider inline-block bg-[#f0fdf4]">Available</span>
-                  ) : (
-                    <span className="text-[10px] font-bold text-[#6b7b79] border border-[#e7e1d6] px-2 py-0.5 rounded-full uppercase tracking-wider inline-block bg-[#f8fafc]">Coming soon</span>
-                  )}
+                  <span className="text-[10px] font-bold text-[#6b7b79] border border-[#e7e1d6] px-2 py-0.5 rounded-full uppercase tracking-wider inline-block bg-[#f8fafc]">Coming soon</span>
                 </div>
-              </Wrapper>
+              </div>
             );
           })}
         </div>

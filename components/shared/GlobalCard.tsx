@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export interface GlobalCardProps {
   title: string;
@@ -8,9 +9,10 @@ export interface GlobalCardProps {
   hours?: string;
   phone?: string;
   locked?: boolean;
+  seed?: string;
 }
 
-export default function GlobalCard({ title, category, imageUrl, icon, hours, phone, locked }: GlobalCardProps) {
+export default function GlobalCard({ title, category, imageUrl, icon, hours, phone, locked, seed }: GlobalCardProps) {
   return (
     <div className="bg-white border border-[#e7e1d6] rounded-[18px] overflow-hidden shadow-[0_10px_30px_rgba(11,79,74,0.1)] relative">
       <div className="aspect-4/3 bg-linear-to-br from-[#dbeafe] to-[#bfdbfe] relative">
@@ -51,17 +53,17 @@ export default function GlobalCard({ title, category, imageUrl, icon, hours, pho
         
         <div className="flex gap-2 mt-2.75">
           {locked ? (
-            <button className="flex-1 rounded-xl p-2.25 font-semibold text-[13px] bg-[#1e40af] text-white hover:bg-[#172554] transition-colors">
+            <Link href="/login" className="flex-1 text-center rounded-xl p-2.25 font-semibold text-[13px] bg-[#1e40af] text-white! hover:bg-[#172554] transition-colors">
               Unlock to book
-            </button>
+            </Link>
           ) : (
             <>
               <button className="flex-1 rounded-xl p-2.25 font-semibold text-[13px] bg-[#1e40af] text-white hover:bg-[#172554] transition-colors">
                 View page
               </button>
-              <button className="flex-1 rounded-xl p-2.25 font-semibold text-[13px] bg-white border border-[#e7e1d6] text-[#172554] hover:bg-[#f8fafc] transition-colors">
+              <Link href={seed ? `/booking?id=${seed}` : "#"} className="flex-1 text-center rounded-xl p-2.25 font-semibold text-[13px] bg-white border border-[#e7e1d6] text-[#172554] hover:bg-[#f8fafc] transition-colors">
                 Book
-              </button>
+              </Link>
             </>
           )}
         </div>

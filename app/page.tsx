@@ -1,9 +1,7 @@
 import { getProperties } from "../lib/api/properties";
 import { getCars } from "../lib/api/cars";
 import { getServices } from "../lib/api/services";
-import PropertyCard from "../components/features/PropertyCard";
-import CarCard from "../components/features/CarCard";
-import ServiceCard from "../components/features/ServiceCard";
+import GlobalCard from "../components/shared/GlobalCard";
 import SearchWidget from "../components/features/SearchWidget";
 import Link from "next/link";
 import Image from "next/image";
@@ -80,7 +78,7 @@ export default async function Home() {
             id="rowBeds"
           >
             {properties.map((p) => (
-              <PropertyCard key={p.id} property={p} />
+              <GlobalCard key={p.id} title={p.title} category="Stay" imageUrl={p.images[0]} hours="Check in 3pm" phone="+1 876 000 0001" />
             ))}
           </div>
 
@@ -100,7 +98,7 @@ export default async function Home() {
             id="rowCars"
           >
             {cars.map((c) => (
-              <CarCard key={c.id} car={c} />
+              <GlobalCard key={c.id} title={`${c.make} ${c.model}`} category="Car rental" imageUrl={c.images[0]} hours="Daily 8am to 7pm" phone="+1 876 000 0002" />
             ))}
           </div>
 
@@ -120,7 +118,7 @@ export default async function Home() {
             id="rowServices"
           >
             {services.map((s) => (
-              <ServiceCard key={s.id} service={s} />
+              <GlobalCard key={s.id} title={s.title} category={s.type} imageUrl={s.images[0]} hours="Daily 9am to 8pm" phone="+1 876 000 0003" />
             ))}
           </div>
         </section>

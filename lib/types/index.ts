@@ -8,16 +8,21 @@ export interface User {
 export interface Property {
   id: string;
   title: string;
+  type?: string;
   description?: string;
   host: User;
   price: number;
-  priceUnit: "night" | "month";
+  priceUnit: "night" | "month" | "day";
   rating: number;
   reviewsCount: number;
   images: string[];
-  amenities: string[];
+  amenities?: string[];
   location: string;
   isSuperhost?: boolean;
+  guests?: number;
+  bedrooms?: number;
+  beds?: number;
+  baths?: number;
 }
 
 export interface Car {

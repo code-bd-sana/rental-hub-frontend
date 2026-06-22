@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import GlobalCard from "../../components/shared/GlobalCard";
 import { DIR_DATA } from "../../lib/data/directoryData";
 
-export default function DirectoryPage() {
+function DirectoryContent() {
   const searchParams = useSearchParams();
   const currentCountry = searchParams.get("country") || "Jamaica";
   const items = DIR_DATA[currentCountry] || [];
@@ -118,5 +118,13 @@ export default function DirectoryPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function DirectoryPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#f8fafc] flex items-center justify-center font-bold text-gray-500">Loading directory...</div>}>
+      <DirectoryContent />
+    </Suspense>
   );
 }

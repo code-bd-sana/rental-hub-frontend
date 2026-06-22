@@ -34,7 +34,7 @@ export default function DirectoryPage() {
     <div className="min-h-screen bg-[#f8fafc] font-sans pb-16">
       {/* Header Area */}
       <div className="bg-white border-b border-[#e7e1d6] py-3">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="font-bold text-[22px] tracking-[0.5px] text-[#172554]" style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
             Roam<b className="text-[#2563eb]">ly</b>
           </div>
@@ -47,10 +47,10 @@ export default function DirectoryPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+      <div className="max-w-7xl mx-auto pt-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4">
           <h2 className="text-[28px] md:text-3xl font-bold text-[#15201f]" style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
-            Directory
+            Directory 
           </h2>
           <span className="text-sm font-semibold text-[#6b7b79] mt-1 sm:mt-0 uppercase tracking-wide">
             {currentCountry}
@@ -65,7 +65,7 @@ export default function DirectoryPage() {
               href={`/directory?country=${encodeURIComponent(c)}`}
               className={`flex-none border rounded-3xl px-3.5 py-2 text-[14px] font-semibold transition-colors ${
                 c === currentCountry
-                  ? "bg-[#1e40af] text-white border-[#1e40af]"
+                  ? "bg-[#1e40af] text-white! border-[#1e40af]"
                   : "bg-white border-[#e7e1d6] text-[#15201f] hover:bg-[#dbeafe]"
               }`}
             >

@@ -106,13 +106,13 @@ export default async function Home() {
 
           <div className="flex items-center justify-between mt-7.5 mb-2">
             <h3 className="text-[1.45rem] font-bold leading-[1.12] tracking-[-0.02em]">
-              Services
+              Foods
             </h3>
             <Link
               href="/services"
               className="text-(--purple) font-bold text-[0.92rem] inline-flex gap-1.5 items-center hover:underline"
             >
-              All services →
+              All foods →
             </Link>
           </div>
           <div

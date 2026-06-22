@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const DEMO_ACCOUNTS = [
   { role: "Guest", email: "guest@roamly.com", password: "password123", redirect: "/browse" },
@@ -159,6 +160,13 @@ export default function LoginPage() {
               </button>
             </div>
           </form>
+          
+          <div className="mt-6 text-center text-[14px] font-medium text-[#6b7b79]">
+            Don&apos;t have an account?{" "}
+            <Link href="/signup" className="text-[#2563eb] hover:text-[#1e40af] font-bold hover:underline">
+              Guest signup
+            </Link>
+          </div>
         </div>
       </div>
       

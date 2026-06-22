@@ -34,6 +34,12 @@ export default function Header() {
               Home
             </Link>
             <Link
+              href="/countries"
+              className={navClass(pathname.startsWith("/countries"))}
+            >
+              Countries
+            </Link>
+            <Link
               href="/browse"
               className={navClass(pathname.startsWith("/browse"))}
             >
@@ -89,6 +95,13 @@ export default function Header() {
             className={mobileNavClass.replace("border-t border-(--line) ", "")}
           >
             Home
+          </Link>
+          <Link
+            href="/countries"
+            onClick={() => setMobileMenuOpen(false)}
+            className={mobileNavClass}
+          >
+            Countries
           </Link>
           <Link
             href="/browse"

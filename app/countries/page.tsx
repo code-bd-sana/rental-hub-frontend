@@ -27,7 +27,7 @@ export default function CountriesPage() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans pb-16">
-      <div className="max-w-7xl mx-auto pt-10">
+      <div className="max-w-7xl mx-auto pt-10 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6">
           <h2 className="text-[28px] md:text-3xl font-bold text-[#15201f]" style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
             Where do you want to go?

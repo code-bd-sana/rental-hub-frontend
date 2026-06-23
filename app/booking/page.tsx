@@ -178,14 +178,14 @@ function BookingContent() {
             <div className="font-bold text-[16px] mb-3 text-[#15201f]">Where are you paying from?</div>
             <div className="flex flex-col gap-3">
               <button onClick={() => setStep("bank-select")} className="text-left flex items-center gap-4 p-4 border border-[#e7e1d6] rounded-xl hover:bg-[#f8fafc] transition-colors">
-                <span className="text-3xl grayscale-20">🇸🇷</span>
+                <span className="text-3xl grayscale-20 shrink-0">🇸🇷</span>
                 <div>
                   <b className="block text-[15px] text-[#15201f]">I am in Suriname</b>
                   <small className="text-[#6b7b79] text-[13px]">Pay by local bank transfer and upload your proof</small>
                 </div>
               </button>
               <button onClick={() => setStep("intl-options")} className="text-left flex items-center gap-4 p-4 border border-[#e7e1d6] rounded-xl hover:bg-[#f8fafc] transition-colors">
-                <span className="text-3xl grayscale-20">🌍</span>
+                <span className="text-3xl grayscale-20 shrink-0">🌍</span>
                 <div>
                   <b className="block text-[15px] text-[#15201f]">International guest</b>
                   <small className="text-[#6b7b79] text-[13px]">Pay at the location or chat with the local host</small>
@@ -278,7 +278,7 @@ function BookingContent() {
           <div className="font-bold text-[18px] mb-4 text-[#15201f]">How would you like to continue?</div>
           <div className="flex flex-col gap-4">
             <button onClick={payAtLocation} className="text-left flex items-start gap-4 p-5 border border-[#e7e1d6] rounded-xl hover:bg-[#f8fafc] transition-colors group">
-              <div className="mt-0.5 w-6 h-6 rounded-full border-[2.5px] border-[#1e40af] flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="mt-0.5 w-6 h-6 rounded-full border-[2.5px] border-[#1e40af] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                 <div className="w-2.5 h-2.5 bg-[#1e40af] rounded-full"></div>
               </div>
               <div>
@@ -287,7 +287,7 @@ function BookingContent() {
               </div>
             </button>
             <button onClick={() => alert("Chat opened with host!")} className="text-left flex items-start gap-4 p-5 border border-[#e7e1d6] rounded-xl hover:bg-[#f8fafc] transition-colors group">
-              <div className="mt-0.5 w-6 h-6 flex items-center justify-center text-[#1e40af] group-hover:scale-110 transition-transform">
+              <div className="mt-0.5 w-6 h-6 flex items-center justify-center shrink-0 text-[#1e40af] group-hover:scale-110 transition-transform">
                 <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6"><path d="M21 12a8 8 0 01-11.5 7.2L4 20l1-4.2A8 8 0 1121 12z" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round"/></svg>
               </div>
               <div>
@@ -364,7 +364,7 @@ function BookingContent() {
   };
 
   return (
-    <div className="min-h-[80vh] bg-[#f8fafc] py-10 px-4">
+    <div className="min-h-[80vh] bg-[#f8fafc] py-6 sm:py-10 px-4 sm:px-6 lg:px-8">
       {renderStep()}
     </div>
   );

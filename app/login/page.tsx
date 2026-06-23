@@ -63,7 +63,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <h1 className="text-4xl font-bold text-[#172554] tracking-tight" style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
           Roam<span className="text-[#2563eb]">ly</span>

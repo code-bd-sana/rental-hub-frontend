@@ -88,20 +88,20 @@ export default function SearchWidget() {
             </button>
           ))}
         </div>
-        <div className="grid grid-cols-1 max-[900px]:grid-cols-2 min-[900px]:grid-cols-[1.5fr_1fr_1fr_auto] gap-0 items-stretch">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_auto] gap-0 items-stretch">
           <div className={fieldClassBase}>
             <label className={labelClass} id="loc-label">Destination</label>
             <div className="font-semibold text-[0.96rem] text-ink">Anywhere</div>
           </div>
-          <div className={`${fieldClassBase} border-l border-line max-[900px]:border-l-0`} id="ciField">
+          <div className={`${fieldClassBase} border-t sm:border-t-0 sm:border-l border-line lg:border-l`} id="ciField">
             <label className={labelClass}>Check in</label>
             <div className="font-medium text-[0.96rem] text-[#a99bbd]">Add date</div>
           </div>
-          <div className={`${fieldClassBase} border-l border-line max-[900px]:border-t max-[900px]:border-l-0`}>
+          <div className={`${fieldClassBase} border-t sm:border-l-0 lg:border-t-0 lg:border-l border-line`}>
             <label className={labelClass}>Check out</label>
             <div className="font-medium text-[0.96rem] text-[#a99bbd]">Add date</div>
           </div>
-          <div className="p-1.5 rounded-xl cursor-pointer transition-colors duration-150 relative hover:bg-[#f8f4fd] border-l border-(--color-line) max-[900px]:col-span-2 max-[900px]:border-l-0 max-[900px]:border-t">
+          <div className="p-1.5 rounded-xl cursor-pointer transition-colors duration-150 relative hover:bg-[#f8f4fd] border-t sm:border-t sm:border-l lg:border-t-0 lg:border-l border-(--color-line) sm:col-span-2 lg:col-span-1">
             <button className="h-full w-full min-h-12 flex items-center justify-center gap-2 bg-(--color-ink) text-white shadow-[0_8px_18px_-8px_rgba(20,16,26,.4)] rounded-[11px] font-bold text-[0.92rem] px-4.5 py-2.5 transition-all duration-180 whitespace-nowrap hover:bg-orange-d hover:-translate-y-px">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2.2" />

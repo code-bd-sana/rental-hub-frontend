@@ -25,7 +25,7 @@ export default function Home() {
             </div>
             <h1 className="text-[clamp(2.4rem,5vw,4rem)] font-semibold leading-[1.12] tracking-[-0.02em]">
               Book the <em className="not-italic text-white">stay</em>, the{" "}
-              <em className="not-italic text-white">plate</em>,<br />
+              <em className="not-italic text-white">plate</em>,<br className="hidden md:block" />
               and everything in between
             </h1>
             <p className="max-w-140 mt-4.5 mx-auto text-[#d9cdeb] text-[1.1rem]">

@@ -557,8 +557,66 @@ export function HostListings() {
 }
 
 export function HostBookings() {
+  const [bookings, setBookings] = useState([
+    {
+      id: 'REQ-001',
+      guest: 'John Doe',
+      item: 'Ocho Rios Grill',
+      type: 'Restaurant',
+      date: 'Oct 15, 2026',
+      amount: '$120',
+      status: 'Pending',
+      rejectionReason: '',
+    },
+    {
+      id: 'REQ-002',
+      guest: 'Sarah Smith',
+      item: 'Blue Mountain Villa',
+      type: 'Stay',
+      date: 'Nov 02 - Nov 05, 2026',
+      amount: '$850',
+      status: 'Accepted',
+      rejectionReason: '',
+    },
+    {
+      id: 'REQ-003',
+      guest: 'Mike Johnson',
+      item: 'Ocho Rios Grill Catering',
+      type: 'Restaurant',
+      date: 'Sep 10, 2026',
+      amount: '$400',
+      status: 'Declined',
+      rejectionReason: 'Fully booked on this date.',
+    },
+  ]);
+
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [viewBooking, setViewBooking] = useState<any>(null);
+
+  const handleAccept = (id: string) => {
+    setBookings(bookings.map((b) => (b.id === id ? { ...b, status: 'Accepted' } : b)));
+  };
+
+  const handleOpenReject = (id: string) => {
+    setRejectingId(id);
+    setRejectReason('');
+  };
+
+  const submitReject = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (rejectingId) {
+      setBookings(
+        bookings.map((b) =>
+          b.id === rejectingId ? { ...b, status: 'Declined', rejectionReason: rejectReason } : b,
+        ),
+      );
+      setRejectingId(null);
+    }
+  };
+
   return (
-    <div className='animate-in fade-in duration-300'>
+    <div className='animate-in fade-in duration-300 relative'>
       <h2
         className='text-[26px] font-bold mb-1 text-[#172554]'
         style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
@@ -568,6 +626,7 @@ export function HostBookings() {
       <p className='text-[14px] text-[#6b7b79] mb-4.5'>
         Accept or decline incoming bookings and reservation requests.
       </p>
+
       <div className='bg-white border border-[#e7e1d6] rounded-2xl shadow-[0_10px_30px_rgba(11,79,74,0.1)] overflow-hidden mt-4'>
         <div className='flex justify-between items-center px-4 py-3.5 border-b border-[#e7e1d6]'>
           <h3
@@ -577,33 +636,289 @@ export function HostBookings() {
             Incoming
           </h3>
         </div>
-        <table className='w-full border-collapse text-[14px]'>
-          <thead>
-            <tr>
-              <th className='text-left text-[#6b7b79] text-[11px] uppercase tracking-[0.5px] p-[10px_16px] border-b border-[#e7e1d6]'>
-                Guest
-              </th>
-              <th className='text-left text-[#6b7b79] text-[11px] uppercase tracking-[0.5px] p-[10px_16px] border-b border-[#e7e1d6]'>
-                Type
-              </th>
-              <th className='text-left text-[#6b7b79] text-[11px] uppercase tracking-[0.5px] p-[10px_16px] border-b border-[#e7e1d6]'>
-                Date
-              </th>
-              <th className='text-left text-[#6b7b79] text-[11px] uppercase tracking-[0.5px] p-[10px_16px] border-b border-[#e7e1d6]'>
-                Status
-              </th>
-              <th className='p-[10px_16px] border-b border-[#e7e1d6]'></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td colSpan={5} className='p-8 text-center text-[#6b7b79]'>
-                No new bookings to display.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div className='overflow-x-auto'>
+          <table className='w-full border-collapse text-[14px] whitespace-nowrap'>
+            <thead>
+              <tr>
+                <th className='text-left text-[#6b7b79] text-[11px] uppercase tracking-[0.5px] p-[10px_16px] border-b border-[#e7e1d6]'>
+                  Guest
+                </th>
+                <th className='text-left text-[#6b7b79] text-[11px] uppercase tracking-[0.5px] p-[10px_16px] border-b border-[#e7e1d6]'>
+                  Listing Details
+                </th>
+                <th className='text-left text-[#6b7b79] text-[11px] uppercase tracking-[0.5px] p-[10px_16px] border-b border-[#e7e1d6]'>
+                  Date & Amount
+                </th>
+                <th className='text-left text-[#6b7b79] text-[11px] uppercase tracking-[0.5px] p-[10px_16px] border-b border-[#e7e1d6]'>
+                  Status
+                </th>
+                <th className='text-center text-[#6b7b79] text-[11px] uppercase tracking-[0.5px] p-[10px_16px] border-b border-[#e7e1d6]'>
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {bookings.map((bkg) => (
+                <tr key={bkg.id} className='hover:bg-[#f8fafc] transition-colors'>
+                  <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
+                    <div className='font-semibold text-[#15201f]'>{bkg.guest}</div>
+                    <div className='text-[12px] text-[#6b7b79]'>{bkg.id}</div>
+                  </td>
+                  <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
+                    <div className='text-[#15201f]'>{bkg.item}</div>
+                    <div className='text-[12px] text-[#6b7b79]'>{bkg.type}</div>
+                  </td>
+                  <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
+                    <div className='text-[#15201f]'>{bkg.date}</div>
+                    <div className='text-[12px] font-medium text-[#6b7b79]'>{bkg.amount}</div>
+                  </td>
+                  <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
+                    {bkg.status === 'Accepted' && (
+                      <span className='bg-[#dff3ec] text-[#1e9e72] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]'>
+                        Accepted
+                      </span>
+                    )}
+                    {bkg.status === 'Pending' && (
+                      <span className='bg-[#fef9c3] text-[#ca8a04] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]'>
+                        Pending
+                      </span>
+                    )}
+                    {bkg.status === 'Declined' && (
+                      <div>
+                        <span className='bg-[#fee2e2] text-[#ef4444] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]'>
+                          Declined
+                        </span>
+                        {bkg.rejectionReason && (
+                          <div
+                            className='text-[11px] text-[#ef4444] mt-1 max-w-37.5 truncate'
+                            title={bkg.rejectionReason}
+                          >
+                            {bkg.rejectionReason}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </td>
+                  <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
+                    <div className='flex items-center justify-center gap-3'>
+                      <button
+                        onClick={() => setViewBooking(bkg)}
+                        className='text-[#6b7b79] hover:text-[#2563eb] transition-colors cursor-pointer'
+                        title='View Details'
+                      >
+                        <svg
+                          width='18'
+                          height='18'
+                          viewBox='0 0 24 24'
+                          fill='none'
+                          stroke='currentColor'
+                          strokeWidth='2'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                        >
+                          <path d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z' />
+                          <circle cx='12' cy='12' r='3' />
+                        </svg>
+                      </button>
+                      {bkg.status === 'Pending' && (
+                        <>
+                          <button
+                            onClick={() => handleAccept(bkg.id)}
+                            className='text-[#6b7b79] hover:text-[#1e9e72] transition-colors cursor-pointer'
+                            title='Accept'
+                          >
+                            <svg
+                              width='18'
+                              height='18'
+                              viewBox='0 0 24 24'
+                              fill='none'
+                              stroke='currentColor'
+                              strokeWidth='2'
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                            >
+                              <path d='M20 6 9 17l-5-5' />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleOpenReject(bkg.id)}
+                            className='text-[#6b7b79] hover:text-[#ef4444] transition-colors cursor-pointer'
+                            title='Decline'
+                          >
+                            <svg
+                              width='18'
+                              height='18'
+                              viewBox='0 0 24 24'
+                              fill='none'
+                              stroke='currentColor'
+                              strokeWidth='2'
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                            >
+                              <path d='M18 6 6 18' />
+                              <path d='m6 6 12 12' />
+                            </svg>
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {bookings.length === 0 && (
+                <tr>
+                  <td colSpan={5} className='p-8 text-center text-[#6b7b79]'>
+                    No bookings to display.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      {/* Reject Modal */}
+      {rejectingId && (
+        <div className='fixed inset-0 bg-[rgba(21,32,31,0.5)] z-100 flex items-center justify-center p-4 backdrop-blur-sm'>
+          <div className='bg-white rounded-2xl max-w-sm w-full shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden animate-in zoom-in-95 duration-200'>
+            <div className='p-5 border-b border-[#e7e1d6] flex justify-between items-center bg-[#f8fafc]'>
+              <h3
+                className='font-bold text-[18px] text-[#15201f]'
+                style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
+              >
+                Decline Booking
+              </h3>
+              <button
+                onClick={() => setRejectingId(null)}
+                className='text-[#6b7b79] hover:text-[#15201f] text-2xl leading-none cursor-pointer'
+              >
+                &times;
+              </button>
+            </div>
+            <form onSubmit={submitReject}>
+              <div className='p-6 text-[14px]'>
+                <label className='block text-[12px] font-bold text-[#15201f] mb-2'>
+                  Reason for declining (required)
+                </label>
+                <textarea
+                  required
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  rows={3}
+                  placeholder='e.g. Fully booked on these dates.'
+                  className='w-full border border-[#e7e1d6] rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:border-[#ef4444] transition-colors resize-none'
+                ></textarea>
+              </div>
+              <div className='p-5 border-t border-[#e7e1d6] bg-[#f8fafc] flex justify-center gap-3'>
+                <button
+                  type='button'
+                  onClick={() => setRejectingId(null)}
+                  className='px-6 py-2.5 rounded-xl font-bold text-[14px] text-[#6b7b79] hover:bg-[#e7e1d6] transition-colors cursor-pointer w-full'
+                >
+                  Cancel
+                </button>
+                <button
+                  type='submit'
+                  className='bg-[#ef4444] text-white px-6 py-2.5 rounded-xl font-bold text-[14px] hover:bg-[#dc2626] transition-colors shadow-sm cursor-pointer w-full'
+                >
+                  Decline
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* View Booking Details Modal */}
+      {viewBooking && (
+        <div className='fixed inset-0 bg-[rgba(21,32,31,0.5)] z-100 flex items-center justify-center p-4 backdrop-blur-sm'>
+          <div className='bg-white rounded-2xl max-w-sm w-full shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden animate-in zoom-in-95 duration-200'>
+            <div className='p-5 border-b border-[#e7e1d6] flex justify-between items-center bg-[#f8fafc]'>
+              <h3
+                className='font-bold text-[18px] text-[#15201f]'
+                style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
+              >
+                Booking Details
+              </h3>
+              <button
+                onClick={() => setViewBooking(null)}
+                className='text-[#6b7b79] hover:text-[#15201f] text-2xl leading-none cursor-pointer'
+              >
+                &times;
+              </button>
+            </div>
+            <div className='p-6 space-y-4 text-[14px]'>
+              <div>
+                <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
+                  Reference
+                </div>
+                <div className='font-semibold text-[#172554] text-[16px]'>{viewBooking.id}</div>
+              </div>
+              <div className='grid grid-cols-2 gap-4'>
+                <div>
+                  <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
+                    Guest Name
+                  </div>
+                  <div className='font-medium text-[#15201f]'>{viewBooking.guest}</div>
+                </div>
+                <div>
+                  <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
+                    Listing
+                  </div>
+                  <div className='font-medium text-[#15201f]'>{viewBooking.item}</div>
+                </div>
+                <div>
+                  <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
+                    Date
+                  </div>
+                  <div className='font-medium text-[#15201f]'>{viewBooking.date}</div>
+                </div>
+                <div>
+                  <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
+                    Amount
+                  </div>
+                  <div className='font-medium text-[#15201f]'>{viewBooking.amount}</div>
+                </div>
+                <div className='col-span-2'>
+                  <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
+                    Status
+                  </div>
+                  <div className='font-medium text-[#15201f] mt-1'>
+                    {viewBooking.status === 'Accepted' && (
+                      <span className='bg-[#dff3ec] text-[#1e9e72] text-[11px] font-bold px-2.5 py-1 rounded-[20px] uppercase tracking-[0.5px]'>
+                        Accepted
+                      </span>
+                    )}
+                    {viewBooking.status === 'Pending' && (
+                      <span className='bg-[#fef9c3] text-[#ca8a04] text-[11px] font-bold px-2.5 py-1 rounded-[20px] uppercase tracking-[0.5px]'>
+                        Pending
+                      </span>
+                    )}
+                    {viewBooking.status === 'Declined' && (
+                      <span className='bg-[#fee2e2] text-[#ef4444] text-[11px] font-bold px-2.5 py-1 rounded-[20px] uppercase tracking-[0.5px]'>
+                        Declined
+                      </span>
+                    )}
+                  </div>
+                  {viewBooking.status === 'Declined' && viewBooking.rejectionReason && (
+                    <div className='mt-3 p-3 bg-[#f8fafc] border border-[#e7e1d6] rounded-xl text-[13px] text-[#ef4444]'>
+                      <span className='font-bold'>Reason:</span> {viewBooking.rejectionReason}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className='p-5 border-t border-[#e7e1d6] bg-[#f8fafc] text-right'>
+              <button
+                onClick={() => setViewBooking(null)}
+                className='bg-[#172554] text-white px-6 py-2.5 rounded-xl font-bold text-[14px] hover:bg-[#0f172a] transition-colors cursor-pointer shadow-sm'
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

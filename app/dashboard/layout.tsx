@@ -42,6 +42,16 @@ function SidebarNav({
           <Link href="/dashboard" className={navClass("/dashboard")}>
             {role === "Agent" ? "My workspace" : "Overview"}
           </Link>
+          {role === "Guest" && (
+            <>
+              <Link
+                href="/dashboard/booking-history"
+                className={navClass("/dashboard/booking-history")}
+              >
+                Booking History
+              </Link>
+            </>
+          )}
           {role === "Host" && (
             <>
               <Link

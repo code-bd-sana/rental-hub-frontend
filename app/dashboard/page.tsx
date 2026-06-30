@@ -3,10 +3,15 @@
 import { HostOverview } from "@/components/dashboard/HostDashboard";
 import { AdminOverview } from "@/components/dashboard/AdminDashboard";
 import { AgentOverview } from "@/components/dashboard/AgentDashboard";
+import { GuestOverview } from "@/components/dashboard/GuestDashboard";
 
 export default function DashboardPage() {
   const authData = typeof window !== "undefined" ? localStorage.getItem("roamly_auth") : null;
   const role = authData ? JSON.parse(authData).role : null;
+
+  if (role === "Guest") {
+    return <GuestOverview />;
+  }
 
   if (role === "Host") {
     return <HostOverview />;

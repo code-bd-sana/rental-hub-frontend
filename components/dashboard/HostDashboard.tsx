@@ -1021,53 +1021,154 @@ export function HostPayouts() {
 }
 
 export function HostSettings() {
+  const [formData, setFormData] = useState({
+    businessName: 'Sample Bistro',
+    contactName: 'Jane Doe',
+    email: 'bookings@business.com',
+    phone: '+1 876 555 0199',
+    address: '123 Ocean View Dr, Ocho Rios, Jamaica',
+    payoutAccount: '**** **** **** 4892',
+    currency: 'USD',
+  });
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const handleChange = (field: string, value: string) => {
+    setFormData({ ...formData, [field]: value });
+    setSaveSuccess(false);
+  };
+
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsSaving(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    }, 800);
+  };
+
   return (
-    <div className='animate-in fade-in duration-300'>
+    <div className='animate-in fade-in duration-300 max-w-4xl'>
       <h2
         className='text-[26px] font-bold mb-1 text-[#172554]'
         style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
       >
         Settings
       </h2>
-      <p className='text-[14px] text-[#6b7b79] mb-4.5'>
-        Your subscription, payout account and contact details.
+      <p className='text-[14px] text-[#6b7b79] mb-6'>
+        Manage your profile, business details, financials, and subscription.
       </p>
 
-      <div className='bg-white border border-[#e7e1d6] rounded-2xl p-6 max-w-2xl'>
-        <div className='space-y-5'>
-          <div>
-            <label className='block text-[#15201f] text-[13px] font-bold mb-1.5'>Plan</label>
-            <input
-              value='Listing owner, $39.99 per month'
-              readOnly
-              className='w-full border border-[#e7e1d6] rounded-xl bg-[#f8fafc] px-4 py-3 text-[15px] text-[#6b7b79] focus:outline-none'
-            />
-          </div>
-          <div>
-            <label className='block text-[#15201f] text-[13px] font-bold mb-1.5'>
-              Payout account
-            </label>
-            <input
-              placeholder='Bank or account for payouts'
-              className='w-full border border-[#e7e1d6] rounded-xl bg-white px-4 py-3 text-[15px] text-[#15201f] focus:outline-none focus:ring-2 focus:ring-[#2563eb]'
-            />
-          </div>
-          <div>
-            <label className='block text-[#15201f] text-[13px] font-bold mb-1.5'>
-              Booking email
-            </label>
-            <input
-              defaultValue='bookings@business.com'
-              className='w-full border border-[#e7e1d6] rounded-xl bg-white px-4 py-3 text-[15px] text-[#15201f] focus:outline-none focus:ring-2 focus:ring-[#2563eb]'
-            />
-          </div>
-          <div className='pt-2'>
-            <button className='bg-[#2563eb] text-white rounded-[30px] px-6 py-3.5 text-[16px] font-bold shadow-sm transition-colors hover:bg-[#1e40af]'>
-              Save settings
-            </button>
+      <form onSubmit={handleSave} className='space-y-6'>
+        {/* Profile & Business Details */}
+        <div className='bg-white border border-[#e7e1d6] rounded-2xl shadow-[0_10px_30px_rgba(11,79,74,0.1)] p-6'>
+          <h3 className='text-[18px] font-bold text-[#15201f] mb-4' style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
+            Business Profile
+          </h3>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
+            <div>
+              <label className='block text-[#15201f] text-[12px] font-bold mb-1.5 uppercase tracking-wide'>Business Name</label>
+              <input
+                value={formData.businessName}
+                onChange={(e) => handleChange('businessName', e.target.value)}
+                className='w-full border border-[#e7e1d6] rounded-xl bg-white px-4 py-3 text-[14px] text-[#15201f] focus:outline-none focus:border-[#2563eb] transition-colors'
+              />
+            </div>
+            <div>
+              <label className='block text-[#15201f] text-[12px] font-bold mb-1.5 uppercase tracking-wide'>Primary Contact</label>
+              <input
+                value={formData.contactName}
+                onChange={(e) => handleChange('contactName', e.target.value)}
+                className='w-full border border-[#e7e1d6] rounded-xl bg-white px-4 py-3 text-[14px] text-[#15201f] focus:outline-none focus:border-[#2563eb] transition-colors'
+              />
+            </div>
+            <div>
+              <label className='block text-[#15201f] text-[12px] font-bold mb-1.5 uppercase tracking-wide'>Booking Email</label>
+              <input
+                type='email'
+                value={formData.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                className='w-full border border-[#e7e1d6] rounded-xl bg-white px-4 py-3 text-[14px] text-[#15201f] focus:outline-none focus:border-[#2563eb] transition-colors'
+              />
+            </div>
+            <div>
+              <label className='block text-[#15201f] text-[12px] font-bold mb-1.5 uppercase tracking-wide'>Contact Phone</label>
+              <input
+                value={formData.phone}
+                onChange={(e) => handleChange('phone', e.target.value)}
+                className='w-full border border-[#e7e1d6] rounded-xl bg-white px-4 py-3 text-[14px] text-[#15201f] focus:outline-none focus:border-[#2563eb] transition-colors'
+              />
+            </div>
+            <div className='md:col-span-2'>
+              <label className='block text-[#15201f] text-[12px] font-bold mb-1.5 uppercase tracking-wide'>Business Address</label>
+              <input
+                value={formData.address}
+                onChange={(e) => handleChange('address', e.target.value)}
+                className='w-full border border-[#e7e1d6] rounded-xl bg-white px-4 py-3 text-[14px] text-[#15201f] focus:outline-none focus:border-[#2563eb] transition-colors'
+              />
+            </div>
           </div>
         </div>
-      </div>
+
+        {/* Financials & Payouts */}
+        <div className='bg-white border border-[#e7e1d6] rounded-2xl shadow-[0_10px_30px_rgba(11,79,74,0.1)] p-6'>
+          <h3 className='text-[18px] font-bold text-[#15201f] mb-4' style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
+            Financials & Payouts
+          </h3>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
+            <div>
+              <label className='block text-[#15201f] text-[12px] font-bold mb-1.5 uppercase tracking-wide'>Payout Account (IBAN/Routing)</label>
+              <input
+                value={formData.payoutAccount}
+                onChange={(e) => handleChange('payoutAccount', e.target.value)}
+                placeholder='Bank or account for payouts'
+                className='w-full border border-[#e7e1d6] rounded-xl bg-white px-4 py-3 text-[14px] text-[#15201f] focus:outline-none focus:border-[#2563eb] transition-colors'
+              />
+            </div>
+            <div>
+              <label className='block text-[#15201f] text-[12px] font-bold mb-1.5 uppercase tracking-wide'>Billing Currency</label>
+              <select
+                value={formData.currency}
+                onChange={(e) => handleChange('currency', e.target.value)}
+                className='w-full border border-[#e7e1d6] rounded-xl bg-white px-4 py-3 text-[14px] text-[#15201f] focus:outline-none focus:border-[#2563eb] transition-colors'
+              >
+                <option value='USD'>USD ($)</option>
+                <option value='EUR'>EUR (€)</option>
+                <option value='GBP'>GBP (£)</option>
+                <option value='JMD'>JMD ($)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Subscription Plan */}
+        <div className='bg-[#f8fafc] border border-[#e7e1d6] rounded-2xl shadow-[0_10px_30px_rgba(11,79,74,0.05)] p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
+          <div>
+            <h3 className='text-[18px] font-bold text-[#15201f] mb-1' style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
+              Current Subscription
+            </h3>
+            <p className='text-[13px] text-[#6b7b79]'>Listing owner, $39.99 per month. Next billing cycle: Nov 1, 2026.</p>
+          </div>
+          <button type='button' className='px-5 py-2.5 bg-white border border-[#2563eb] text-[#2563eb] rounded-xl font-bold text-[13px] hover:bg-[#e6eefb] transition-colors shrink-0'>
+            Manage Plan
+          </button>
+        </div>
+
+        {/* Actions */}
+        <div className='flex items-center justify-end gap-4 pt-2'>
+          {saveSuccess && <span className='text-[#1e9e72] font-bold text-[14px] animate-in fade-in'>Changes saved successfully!</span>}
+          <button
+            type='submit'
+            disabled={isSaving}
+            className='bg-[#2563eb] text-white rounded-[30px] px-8 py-3.5 text-[15px] font-bold shadow-sm transition-colors hover:bg-[#1e40af] disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2'
+          >
+            {isSaving ? 'Saving...' : 'Save All Settings'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

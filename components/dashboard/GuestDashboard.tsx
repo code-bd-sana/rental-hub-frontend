@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 
 export function GuestOverview() {
   return (
@@ -62,7 +63,7 @@ export function GuestOverview() {
 }
 
 export function GuestBookingHistory() {
-  const demoBookings = [
+  const [bookings, setBookings] = useState([
     {
       id: 'BKG-9382',
       item: 'Blue Mountain Villa',
@@ -99,10 +100,31 @@ export function GuestBookingHistory() {
       status: 'Completed',
       amount: '$890',
     },
-  ];
+  ]);
+
+  const [viewBkg, setViewBkg] = useState<any>(null);
+  const [editBkg, setEditBkg] = useState<any>(null);
+  const [deleteBkgId, setDeleteBkgId] = useState<string | null>(null);
+
+  const confirmDelete = () => {
+    if (deleteBkgId) {
+      setBookings(bookings.filter((b) => b.id !== deleteBkgId));
+      setDeleteBkgId(null);
+    }
+  };
+
+  const handleEditChange = (field: string, value: string) => {
+    setEditBkg({ ...editBkg, [field]: value });
+  };
+
+  const handleEditSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    setBookings(bookings.map((b) => (b.id === editBkg.id ? editBkg : b)));
+    setEditBkg(null);
+  };
 
   return (
-    <div className='animate-in fade-in duration-300'>
+    <div className='animate-in fade-in duration-300 relative'>
       <h2
         className='text-[26px] font-bold mb-1 text-[#172554]'
         style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
@@ -124,6 +146,7 @@ export function GuestBookingHistory() {
         </div>
         <div className='overflow-x-auto'>
           <table className='w-full border-collapse text-[14px] whitespace-nowrap'>
+            {/* Table Header */}
             <thead>
               <tr>
                 <th className='text-left text-[#6b7b79] text-[11px] uppercase tracking-[0.5px] p-[10px_16px] border-b border-[#e7e1d6]'>
@@ -146,8 +169,9 @@ export function GuestBookingHistory() {
                 </th>
               </tr>
             </thead>
+            {/* Table Body */}
             <tbody>
-              {demoBookings.map((bkg) => (
+              {bookings.map((bkg) => (
                 <tr key={bkg.id} className='hover:bg-[#f8fafc] transition-colors'>
                   <td className='p-[12px_16px] border-b border-[#e7e1d6] font-semibold text-[#172554]'>
                     {bkg.id}
@@ -165,20 +189,27 @@ export function GuestBookingHistory() {
                     {bkg.amount}
                   </td>
                   <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
-                    {bkg.status === 'Upcoming' ? (
+                    {bkg.status === 'Upcoming' && (
                       <span className='bg-[#e6eefb] text-[#2a5db0] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]'>
                         Upcoming
                       </span>
-                    ) : (
+                    )}
+                    {bkg.status === 'Completed' && (
                       <span className='bg-[#dff3ec] text-[#1e9e72] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]'>
                         Completed
+                      </span>
+                    )}
+                    {bkg.status === 'Cancelled' && (
+                      <span className='bg-[#fee2e2] text-[#ef4444] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]'>
+                        Cancelled
                       </span>
                     )}
                   </td>
                   <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
                     <div className='flex items-center justify-center gap-3'>
                       <button
-                        className='text-[#6b7b79] hover:text-[#2563eb] transition-colors'
+                        onClick={() => setViewBkg(bkg)}
+                        className='text-[#6b7b79] hover:text-[#2563eb] transition-colors cursor-pointer'
                         title='View'
                       >
                         <svg
@@ -196,7 +227,8 @@ export function GuestBookingHistory() {
                         </svg>
                       </button>
                       <button
-                        className='text-[#6b7b79] hover:text-[#1e9e72] transition-colors'
+                        onClick={() => setEditBkg(bkg)}
+                        className='text-[#6b7b79] hover:text-[#1e9e72] transition-colors cursor-pointer'
                         title='Edit'
                       >
                         <svg
@@ -214,7 +246,8 @@ export function GuestBookingHistory() {
                         </svg>
                       </button>
                       <button
-                        className='text-[#6b7b79] hover:text-[#dc2626] transition-colors'
+                        onClick={() => setDeleteBkgId(bkg.id)}
+                        className='text-[#6b7b79] hover:text-[#dc2626] transition-colors cursor-pointer'
                         title='Delete'
                       >
                         <svg
@@ -236,10 +269,252 @@ export function GuestBookingHistory() {
                   </td>
                 </tr>
               ))}
+              {bookings.length === 0 && (
+                <tr>
+                  <td colSpan={6} className='p-8 text-center text-[#6b7b79]'>
+                    No bookings found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* View Modal */}
+      {viewBkg && (
+        <div className='fixed inset-0 bg-[rgba(21,32,31,0.5)] z-[100] flex items-center justify-center p-4 backdrop-blur-sm'>
+          <div className='bg-white rounded-2xl max-w-md w-full shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden animate-in zoom-in-95 duration-200'>
+            <div className='p-5 border-b border-[#e7e1d6] flex justify-between items-center bg-[#f8fafc]'>
+              <h3
+                className='font-bold text-[18px] text-[#15201f]'
+                style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
+              >
+                Booking Details
+              </h3>
+              <button
+                onClick={() => setViewBkg(null)}
+                className='text-[#6b7b79] hover:text-[#15201f] text-2xl leading-none cursor-pointer'
+              >
+                &times;
+              </button>
+            </div>
+            <div className='p-6 space-y-5 text-[14px]'>
+              <div>
+                <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
+                  Reference
+                </div>
+                <div className='font-semibold text-[#172554] text-[18px]'>{viewBkg.id}</div>
+              </div>
+              <div className='grid grid-cols-2 gap-5'>
+                <div>
+                  <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
+                    Item
+                  </div>
+                  <div className='font-medium text-[#15201f]'>{viewBkg.item}</div>
+                </div>
+                <div>
+                  <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
+                    Type
+                  </div>
+                  <div className='font-medium text-[#15201f]'>{viewBkg.type}</div>
+                </div>
+                <div>
+                  <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
+                    Location
+                  </div>
+                  <div className='font-medium text-[#15201f]'>{viewBkg.location}</div>
+                </div>
+                <div>
+                  <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
+                    Dates
+                  </div>
+                  <div className='font-medium text-[#15201f]'>{viewBkg.dates}</div>
+                </div>
+                <div>
+                  <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
+                    Amount
+                  </div>
+                  <div className='font-medium text-[#15201f]'>{viewBkg.amount}</div>
+                </div>
+                <div>
+                  <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
+                    Status
+                  </div>
+                  <div className='font-medium text-[#15201f]'>
+                    {viewBkg.status === 'Upcoming' && (
+                      <span className='bg-[#e6eefb] text-[#2a5db0] text-[11px] font-bold px-2 py-0.5 rounded-[20px] uppercase tracking-[0.5px]'>
+                        {viewBkg.status}
+                      </span>
+                    )}
+                    {viewBkg.status === 'Completed' && (
+                      <span className='bg-[#dff3ec] text-[#1e9e72] text-[11px] font-bold px-2 py-0.5 rounded-[20px] uppercase tracking-[0.5px]'>
+                        {viewBkg.status}
+                      </span>
+                    )}
+                    {viewBkg.status === 'Cancelled' && (
+                      <span className='bg-[#fee2e2] text-[#ef4444] text-[11px] font-bold px-2 py-0.5 rounded-[20px] uppercase tracking-[0.5px]'>
+                        {viewBkg.status}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className='p-5 border-t border-[#e7e1d6] bg-[#f8fafc] text-right'>
+              <button
+                onClick={() => setViewBkg(null)}
+                className='bg-[#172554] text-white px-6 py-2.5 rounded-xl font-bold text-[14px] hover:bg-[#0f172a] transition-colors cursor-pointer shadow-sm'
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editBkg && (
+        <div className='fixed inset-0 bg-[rgba(21,32,31,0.5)] z-[100] flex items-center justify-center p-4 backdrop-blur-sm'>
+          <div className='bg-white rounded-2xl max-w-md w-full shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden animate-in zoom-in-95 duration-200'>
+            <div className='p-5 border-b border-[#e7e1d6] flex justify-between items-center bg-[#f8fafc]'>
+              <h3
+                className='font-bold text-[18px] text-[#15201f]'
+                style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
+              >
+                Edit Booking
+              </h3>
+              <button
+                onClick={() => setEditBkg(null)}
+                className='text-[#6b7b79] hover:text-[#15201f] text-2xl leading-none cursor-pointer'
+              >
+                &times;
+              </button>
+            </div>
+            <form onSubmit={handleEditSave}>
+              <div className='p-6 space-y-4 text-[14px]'>
+                <div className='grid grid-cols-2 gap-4'>
+                  <div>
+                    <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                      Item Name
+                    </label>
+                    <input
+                      required
+                      value={editBkg.item}
+                      onChange={(e) => handleEditChange('item', e.target.value)}
+                      className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                    />
+                  </div>
+                  <div>
+                    <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                      Location
+                    </label>
+                    <input
+                      required
+                      value={editBkg.location}
+                      onChange={(e) => handleEditChange('location', e.target.value)}
+                      className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                    />
+                  </div>
+                </div>
+                <div className='grid grid-cols-2 gap-4'>
+                  <div>
+                    <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                      Dates
+                    </label>
+                    <input
+                      required
+                      value={editBkg.dates}
+                      onChange={(e) => handleEditChange('dates', e.target.value)}
+                      className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                    />
+                  </div>
+                  <div>
+                    <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                      Amount
+                    </label>
+                    <input
+                      required
+                      value={editBkg.amount}
+                      onChange={(e) => handleEditChange('amount', e.target.value)}
+                      className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                    Status
+                  </label>
+                  <select
+                    value={editBkg.status}
+                    onChange={(e) => handleEditChange('status', e.target.value)}
+                    className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] bg-white focus:outline-none focus:border-[#2563eb] transition-colors'
+                  >
+                    <option value='Upcoming'>Upcoming</option>
+                    <option value='Completed'>Completed</option>
+                    <option value='Cancelled'>Cancelled</option>
+                  </select>
+                </div>
+              </div>
+              <div className='p-5 border-t border-[#e7e1d6] bg-[#f8fafc] flex justify-end gap-3'>
+                <button
+                  type='button'
+                  onClick={() => setEditBkg(null)}
+                  className='px-5 py-2.5 rounded-xl font-bold text-[14px] text-[#6b7b79] hover:bg-[#e7e1d6] transition-colors cursor-pointer'
+                >
+                  Cancel
+                </button>
+                <button
+                  type='submit'
+                  className='bg-[#2563eb] text-white px-6 py-2.5 rounded-xl font-bold text-[14px] hover:bg-[#1e40af] transition-colors shadow-sm cursor-pointer'
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteBkgId && (
+        <div className='fixed inset-0 bg-[rgba(21,32,31,0.5)] z-[100] flex items-center justify-center p-4 backdrop-blur-sm'>
+          <div className='bg-white rounded-2xl max-w-sm w-full shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden animate-in zoom-in-95 duration-200'>
+            <div className='p-6 text-center'>
+              <div className='w-14 h-14 rounded-full bg-[#fee2e2] flex items-center justify-center mx-auto mb-4 text-[#ef4444]'>
+                <svg width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+                  <path d='M3 6h18' />
+                  <path d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' />
+                  <path d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' />
+                </svg>
+              </div>
+              <h3
+                className='font-bold text-[20px] text-[#15201f] mb-2'
+                style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
+              >
+                Delete Booking
+              </h3>
+              <p className='text-[14px] text-[#6b7b79] leading-relaxed'>
+                Are you sure you want to delete this booking? This action cannot be undone.
+              </p>
+            </div>
+            <div className='p-5 border-t border-[#e7e1d6] bg-[#f8fafc] flex justify-center gap-3'>
+              <button
+                onClick={() => setDeleteBkgId(null)}
+                className='px-6 py-2.5 rounded-xl font-bold text-[14px] text-[#6b7b79] hover:bg-[#e7e1d6] transition-colors cursor-pointer w-full'
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className='bg-[#ef4444] text-white px-6 py-2.5 rounded-xl font-bold text-[14px] hover:bg-[#dc2626] transition-colors shadow-sm cursor-pointer w-full'
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

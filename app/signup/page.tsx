@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { apiClient } from "../../lib/api/client";
 
 export default function SignupPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   // Form State
   const [name, setName] = useState("");
@@ -38,9 +41,28 @@ export default function SignupPage() {
     }
   };
 
-  const handleNextStep2 = (e: React.FormEvent) => {
+  const handleNextStep2 = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStep(3);
+    setLoading(true);
+    setError("");
+
+    try {
+      await apiClient.post("/auth/register/guest", {
+        name,
+        email,
+        password,
+        confirmPassword,
+        countriesToVisit: selectedCountries,
+        interests: selectedInterests.join(", "),
+        allergies: selectedDiet.join(", "),
+        extraText: dietNote
+      });
+      setStep(3);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Something went wrong during registration.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleFinish = () => {
@@ -102,6 +124,12 @@ export default function SignupPage() {
                 This builds your profile so the assistant can help you right away and remember you next time.
               </p>
 
+              {error && (
+                <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 rounded-xl font-medium">
+                  {error}
+                </div>
+              )}
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-[13px] font-bold text-[#15201f] mb-2.5">Which countries do you want to visit?</label>
@@ -138,8 +166,8 @@ export default function SignupPage() {
                 </div>
               </div>
 
-              <button type="submit" className="w-full mt-8 bg-[#2563eb] text-white rounded-[30px] py-3.5 px-6 font-bold text-[16px] hover:bg-[#1e40af] transition-colors shadow-sm">
-                Build my profile
+              <button type="submit" disabled={loading} className="w-full mt-8 bg-[#2563eb] text-white rounded-[30px] py-3.5 px-6 font-bold text-[16px] hover:bg-[#1e40af] transition-colors shadow-sm disabled:opacity-50">
+                {loading ? "Creating Profile..." : "Build my profile"}
               </button>
             </form>
           )}

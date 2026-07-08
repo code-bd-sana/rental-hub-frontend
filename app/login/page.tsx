@@ -3,71 +3,82 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
-const DEMO_ACCOUNTS = [
-  { role: "Guest", email: "guest@roamly.com", password: "password123", redirect: "/countries" },
-  { role: "Host", email: "host@roamly.com", password: "password123", redirect: "/dashboard" },
-  { role: "Agent", email: "agent@roamly.com", password: "password123", redirect: "/dashboard" },
-  { role: "Super Admin", email: "admin@roamly.com", password: "password123", redirect: "/dashboard" },
-];
+import { apiClient } from "../../lib/api/client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  // Useful for quick testing during development
+  const handleQuickFill = (roleEmail: string) => {
+    setEmail(roleEmail);
+    setPassword("superadmin123"); // assuming we use this standard test password
+  };
+
   useEffect(() => {
+    // If they already have a token, auto-redirect
     const authData = localStorage.getItem("roamly_auth");
     if (authData) {
       try {
         const parsed = JSON.parse(authData);
-        if (parsed?.isAuthenticated) {
+        if (parsed?.accessToken) {
           router.replace("/dashboard");
         }
       } catch (e) {
-        console.warn("Failed to parse auth data from localStorage", e);
+        console.warn("Failed to parse auth data", e);
       }
     }
   }, [router]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
-    const user = DEMO_ACCOUNTS.find(
-      (acc) => acc.email === email && acc.password === password
-    );
+    try {
+      const response = await apiClient.post("/auth/login", { email, password });
+      
+      const { accessToken, user } = response.data.data;
 
-    if (user) {
-      // Save to localStorage
+      // Save real credentials from our backend
       localStorage.setItem(
         "roamly_auth",
         JSON.stringify({
+          accessToken,
           role: user.role,
           email: user.email,
+          name: user.name,
           isAuthenticated: true,
         })
       );
 
-      // Redirect to the appropriate dashboard
-      router.push(user.redirect);
-    } else {
-      setError("Invalid email or password");
+      // Route based on role
+      if (user.role === 'SUPER_ADMIN' || user.role === 'AGENT') {
+        router.push("/dashboard");
+      } else if (user.role === 'HOST') {
+        router.push("/dashboard"); // Later we can route to specific host dashboard
+      } else {
+        router.push("/directory"); // Guests go to directory/booking by default
+      }
+      
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Invalid email or password");
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleDemoClick = (account: typeof DEMO_ACCOUNTS[0]) => {
-    setEmail(account.email);
-    setPassword(account.password);
   };
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <h1 className="text-4xl font-bold text-[#172554] tracking-tight" style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
-          Roam<span className="text-[#2563eb]">ly</span>
-        </h1>
+        <Link href="/" className="inline-block">
+          <h1 className="text-4xl font-bold text-[#172554] tracking-tight" style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
+            Roam<span className="text-[#2563eb]">ly</span>
+          </h1>
+        </Link>
         <h2 className="mt-4 text-2xl font-bold text-[#15201f]">
           Sign in to your account
         </h2>
@@ -76,19 +87,17 @@ export default function LoginPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-[0_10px_30px_rgba(11,79,74,0.1)] rounded-[18px] sm:px-10">
           
+          {/* Developer quick-fill for testing */}
           <div className="mb-6">
-            <p className="text-sm font-semibold text-[#6b7b79] mb-3">Demo Credentials</p>
+            <p className="text-sm font-semibold text-[#6b7b79] mb-3">Quick Fill (Dev)</p>
             <div className="grid grid-cols-2 gap-3">
-              {DEMO_ACCOUNTS.map((acc) => (
-                <button
-                  key={acc.role}
-                  type="button"
-                  onClick={() => handleDemoClick(acc)}
-                  className="w-full flex justify-center py-2 px-3 border border-[#e7e1d6] rounded-xl text-sm font-semibold text-[#172554] bg-[#f8fafc] hover:bg-[#dbeafe] hover:text-[#1e40af] transition-colors"
-                >
-                  {acc.role}
-                </button>
-              ))}
+              <button
+                type="button"
+                onClick={() => handleQuickFill("superadmin@rentalhub.com")}
+                className="w-full py-2 px-3 border border-[#e7e1d6] rounded-xl text-xs font-bold text-[#172554] bg-[#f8fafc] hover:bg-[#dbeafe] hover:border-[#2563eb] transition-all"
+              >
+                Super Admin
+              </button>
             </div>
           </div>
 
@@ -97,13 +106,13 @@ export default function LoginPage() {
               <div className="w-full border-t border-[#e7e1d6]" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-[#6b7b79]">Or login manually</span>
+              <span className="px-2 bg-white text-[#6b7b79]">Log in with email</span>
             </div>
           </div>
 
           <form className="space-y-5" onSubmit={handleLogin}>
             {error && (
-              <div className="p-3 text-sm text-[#1e40af] bg-[#dbeafe] rounded-xl text-center font-medium">
+              <div className="p-3 text-sm text-red-600 bg-red-50 rounded-xl text-center font-medium border border-red-100">
                 {error}
               </div>
             )}
@@ -123,7 +132,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-4 py-3 border border-[#e7e1d6] rounded-xl bg-[#f8fafc] placeholder-[#6b7b79] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent sm:text-[15px]"
+                  className="appearance-none block w-full px-4 py-3 border border-[#e7e1d6] rounded-xl bg-[#f8fafc] placeholder-[#6b7b79] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent sm:text-[15px] transition-all"
                   placeholder="you@example.com"
                 />
               </div>
@@ -145,7 +154,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-4 py-3 border border-[#e7e1d6] rounded-xl bg-[#f8fafc] placeholder-[#6b7b79] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent sm:text-[15px]"
+                  className="appearance-none block w-full px-4 py-3 border border-[#e7e1d6] rounded-xl bg-[#f8fafc] placeholder-[#6b7b79] focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:border-transparent sm:text-[15px] transition-all"
                   placeholder="••••••••"
                 />
               </div>
@@ -154,24 +163,29 @@ export default function LoginPage() {
             <div className="pt-2">
               <button
                 type="submit"
-                className="w-full flex justify-center py-3.5 px-6 border border-transparent rounded-[30px] shadow-sm text-[16px] font-bold text-white bg-[#2563eb] hover:bg-[#1e40af] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2563eb] transition-colors"
+                disabled={loading}
+                className="w-full flex justify-center py-3.5 px-6 border border-transparent rounded-[30px] shadow-sm text-[16px] font-bold text-white bg-[#2563eb] hover:bg-[#1e40af] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2563eb] transition-colors disabled:opacity-50"
               >
-                Sign in
+                {loading ? "Signing in..." : "Sign in"}
               </button>
             </div>
           </form>
           
-          <div className="mt-6 text-center text-[14px] font-medium text-[#6b7b79]">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-[#2563eb] hover:text-[#1e40af] font-bold hover:underline">
-              Guest signup
-            </Link>
+          <div className="mt-6 text-center space-y-2">
+            <div className="text-[14px] font-medium text-[#6b7b79]">
+              Don&apos;t have an account?{" "}
+              <Link href="/signup" className="text-[#2563eb] hover:text-[#1e40af] font-bold hover:underline transition-colors">
+                Guest signup
+              </Link>
+            </div>
+            <div className="text-[14px] font-medium text-[#6b7b79]">
+              Want to host your property?{" "}
+              <Link href="/signup/host" className="text-[#2563eb] hover:text-[#1e40af] font-bold hover:underline transition-colors">
+                Apply to host
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <div className="mt-8 text-center text-sm text-[#6b7b79]">
-        Roamly Demo Prototype
       </div>
     </div>
   );

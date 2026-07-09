@@ -3,12 +3,30 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Header() {
   const pathname = usePathname();
-  if (pathname.startsWith("/dashboard")) return null;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const authDataString = localStorage.getItem('roamly_auth');
+      if (authDataString) {
+        try {
+          const authData = JSON.parse(authDataString);
+          if (authData?.accessToken || authData?.isAuthenticated) {
+            setIsAuthenticated(true);
+          }
+        } catch (e) {
+          console.error('Failed to parse auth data', e);
+        }
+      }
+    }
+  }, [pathname]);
+
+  if (pathname.startsWith("/dashboard")) return null;
 
   const navClass = (isActive: boolean) =>
     `px-3.5 py-2.25 rounded-2.5 font-semibold text-[1.05rem] transition-colors duration-200 cursor-pointer bg-transparent border-none text-left font-inherit ${isActive ? "text-(--purple)" : "text-(--ink) hover:bg-[#f1eaf9] hover:text-(--purple)"}`;
@@ -59,12 +77,21 @@ export default function Header() {
               List Your Business
             </button> */}
           </nav>
-          <Link
-            href="/login"
-            className="max-[900px]:hidden rounded-xl font-bold text-[.92rem] px-4.5 py-2.5 transition-all duration-200 whitespace-nowrap bg-white border-[1.5px] border-(--line) text-(--ink) hover:border-(--purple) hover:text-(--purple) shadow-custom-sm"
-          >
-            Sign In
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              href="/dashboard"
+              className="max-[900px]:hidden rounded-xl font-bold text-[.92rem] px-4.5 py-2.5 transition-all duration-200 whitespace-nowrap bg-[#2563eb] text-white hover:bg-[#1e40af] shadow-custom-sm"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="max-[900px]:hidden rounded-xl font-bold text-[.92rem] px-4.5 py-2.5 transition-all duration-200 whitespace-nowrap bg-white border-[1.5px] border-(--line) text-(--ink) hover:border-(--purple) hover:text-(--purple) shadow-custom-sm"
+            >
+              Sign In
+            </Link>
+          )}
           <button
             className="hidden max-[900px]:flex w-11.5 h-11.5 rounded-2.75 border-[1.5px] border-(--line) bg-white items-center justify-center ml-auto active:bg-[#f1eaf9]"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -121,13 +148,23 @@ export default function Header() {
           >
             List Your Business
           </button> */}
-          <Link
-            href="/login"
-            onClick={() => setMobileMenuOpen(false)}
-            className={mobileNavClass}
-          >
-            Sign In
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              href="/dashboard"
+              onClick={() => setMobileMenuOpen(false)}
+              className={mobileNavClass}
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              onClick={() => setMobileMenuOpen(false)}
+              className={mobileNavClass}
+            >
+              Sign In
+            </Link>
+          )}
         </div>
       )}
     </>

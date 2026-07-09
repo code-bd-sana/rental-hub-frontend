@@ -91,10 +91,7 @@ function SidebarNav({
                 href="/dashboard/claims"
                 className={navClass("/dashboard/claims")}
               >
-                Claims{" "}
-                <span className="bg-[#2563eb] text-white text-[11px] font-bold rounded-[20px] px-2 py-px">
-                  3
-                </span>
+                Claims
               </Link>
               <Link
                 href="/dashboard/listings"

@@ -12,12 +12,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Useful for quick testing during development
-  const handleQuickFill = (roleEmail: string) => {
-    setEmail(roleEmail);
-    setPassword("superadmin123"); // assuming we use this standard test password
-  };
-
   useEffect(() => {
     // If they already have a token, auto-redirect
     const authData = localStorage.getItem("roamly_auth");
@@ -87,20 +81,6 @@ export default function LoginPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-[0_10px_30px_rgba(11,79,74,0.1)] rounded-[18px] sm:px-10">
           
-          {/* Developer quick-fill for testing */}
-          <div className="mb-6">
-            <p className="text-sm font-semibold text-[#6b7b79] mb-3">Quick Fill (Dev)</p>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => handleQuickFill("superadmin@rentalhub.com")}
-                className="w-full py-2 px-3 border border-[#e7e1d6] rounded-xl text-xs font-bold text-[#172554] bg-[#f8fafc] hover:bg-[#dbeafe] hover:border-[#2563eb] transition-all"
-              >
-                Super Admin
-              </button>
-            </div>
-          </div>
-
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-[#e7e1d6]" />

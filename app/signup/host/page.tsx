@@ -97,11 +97,7 @@ export default function HostSignupPage() {
       });
 
       // We use apiClient with multipart/form-data
-      await apiClient.post('/auth/register/host', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      await apiClient.post('/auth/register/host', formData);
 
       setStep(4);
     } catch (err: any) {

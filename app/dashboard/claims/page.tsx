@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { apiClient } from '../../../lib/api/client';
 
 interface HostDocument {
@@ -182,7 +182,7 @@ export default function ClaimsPage() {
                       <div className='font-semibold text-[#15201f]'>
                         {host.businessName || 'Individual'}
                       </div>
-                      <div className='text-[#6b7b79] text-xs mt-0.5 max-w-[200px] truncate'>
+                      <div className='text-[#6b7b79] text-xs mt-0.5 max-w-50 truncate'>
                         {host.hostTypes?.map(formatHostType).join(', ') || 'Unspecified'}
                       </div>
                     </td>
@@ -292,13 +292,13 @@ export default function ClaimsPage() {
                     </div>
                     <div className='flex justify-between border-b border-gray-50 pb-2'>
                       <span className='text-gray-500'>Types</span>
-                      <span className='font-semibold text-[#15201f] text-right max-w-[200px] break-words'>
+                      <span className='font-semibold text-[#15201f] text-right max-w-50 wrap-break-word'>
                         {selectedHost.hostTypes?.map(formatHostType).join(', ') || 'None'}
                       </span>
                     </div>
                     <div className='flex justify-between pb-1'>
                       <span className='text-gray-500'>Address</span>
-                      <span className='font-semibold text-[#15201f] text-right max-w-[150px]'>
+                      <span className='font-semibold text-[#15201f] text-right max-w-37.5'>
                         {selectedHost.address
                           ? `${selectedHost.address}, ${selectedHost.city || ''}, ${selectedHost.country || ''}`
                           : 'N/A'}

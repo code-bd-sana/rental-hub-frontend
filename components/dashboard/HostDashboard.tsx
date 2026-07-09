@@ -115,8 +115,8 @@ export function HostListings() {
   ]);
 
   const [isAdding, setIsAdding] = useState(false);
-  const [editListing, setEditListing] = useState<any>(null);
-  const [viewListing, setViewListing] = useState<any>(null);
+  const [editListing, setEditListing] = useState<Record<string, unknown> | null>(null);
+  const [viewListing, setViewListing] = useState<Record<string, unknown> | null>(null);
   const [deleteListingId, setDeleteListingId] = useState<string | null>(null);
 
   // Form state
@@ -141,8 +141,15 @@ export function HostListings() {
     setIsAdding(true);
   };
 
-  const handleOpenEdit = (lst: any) => {
-    setFormData({ ...lst });
+  const handleOpenEdit = (lst: Record<string, unknown>) => {
+    setFormData({
+      title: (lst.title as string) || '',
+      category: (lst.category as string) || '',
+      country: (lst.country as string) || '',
+      hours: (lst.hours as string) || '',
+      phone: (lst.phone as string) || '',
+      status: (lst.status as string) || '',
+    });
     setEditListing(lst);
   };
 
@@ -154,7 +161,7 @@ export function HostListings() {
     e.preventDefault();
     if (editListing) {
       setListings(
-        listings.map((l) => (l.id === editListing.id ? { ...formData, id: editListing.id } : l)),
+        listings.map((l) => (l.id === editListing.id ? { ...formData, id: editListing.id as string, status: formData.status } : l)),
       );
       setEditListing(null);
     } else {
@@ -482,12 +489,12 @@ export function HostListings() {
             <div className='p-6 bg-[#f8fafc] flex justify-center'>
               <div className='w-full max-w-70'>
                 <GlobalCard
-                  title={viewListing.title}
-                  category={viewListing.category}
-                  hours={viewListing.hours}
-                  phone={viewListing.phone}
+                  title={viewListing?.title as string}
+                  category={viewListing?.category as string}
+                  hours={viewListing?.hours as string}
+                  phone={viewListing?.phone as string}
                   locked={false}
-                  seed={viewListing.id}
+                  seed={viewListing?.id as string}
                 />
               </div>
             </div>
@@ -592,7 +599,7 @@ export function HostBookings() {
 
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
-  const [viewBooking, setViewBooking] = useState<any>(null);
+  const [viewBooking, setViewBooking] = useState<Record<string, unknown> | null>(null);
 
   const handleAccept = (id: string) => {
     setBookings(bookings.map((b) => (b.id === id ? { ...b, status: 'Accepted' } : b)));
@@ -852,32 +859,32 @@ export function HostBookings() {
                 <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
                   Reference
                 </div>
-                <div className='font-semibold text-[#172554] text-[16px]'>{viewBooking.id}</div>
+                <div className='font-semibold text-[#172554] text-[16px]'>{viewBooking.id as string}</div>
               </div>
               <div className='grid grid-cols-2 gap-4'>
                 <div>
                   <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
                     Guest Name
                   </div>
-                  <div className='font-medium text-[#15201f]'>{viewBooking.guest}</div>
+                  <div className='font-medium text-[#15201f]'>{viewBooking.guest as string}</div>
                 </div>
                 <div>
                   <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
                     Listing
                   </div>
-                  <div className='font-medium text-[#15201f]'>{viewBooking.item}</div>
+                  <div className='font-medium text-[#15201f]'>{viewBooking.item as string}</div>
                 </div>
                 <div>
                   <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
                     Date
                   </div>
-                  <div className='font-medium text-[#15201f]'>{viewBooking.date}</div>
+                  <div className='font-medium text-[#15201f]'>{viewBooking.date as string}</div>
                 </div>
                 <div>
                   <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
                     Amount
                   </div>
-                  <div className='font-medium text-[#15201f]'>{viewBooking.amount}</div>
+                  <div className='font-medium text-[#15201f]'>{viewBooking.amount as string}</div>
                 </div>
                 <div className='col-span-2'>
                   <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
@@ -900,9 +907,9 @@ export function HostBookings() {
                       </span>
                     )}
                   </div>
-                  {viewBooking.status === 'Declined' && viewBooking.rejectionReason && (
-                    <div className='mt-3 p-3 bg-[#f8fafc] border border-[#e7e1d6] rounded-xl text-[13px] text-[#ef4444]'>
-                      <span className='font-bold'>Reason:</span> {viewBooking.rejectionReason}
+                  {viewBooking.status === 'Declined' && !!viewBooking.rejectionReason && (
+                    <div className='mt-2 p-3 bg-[#fee2e2] rounded-xl text-[12px] text-[#ef4444]'>
+                      <span className='font-bold'>Reason:</span> {viewBooking.rejectionReason as string}
                     </div>
                   )}
                 </div>

@@ -58,8 +58,9 @@ export default function LoginPage() {
         router.push("/directory"); // Guests go to directory/booking by default
       }
       
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Invalid email or password");
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || 'Invalid email or password.');
     } finally {
       setLoading(false);
     }

@@ -50,14 +50,16 @@ export default function ClaimsPage() {
     try {
       const response = await apiClient.get('/users/hosts');
       setHosts(response.data.data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch host claims.');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || 'Failed to fetch host claims.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchHosts();
   }, []);
 
@@ -68,11 +70,12 @@ export default function ClaimsPage() {
       await apiClient.patch(`/users/host/${selectedHost.id}/approve`, { status });
       // Update local state without full reload
       setHosts((prev) =>
-        prev.map((h) => (h.id === selectedHost.id ? { ...h, approvalStatus: status as any } : h)),
+        prev.map((h) => (h.id === selectedHost.id ? { ...h, approvalStatus: status as HostProfile['approvalStatus'] } : h)),
       );
-      setSelectedHost({ ...selectedHost, approvalStatus: status as any });
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to update status.');
+      setSelectedHost({ ...selectedHost, approvalStatus: status as HostProfile['approvalStatus'] });
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      alert(error.response?.data?.message || 'Failed to update status.');
     } finally {
       setActionLoading(false);
       setSelectedHost(null); // Close modal on success

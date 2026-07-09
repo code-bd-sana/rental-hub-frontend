@@ -102,8 +102,8 @@ export function GuestBookingHistory() {
     },
   ]);
 
-  const [viewBkg, setViewBkg] = useState<any>(null);
-  const [editBkg, setEditBkg] = useState<any>(null);
+  const [viewBkg, setViewBkg] = useState<Record<string, unknown> | null>(null);
+  const [editBkg, setEditBkg] = useState<Record<string, unknown> | null>(null);
   const [deleteBkgId, setDeleteBkgId] = useState<string | null>(null);
 
   const confirmDelete = () => {
@@ -119,7 +119,7 @@ export function GuestBookingHistory() {
 
   const handleEditSave = (e: React.FormEvent) => {
     e.preventDefault();
-    setBookings(bookings.map((b) => (b.id === editBkg.id ? editBkg : b)));
+    setBookings(bookings.map((b) => (b.id === editBkg?.id ? editBkg as typeof bookings[0] : b)));
     setEditBkg(null);
   };
 
@@ -304,57 +304,57 @@ export function GuestBookingHistory() {
                 <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
                   Reference
                 </div>
-                <div className='font-semibold text-[#172554] text-[18px]'>{viewBkg.id}</div>
+                <div className='font-semibold text-[#172554] text-[18px]'>{viewBkg?.id as string}</div>
               </div>
               <div className='grid grid-cols-2 gap-5'>
                 <div>
                   <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
                     Item
                   </div>
-                  <div className='font-medium text-[#15201f]'>{viewBkg.item}</div>
+                  <div className='font-medium text-[#15201f]'>{viewBkg?.item as string}</div>
                 </div>
                 <div>
                   <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
                     Type
                   </div>
-                  <div className='font-medium text-[#15201f]'>{viewBkg.type}</div>
+                  <div className='font-medium text-[#15201f]'>{viewBkg?.type as string}</div>
                 </div>
                 <div>
                   <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
                     Location
                   </div>
-                  <div className='font-medium text-[#15201f]'>{viewBkg.location}</div>
+                  <div className='font-medium text-[#15201f]'>{viewBkg?.location as string}</div>
                 </div>
                 <div>
                   <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
                     Dates
                   </div>
-                  <div className='font-medium text-[#15201f]'>{viewBkg.dates}</div>
+                  <div className='font-medium text-[#15201f]'>{viewBkg?.dates as string}</div>
                 </div>
                 <div>
                   <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
                     Amount
                   </div>
-                  <div className='font-medium text-[#15201f]'>{viewBkg.amount}</div>
+                  <div className='font-medium text-[#15201f]'>{viewBkg?.amount as string}</div>
                 </div>
                 <div>
                   <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
                     Status
                   </div>
                   <div className='font-medium text-[#15201f]'>
-                    {viewBkg.status === 'Upcoming' && (
+                    {viewBkg?.status === 'Upcoming' && (
                       <span className='bg-[#e6eefb] text-[#2a5db0] text-[11px] font-bold px-2 py-0.5 rounded-[20px] uppercase tracking-[0.5px]'>
-                        {viewBkg.status}
+                        {viewBkg?.status as string}
                       </span>
                     )}
-                    {viewBkg.status === 'Completed' && (
+                    {viewBkg?.status === 'Completed' && (
                       <span className='bg-[#dff3ec] text-[#1e9e72] text-[11px] font-bold px-2 py-0.5 rounded-[20px] uppercase tracking-[0.5px]'>
-                        {viewBkg.status}
+                        {viewBkg?.status as string}
                       </span>
                     )}
-                    {viewBkg.status === 'Cancelled' && (
+                    {viewBkg?.status === 'Cancelled' && (
                       <span className='bg-[#fee2e2] text-[#ef4444] text-[11px] font-bold px-2 py-0.5 rounded-[20px] uppercase tracking-[0.5px]'>
-                        {viewBkg.status}
+                        {viewBkg?.status as string}
                       </span>
                     )}
                   </div>
@@ -400,7 +400,7 @@ export function GuestBookingHistory() {
                     </label>
                     <input
                       required
-                      value={editBkg.item}
+                      value={(editBkg?.item as string) || ''}
                       onChange={(e) => handleEditChange('item', e.target.value)}
                       className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
                     />
@@ -411,7 +411,7 @@ export function GuestBookingHistory() {
                     </label>
                     <input
                       required
-                      value={editBkg.location}
+                      value={(editBkg?.location as string) || ''}
                       onChange={(e) => handleEditChange('location', e.target.value)}
                       className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
                     />
@@ -424,7 +424,7 @@ export function GuestBookingHistory() {
                     </label>
                     <input
                       required
-                      value={editBkg.dates}
+                      value={(editBkg?.dates as string) || ''}
                       onChange={(e) => handleEditChange('dates', e.target.value)}
                       className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
                     />
@@ -435,7 +435,7 @@ export function GuestBookingHistory() {
                     </label>
                     <input
                       required
-                      value={editBkg.amount}
+                      value={(editBkg?.amount as string) || ''}
                       onChange={(e) => handleEditChange('amount', e.target.value)}
                       className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
                     />
@@ -446,7 +446,7 @@ export function GuestBookingHistory() {
                     Status
                   </label>
                   <select
-                    value={editBkg.status}
+                    value={(editBkg?.status as string) || ''}
                     onChange={(e) => handleEditChange('status', e.target.value)}
                     className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] bg-white focus:outline-none focus:border-[#2563eb] transition-colors'
                   >

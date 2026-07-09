@@ -16,6 +16,7 @@ export default function DirectorySection() {
       try {
         const parsed = JSON.parse(authData);
         if (parsed?.isAuthenticated) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setIsLoggedIn(true);
         }
       } catch (e) {

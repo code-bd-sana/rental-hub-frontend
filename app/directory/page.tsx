@@ -21,6 +21,7 @@ function DirectoryContent() {
       try {
         const parsed = JSON.parse(authData);
         if (parsed?.isAuthenticated) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setIsLoggedIn(true);
           setUserRole(parsed.role || "Guest");
         }

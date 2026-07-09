@@ -20,7 +20,9 @@ const SR_BANKS = [
   {code:'southern',name:'Southern Commercial Bank',short:'SCB',color:'#16386b',acct:'24.880.131'}
 ];
 
-function bankMark(b: any) {
+type Bank = typeof SR_BANKS[0];
+
+function bankMark(b: Bank) {
   return (
     <svg viewBox="0 0 64 64" className="w-12 h-12 inline-block">
       <rect width="64" height="64" rx="15" fill={b.color} />
@@ -38,15 +40,15 @@ function BookingContent() {
   const seed = searchParams.get("id");
   const { openModal } = useModal();
 
-  const [item, setItem] = useState<any>(null);
+  const [item, setItem] = useState<Record<string, unknown> | null>(null);
   const [step, setStep] = useState<"summary" | "bank-select" | "bank-details" | "intl-options" | "status">("summary");
   
   // Payment states
-  const [payData, setPayData] = useState<any>(null);
-  const [selectedBank, setSelectedBank] = useState<any>(null);
+  const [payData, setPayData] = useState<Record<string, unknown> | null>(null);
+  const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
   const [email, setEmail] = useState("");
   const [proofName, setProofName] = useState("");
-  const [receipt, setReceipt] = useState<any>(null);
+  const [receipt, setReceipt] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     if (!seed) {
@@ -69,6 +71,7 @@ function BookingContent() {
       return;
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setItem(foundItem);
 
     // Dynamic mock pricing based on category
@@ -113,7 +116,7 @@ function BookingContent() {
     return <div className="min-h-[60vh] flex items-center justify-center font-bold text-gray-500">Loading booking details...</div>;
   }
 
-  const handleBankSelect = (bank: any) => {
+  const handleBankSelect = (bank: Bank) => {
     setSelectedBank(bank);
     setStep("bank-details");
   };
@@ -127,7 +130,7 @@ function BookingContent() {
     const otp = Math.floor(100000 + Math.random() * 900000);
     setReceipt({
       ...payData,
-      bank: selectedBank.name,
+      bank: selectedBank?.name,
       email,
       proof: proofName,
       status: "review",
@@ -156,20 +159,20 @@ function BookingContent() {
           <div className="p-6 border-b border-[#e7e1d6] flex justify-between items-start">
             <div>
               <h3 className="text-[20px] font-bold text-[#15201f]">Confirm and pay</h3>
-              <p className="text-[#6b7b79] font-medium mt-1">{payData.company}</p>
+              <p className="text-[#6b7b79] font-medium mt-1">{payData.company as string}</p>
             </div>
             <Link href="/" className="text-[#6b7b79] hover:text-[#15201f] text-xl leading-none">✕</Link>
           </div>
           <div className="p-6">
             <div className="bg-[#f8fafc] border border-[#e7e1d6] rounded-xl p-5 mb-6 text-[14px]">
-              <div className="flex justify-between mb-3"><span className="text-[#6b7b79]">Subtotal</span><span className="font-semibold">{payData.currency} {payData.base}</span></div>
-              <div className="flex justify-between mb-4 border-b border-[#e7e1d6] pb-4"><span className="text-[#6b7b79]">{payData.taxLabel} ({payData.taxRate}%)</span><span className="font-semibold">{payData.currency} {payData.tax}</span></div>
-              <div className="flex justify-between font-bold text-[18px] mb-4"><span>Total</span><span>{payData.currency} {payData.amount}</span></div>
-              <div className="flex justify-between text-[#1e40af] font-bold mb-3"><span>Pay now to hold ({payData.holdPct}%)</span><span>{payData.currency} {payData.hold}</span></div>
-              <div className="flex justify-between text-[#6b7b79] font-medium"><span>Balance at the location</span><span>{payData.currency} {payData.balance}</span></div>
+              <div className="flex justify-between mb-3"><span className="text-[#6b7b79]">Subtotal</span><span className="font-semibold">{payData.currency as string} {payData.base as number}</span></div>
+              <div className="flex justify-between mb-4 border-b border-[#e7e1d6] pb-4"><span className="text-[#6b7b79]">{payData.taxLabel as string} ({payData.taxRate as number}%)</span><span className="font-semibold">{payData.currency as string} {payData.tax as number}</span></div>
+              <div className="flex justify-between font-bold text-[18px] mb-4"><span>Total</span><span>{payData.currency as string} {payData.amount as number}</span></div>
+              <div className="flex justify-between text-[#1e40af] font-bold mb-3"><span>Pay now to hold ({payData.holdPct as number}%)</span><span>{payData.currency as string} {payData.hold as number}</span></div>
+              <div className="flex justify-between text-[#6b7b79] font-medium"><span>Balance at the location</span><span>{payData.currency as string} {payData.balance as number}</span></div>
             </div>
             
-            {payData.isFood && (
+            {(payData.isFood as boolean) && (
               <div className="bg-[#fff3cd] text-[#856404] p-4 rounded-xl text-[13px] font-medium mb-6">
                 For food orders, 50% must be paid before your food is prepared. The rest is paid on pickup.
               </div>
@@ -220,18 +223,18 @@ function BookingContent() {
           <button className="text-[#1e40af] font-semibold text-sm mb-6 hover:underline flex items-center gap-1" onClick={() => setStep("bank-select")}>‹ Banks</button>
           
           <div className="flex items-center gap-4 mb-6 pb-6 border-b border-[#e7e1d6]">
-            {bankMark(selectedBank)}
+            <div dangerouslySetInnerHTML={{ __html: selectedBank ? bankMark(selectedBank) : '' }} />
             <div>
-              <b className="block text-[16px] text-[#15201f]">{selectedBank.name}</b>
+              <b className="block text-[16px] text-[#15201f]">{selectedBank?.name}</b>
               <small className="text-[#6b7b79] text-[13px]">Transfer to the host account below</small>
             </div>
           </div>
           
           <div className="bg-[#f8fafc] border border-[#e7e1d6] rounded-xl p-5 text-[14px] flex flex-col gap-3 mb-6">
-            <div className="flex justify-between"><span className="text-[#6b7b79]">Account name</span><b className="text-[#15201f] text-right">{payData.company}</b></div>
-            <div className="flex justify-between"><span className="text-[#6b7b79]">Account number</span><b className="text-[#15201f] text-right font-mono text-[15px]">{selectedBank.acct}</b></div>
-            <div className="flex justify-between text-[#1e40af]"><span className="font-semibold">Amount to transfer</span><b className="text-[16px] text-right">{payData.currency} {payData.hold}</b></div>
-            <div className="flex justify-between"><span className="text-[#6b7b79]">Reference</span><b className="text-[#15201f] text-right font-mono text-[15px]">{payData.ref}</b></div>
+            <div className="flex justify-between"><span className="text-[#6b7b79]">Account name</span><b className="text-[#15201f] text-right">{payData.company as string}</b></div>
+            <div className="flex justify-between"><span className="text-[#6b7b79]">Account number</span><b className="text-[#15201f] text-right font-mono text-[15px]">{selectedBank?.acct}</b></div>
+            <div className="flex justify-between text-[#1e40af]"><span className="font-semibold">Amount to transfer</span><b className="text-[16px] text-right">{payData.currency as string} {payData.hold as number}</b></div>
+            <div className="flex justify-between"><span className="text-[#6b7b79]">Reference</span><b className="text-[#15201f] text-right font-mono text-[15px]">{payData.ref as string}</b></div>
           </div>
 
           <input 
@@ -283,7 +286,7 @@ function BookingContent() {
               </div>
               <div>
                 <b className="block text-[16px] text-[#15201f]">Pay at the location</b>
-                <small className="text-[#6b7b79] leading-relaxed block mt-1 text-[13px]">Reserve now and settle in cash or card when you arrive. {payData.isFood && <span className="font-medium text-[#856404]">Food orders need 50% confirmed with the host first.</span>}</small>
+                <small className="text-[#6b7b79] leading-relaxed block mt-1 text-[13px]">Reserve now and settle in cash or card when you arrive. {(payData.isFood as boolean) && <span className="font-medium text-[#856404]">Food orders need 50% confirmed with the host first.</span>}</small>
               </div>
             </button>
             <button onClick={() => alert("Chat opened with host!")} className="text-left flex items-start gap-4 p-5 border border-[#e7e1d6] rounded-xl hover:bg-[#f8fafc] transition-colors group">
@@ -300,7 +303,7 @@ function BookingContent() {
       );
     }
 
-    if (step === "status") {
+    if (step === "status" && receipt) {
       const isReview = receipt.status === "review";
       const statusTitle = isReview ? "Under review" : "Reserved";
       const statusColor = isReview ? "#e8a33d" : "#10b981";
@@ -323,25 +326,25 @@ function BookingContent() {
             </div>
 
             <div className="bg-[#f8fafc] border border-[#e7e1d6] rounded-2xl p-6 mb-8 text-[14px]">
-              <div className="flex justify-between py-2.5 border-b border-[#e7e1d6]"><span className="text-[#6b7b79]">Reference</span><b className="text-[#15201f]">{receipt.ref}</b></div>
-              <div className="flex justify-between py-2.5 border-b border-[#e7e1d6]"><span className="text-[#6b7b79]">Booking</span><b className="text-[#15201f]">{receipt.cat}</b></div>
-              <div className="flex justify-between py-2.5 border-b border-[#e7e1d6]"><span className="text-[#6b7b79]">Sold by</span><b className="text-[#15201f] text-right">{receipt.company}</b></div>
-              {receipt.bank && <div className="flex justify-between py-2.5 border-b border-[#e7e1d6]"><span className="text-[#6b7b79]">Paid via</span><b className="text-[#15201f]">{receipt.bank}</b></div>}
-              <div className="flex justify-between py-2.5 border-b border-[#e7e1d6]"><span className="text-[#6b7b79]">Subtotal</span><b className="text-[#15201f]">{receipt.currency} {receipt.base}</b></div>
-              <div className="flex justify-between py-2.5 border-b border-[#e7e1d6]"><span className="text-[#6b7b79]">{receipt.taxLabel} ({receipt.taxRate}%)</span><b className="text-[#15201f]">{receipt.currency} {receipt.tax}</b></div>
-              <div className="flex justify-between py-3 border-b border-[#e7e1d6] font-bold text-[18px]"><span>Total</span><span className="text-[#15201f]">{receipt.currency} {receipt.amount}</span></div>
-              <div className="flex justify-between py-3 border-b border-[#e7e1d6] text-[#1e40af] font-semibold"><span>Amount {receipt.status === 'pay_at_location' ? 'due at location' : 'paid now'}</span><b>{receipt.currency} {receipt.status === 'pay_at_location' ? receipt.amount : receipt.hold}</b></div>
-              {receipt.proof && <div className="flex justify-between py-3 border-b border-[#e7e1d6]"><span className="text-[#6b7b79]">Proof</span><b className="text-[#10b981]">{receipt.proof}</b></div>}
+              <div className="flex justify-between py-2.5 border-b border-[#e7e1d6]"><span className="text-[#6b7b79]">Reference</span><b className="text-[#15201f]">{receipt.ref as string}</b></div>
+              <div className="flex justify-between py-2.5 border-b border-[#e7e1d6]"><span className="text-[#6b7b79]">Booking</span><b className="text-[#15201f]">{receipt.cat as string}</b></div>
+              <div className="flex justify-between py-2.5 border-b border-[#e7e1d6]"><span className="text-[#6b7b79]">Sold by</span><b className="text-[#15201f] text-right">{receipt.company as string}</b></div>
+              {(receipt.bank as string) && <div className="flex justify-between py-2.5 border-b border-[#e7e1d6]"><span className="text-[#6b7b79]">Paid via</span><b className="text-[#15201f]">{receipt.bank as string}</b></div>}
+              <div className="flex justify-between py-2.5 border-b border-[#e7e1d6]"><span className="text-[#6b7b79]">Subtotal</span><b className="text-[#15201f]">{receipt.currency as string} {receipt.base as number}</b></div>
+              <div className="flex justify-between py-2.5 border-b border-[#e7e1d6]"><span className="text-[#6b7b79]">{receipt.taxLabel as string} ({receipt.taxRate as number}%)</span><b className="text-[#15201f]">{receipt.currency as string} {receipt.tax as number}</b></div>
+              <div className="flex justify-between py-3 border-b border-[#e7e1d6] font-bold text-[18px]"><span>Total</span><span className="text-[#15201f]">{receipt.currency as string} {receipt.amount as number}</span></div>
+              <div className="flex justify-between py-3 border-b border-[#e7e1d6] text-[#1e40af] font-semibold"><span>Amount {receipt.status === 'pay_at_location' ? 'due at location' : 'paid now'}</span><b>{receipt.currency as string} {receipt.status === 'pay_at_location' ? (receipt.amount as number) : (receipt.hold as number)}</b></div>
+              {(receipt.proof as string) && <div className="flex justify-between py-3 border-b border-[#e7e1d6]"><span className="text-[#6b7b79]">Proof</span><b className="text-[#10b981]">{receipt.proof as string}</b></div>}
               
               <div className="bg-[#dbeafe] text-[#1e40af] p-5 rounded-xl mt-6 text-center border border-[#bfdbfe]">
                 <small className="block mb-2 font-bold uppercase tracking-wider text-[11px]">{otpLabel}</small>
-                <div className="text-[38px] font-mono font-bold tracking-widest leading-none drop-shadow-sm">{receipt.otp}</div>
+                <div className="text-[38px] font-mono font-bold tracking-widest leading-none drop-shadow-sm">{receipt.otp as number}</div>
               </div>
             </div>
 
-            {receipt.email && (
+            {(receipt.email as string) && (
               <div className="text-center text-[#6b7b79] text-[14px] font-medium mb-8">
-                A receipt with your code was emailed instantly to <b className="text-[#15201f]">{receipt.email}</b>
+                A receipt with your code was emailed instantly to <b className="text-[#15201f]">{receipt.email as string}</b>
               </div>
             )}
 

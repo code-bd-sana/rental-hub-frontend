@@ -100,8 +100,9 @@ export default function HostSignupPage() {
       await apiClient.post('/auth/register/host', formData);
 
       setStep(4);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Something went wrong during host registration.');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || 'Something went wrong during host registration.');
     } finally {
       setLoading(false);
     }

@@ -17,6 +17,7 @@ export default function Header() {
         try {
           const authData = JSON.parse(authDataString);
           if (authData?.accessToken || authData?.isAuthenticated) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsAuthenticated(true);
           }
         } catch (e) {

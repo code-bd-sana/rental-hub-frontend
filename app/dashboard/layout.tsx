@@ -161,6 +161,7 @@ export default function DashboardLayout({
         router.replace("/login");
         return;
       }
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRole(parsed.role);
       setIsAuthChecking(false);
     } catch (e) {

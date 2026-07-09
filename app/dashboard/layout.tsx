@@ -40,9 +40,9 @@ function SidebarNav({
       <nav className="flex flex-col flex-1">
         <div className="flex flex-col gap-1">
           <Link href="/dashboard" className={navClass("/dashboard")}>
-            {role === "Agent" ? "My workspace" : "Overview"}
+            {role === "AGENT" ? "My workspace" : "Overview"}
           </Link>
-          {role === "Guest" && (
+          {role === "GUEST" && (
             <>
               <Link
                 href="/dashboard/booking-history"
@@ -52,7 +52,7 @@ function SidebarNav({
               </Link>
             </>
           )}
-          {role === "Host" && (
+          {role === "HOST" && (
             <>
               <Link
                 href="/dashboard/listings"
@@ -80,12 +80,12 @@ function SidebarNav({
               </Link>
             </>
           )}
-          {role === "Agent" && (
+          {role === "AGENT" && (
             <button className="bg-transparent text-white text-left w-full px-3.25 py-2.75 rounded-[11px] text-[14px] font-semibold opacity-80 flex justify-between items-center hover:bg-[rgba(255,255,255,0.14)] hover:opacity-100 transition-colors">
               Load directory
             </button>
           )}
-          {role === "Super Admin" && (
+          {role === "SUPER_ADMIN" && (
             <>
               <Link
                 href="/dashboard/claims"
@@ -116,7 +116,7 @@ function SidebarNav({
               </Link>
             </>
           )}
-          {role !== "Agent" && (
+          {role !== "AGENT" && (
             <Link
               href="/dashboard/settings"
               className={navClass("/dashboard/settings")}

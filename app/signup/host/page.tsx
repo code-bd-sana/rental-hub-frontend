@@ -29,11 +29,18 @@ export default function HostSignupPage() {
   // Step 3: Documents
   const [documents, setDocuments] = useState<File[]>([]);
 
-  const availableHostTypes = ["Property Manager", "Individual Host", "Boutique Hotel", "Resort", "Other"];
+  const availableHostTypes = [
+    { label: "Registered Rental Property", value: "RENTAL_PROPERTY_REGISTERED" },
+    { label: "Individual Property", value: "INDIVIDUAL_PROPERTY" },
+    { label: "Car Rental", value: "CAR_RENTAL" },
+    { label: "Restaurant", value: "RESTAURANT" },
+    { label: "Barbershop", value: "BARBERSHOP" },
+    { label: "Spa / Salon", value: "SPA_SALON" },
+  ];
 
-  const toggleHostType = (type: string) => {
+  const toggleHostType = (typeValue: string) => {
     setHostTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+      prev.includes(typeValue) ? prev.filter((t) => t !== typeValue) : [...prev, typeValue]
     );
   };
 
@@ -184,8 +191,8 @@ export default function HostSignupPage() {
                   <label className="block text-[13px] font-bold text-[#15201f] mb-2.5">What type of host are you?</label>
                   <div className="flex flex-wrap gap-2">
                     {availableHostTypes.map(t => (
-                      <button type="button" key={t} onClick={() => toggleHostType(t)} className={`border rounded-[22px] px-4 py-2 text-[13px] font-semibold transition-colors ${hostTypes.includes(t) ? 'bg-[#1e40af] text-white border-[#1e40af]' : 'border-[#e7e1d6] bg-[#f8fafc] text-[#15201f] hover:bg-[#dbeafe]'}`}>
-                        {t}
+                      <button type="button" key={t.value} onClick={() => toggleHostType(t.value)} className={`border rounded-[22px] px-4 py-2 text-[13px] font-semibold transition-colors ${hostTypes.includes(t.value) ? 'bg-[#1e40af] text-white border-[#1e40af]' : 'border-[#e7e1d6] bg-[#f8fafc] text-[#15201f] hover:bg-[#dbeafe]'}`}>
+                        {t.label}
                       </button>
                     ))}
                   </div>

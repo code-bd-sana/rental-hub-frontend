@@ -328,7 +328,7 @@ export default function ClaimsPage() {
                           href={
                             doc.fileUrl.startsWith('http')
                               ? doc.fileUrl
-                              : `http://localhost:5000/${doc.fileUrl}`
+                              : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'}${doc.fileUrl.startsWith('/') ? '' : '/'}${doc.fileUrl}`
                           }
                           target='_blank'
                           rel='noreferrer'

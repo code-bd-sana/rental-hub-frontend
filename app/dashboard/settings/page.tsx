@@ -1,6 +1,7 @@
 "use client";
 
 import { HostSettings } from "@/components/dashboard/HostDashboard";
+import { GuestSettings } from "@/components/dashboard/GuestDashboard";
 
 export default function DashboardSettingsPage() {
   const authData = typeof window !== "undefined" ? localStorage.getItem("roamly_auth") : null;
@@ -8,6 +9,10 @@ export default function DashboardSettingsPage() {
 
   if (role === "Host") {
     return <HostSettings />;
+  }
+
+  if (role === "Guest") {
+    return <GuestSettings />;
   }
 
   return (

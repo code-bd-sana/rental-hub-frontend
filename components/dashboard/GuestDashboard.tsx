@@ -1,7 +1,8 @@
 'use client';
 
+import { apiClient } from '@/lib/api/client';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function GuestOverview() {
   return (
@@ -119,7 +120,9 @@ export function GuestBookingHistory() {
 
   const handleEditSave = (e: React.FormEvent) => {
     e.preventDefault();
-    setBookings(bookings.map((b) => (b.id === editBkg?.id ? editBkg as typeof bookings[0] : b)));
+    setBookings(
+      bookings.map((b) => (b.id === editBkg?.id ? (editBkg as (typeof bookings)[0]) : b)),
+    );
     setEditBkg(null);
   };
 
@@ -304,7 +307,9 @@ export function GuestBookingHistory() {
                 <div className='text-[11px] font-bold text-[#6b7b79] uppercase tracking-wide mb-1'>
                   Reference
                 </div>
-                <div className='font-semibold text-[#172554] text-[18px]'>{viewBkg?.id as string}</div>
+                <div className='font-semibold text-[#172554] text-[18px]'>
+                  {viewBkg?.id as string}
+                </div>
               </div>
               <div className='grid grid-cols-2 gap-5'>
                 <div>
@@ -524,6 +529,428 @@ export function GuestBookingHistory() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+export function GuestSettings() {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    city: '',
+    country: '',
+    emergencyContactName: '',
+    emergencyContactRelation: '',
+    emergencyContactPhone: '',
+    currency: 'USD',
+    language: 'en',
+    emailNotifications: true,
+    smsNotifications: true,
+    marketingEmails: false,
+
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const { data } = await apiClient.get('/users/me');
+        const user = data.data;
+        const gp = user.guestProfile || {};
+
+        setFormData((prev) => ({
+          ...prev,
+          name: user.name || '',
+          email: user.email || '',
+          phone: user.phone || '',
+          city: gp.city || '',
+          country: gp.country || '',
+          emergencyContactName: gp.emergencyContactName || '',
+          emergencyContactRelation: gp.emergencyContactRelation || '',
+          emergencyContactPhone: gp.emergencyContactPhone || '',
+          currency: gp.currency || 'USD',
+          language: gp.language || 'en',
+          emailNotifications: gp.emailNotifications ?? true,
+          smsNotifications: gp.smsNotifications ?? true,
+          marketingEmails: gp.marketingEmails ?? false,
+        }));
+      } catch (err: unknown) {
+        console.error(err);
+        setError('Failed to load profile data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleChange = (field: string, value: string | boolean) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSave = async () => {
+    setError('');
+    setSuccessMsg('');
+    if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
+      setError('New passwords do not match.');
+      return;
+    }
+    if (formData.newPassword && !formData.currentPassword) {
+      setError('Current password is required to set a new password.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload: Record<string, unknown> = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        city: formData.city,
+        country: formData.country,
+        emergencyContactName: formData.emergencyContactName,
+        emergencyContactRelation: formData.emergencyContactRelation,
+        emergencyContactPhone: formData.emergencyContactPhone,
+        currency: formData.currency,
+        language: formData.language,
+        emailNotifications: formData.emailNotifications,
+        smsNotifications: formData.smsNotifications,
+        marketingEmails: formData.marketingEmails,
+      };
+
+      await apiClient.patch('/users/me', payload);
+
+      if (formData.newPassword) {
+        await apiClient.post('/auth/change-password', {
+          oldPassword: formData.currentPassword,
+          newPassword: formData.newPassword,
+        });
+        setFormData((prev) => ({
+          ...prev,
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        }));
+      }
+
+      setSuccessMsg('Settings saved successfully!');
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      setError(axiosError.response?.data?.message || 'Failed to save settings.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return <div className='p-8 text-[#6b7b79] animate-pulse'>Loading settings...</div>;
+  }
+
+  return (
+    <div className='animate-in fade-in duration-300 max-w-4xl pb-10'>
+      <div className='mb-6'>
+        <h2
+          className='text-[26px] font-bold mb-1 text-[#172554]'
+          style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
+        >
+          Account Settings
+        </h2>
+        <p className='text-[14px] text-[#6b7b79]'>
+          Update your personal details, security, and preferences.
+        </p>
+      </div>
+
+      {error && (
+        <div className='bg-[#fee2e2] text-[#ef4444] p-4 rounded-xl mb-6 text-[14px] font-medium border border-[#fca5a5]'>
+          {error}
+        </div>
+      )}
+
+      {successMsg && (
+        <div className='bg-[#dff3ec] text-[#1e9e72] p-4 rounded-xl mb-6 text-[14px] font-medium border border-[#a7f3d0]'>
+          {successMsg}
+        </div>
+      )}
+
+      <div className='space-y-6'>
+        {/* Profile Information */}
+        <div className='bg-white border border-[#e7e1d6] rounded-2xl p-6 md:p-8 shadow-custom-sm'>
+          <h3
+            className='text-[18px] font-bold text-[#15201f] mb-6 border-b border-[#e7e1d6] pb-3'
+            style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
+          >
+            Profile Information
+          </h3>
+          <div className='flex flex-col md:flex-row gap-8'>
+            <div className='flex flex-col items-center gap-3 md:w-37.5 shrink-0'>
+              <div className='w-24 h-24 rounded-full bg-[#e6eefb] text-[#2a5db0] flex items-center justify-center text-3xl font-bold border-4 border-white shadow-sm'>
+                {formData.name ? formData.name.charAt(0).toUpperCase() : 'G'}
+              </div>
+              <button className='text-[13px] font-bold text-[#2563eb] hover:text-[#1e40af] transition-colors'>
+                Change Photo
+              </button>
+            </div>
+            <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-5'>
+              <div>
+                <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                  Full Name
+                </label>
+                <input
+                  type='text'
+                  value={formData.name}
+                  onChange={(e) => handleChange('name', e.target.value)}
+                  className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                />
+              </div>
+              <div>
+                <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                  Email Address
+                </label>
+                <input
+                  type='email'
+                  value={formData.email}
+                  onChange={(e) => handleChange('email', e.target.value)}
+                  className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                />
+              </div>
+              <div>
+                <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                  Phone Number
+                </label>
+                <input
+                  type='tel'
+                  value={formData.phone}
+                  onChange={(e) => handleChange('phone', e.target.value)}
+                  className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                />
+              </div>
+              <div>
+                <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>City</label>
+                <input
+                  type='text'
+                  value={formData.city}
+                  onChange={(e) => handleChange('city', e.target.value)}
+                  className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                />
+              </div>
+              <div>
+                <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>Country</label>
+                <input
+                  type='text'
+                  value={formData.country}
+                  onChange={(e) => handleChange('country', e.target.value)}
+                  className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Emergency Contact */}
+        <div className='bg-white border border-[#e7e1d6] rounded-2xl p-6 md:p-8 shadow-custom-sm'>
+          <h3
+            className='text-[18px] font-bold text-[#15201f] mb-6 border-b border-[#e7e1d6] pb-3'
+            style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
+          >
+            Emergency Contact
+          </h3>
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-5'>
+            <div>
+              <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                Contact Name
+              </label>
+              <input
+                type='text'
+                value={formData.emergencyContactName}
+                onChange={(e) => handleChange('emergencyContactName', e.target.value)}
+                placeholder='Jane Doe'
+                className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+              />
+            </div>
+            <div>
+              <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                Relationship
+              </label>
+              <input
+                type='text'
+                value={formData.emergencyContactRelation}
+                onChange={(e) => handleChange('emergencyContactRelation', e.target.value)}
+                placeholder='Spouse'
+                className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+              />
+            </div>
+            <div>
+              <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                Phone Number
+              </label>
+              <input
+                type='tel'
+                value={formData.emergencyContactPhone}
+                onChange={(e) => handleChange('emergencyContactPhone', e.target.value)}
+                placeholder='+1 (555) 987-6543'
+                className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Security & Password */}
+        <div className='bg-white border border-[#e7e1d6] rounded-2xl p-6 md:p-8 shadow-custom-sm'>
+          <h3
+            className='text-[18px] font-bold text-[#15201f] mb-6 border-b border-[#e7e1d6] pb-3'
+            style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
+          >
+            Security & Password
+          </h3>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
+            <div>
+              <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                Current Password
+              </label>
+              <input
+                type='password'
+                value={formData.currentPassword}
+                onChange={(e) => handleChange('currentPassword', e.target.value)}
+                placeholder='••••••••'
+                className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+              />
+            </div>
+            <div className='hidden md:block'></div>
+            <div>
+              <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                New Password
+              </label>
+              <input
+                type='password'
+                value={formData.newPassword}
+                onChange={(e) => handleChange('newPassword', e.target.value)}
+                placeholder='Enter new password'
+                className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+              />
+            </div>
+            <div>
+              <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                Confirm New Password
+              </label>
+              <input
+                type='password'
+                value={formData.confirmPassword}
+                onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                placeholder='Confirm new password'
+                className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Preferences & Notifications */}
+        <div className='bg-white border border-[#e7e1d6] rounded-2xl p-6 md:p-8 shadow-custom-sm'>
+          <h3
+            className='text-[18px] font-bold text-[#15201f] mb-6 border-b border-[#e7e1d6] pb-3'
+            style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
+          >
+            Preferences & Notifications
+          </h3>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
+            <div className='space-y-5'>
+              <div>
+                <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                  Preferred Currency
+                </label>
+                <select
+                  value={formData.currency}
+                  onChange={(e) => handleChange('currency', e.target.value)}
+                  className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] bg-white focus:outline-none focus:border-[#2563eb] transition-colors'
+                >
+                  <option value='USD'>USD ($)</option>
+                  <option value='JMD'>JMD (J$)</option>
+                  <option value='GBP'>GBP (£)</option>
+                  <option value='EUR'>EUR (€)</option>
+                </select>
+              </div>
+              <div>
+                <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                  Language
+                </label>
+                <select
+                  value={formData.language}
+                  onChange={(e) => handleChange('language', e.target.value)}
+                  className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] bg-white focus:outline-none focus:border-[#2563eb] transition-colors'
+                >
+                  <option value='en'>English</option>
+                  <option value='es'>Spanish</option>
+                  <option value='fr'>French</option>
+                </select>
+              </div>
+            </div>
+            <div className='space-y-5'>
+              <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                Notifications
+              </label>
+              <label className='flex items-center gap-3 cursor-pointer group'>
+                <div className='relative'>
+                  <input
+                    type='checkbox'
+                    className='sr-only peer'
+                    checked={formData.emailNotifications}
+                    onChange={(e) => handleChange('emailNotifications', e.target.checked)}
+                  />
+                  <div className='w-11 h-6 bg-[#e7e1d6] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[""] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2563eb]'></div>
+                </div>
+                <span className='text-[14px] text-[#15201f] font-medium group-hover:text-[#2563eb] transition-colors'>
+                  Email Notifications
+                </span>
+              </label>
+              <label className='flex items-center gap-3 cursor-pointer group'>
+                <div className='relative'>
+                  <input
+                    type='checkbox'
+                    className='sr-only peer'
+                    checked={formData.smsNotifications}
+                    onChange={(e) => handleChange('smsNotifications', e.target.checked)}
+                  />
+                  <div className='w-11 h-6 bg-[#e7e1d6] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[""] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2563eb]'></div>
+                </div>
+                <span className='text-[14px] text-[#15201f] font-medium group-hover:text-[#2563eb] transition-colors'>
+                  SMS Notifications
+                </span>
+              </label>
+              <label className='flex items-center gap-3 cursor-pointer group'>
+                <div className='relative'>
+                  <input
+                    type='checkbox'
+                    className='sr-only peer'
+                    checked={formData.marketingEmails}
+                    onChange={(e) => handleChange('marketingEmails', e.target.checked)}
+                  />
+                  <div className='w-11 h-6 bg-[#e7e1d6] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[""] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2563eb]'></div>
+                </div>
+                <span className='text-[14px] text-[#15201f] font-medium group-hover:text-[#2563eb] transition-colors'>
+                  Marketing Emails
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div className='flex justify-end pt-2'>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className='bg-[#2563eb] text-white px-8 py-3 rounded-xl font-bold text-[15px] hover:bg-[#1e40af] transition-colors shadow-sm disabled:opacity-50'
+          >
+            {saving ? 'Saving...' : 'Save All Changes'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

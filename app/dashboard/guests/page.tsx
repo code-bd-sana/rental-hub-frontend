@@ -6,7 +6,7 @@ export default function DashboardGuestsPage() {
   const authData = typeof window !== "undefined" ? localStorage.getItem("roamly_auth") : null;
   const role = authData ? JSON.parse(authData).role : null;
 
-  if (role === "Super Admin") {
+  if (role === "SUPER_ADMIN" || role === "Super Admin") {
     return <AdminGuests />;
   }
 

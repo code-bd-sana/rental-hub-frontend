@@ -7,11 +7,11 @@ export default function DashboardListingsPage() {
   const authData = typeof window !== "undefined" ? localStorage.getItem("roamly_auth") : null;
   const role = authData ? JSON.parse(authData).role : null;
 
-  if (role === "Host") {
+  if (role === "HOST" || role === "Host") {
     return <HostListings />;
   }
   
-  if (role === "Super Admin") {
+  if (role === "SUPER_ADMIN" || role === "Super Admin") {
     return <AdminListings />;
   }
 

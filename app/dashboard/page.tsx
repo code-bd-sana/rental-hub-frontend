@@ -9,19 +9,19 @@ export default function DashboardPage() {
   const authData = typeof window !== "undefined" ? localStorage.getItem("roamly_auth") : null;
   const role = authData ? JSON.parse(authData).role : null;
 
-  if (role === "Guest") {
+  if (role === "GUEST" || role === "Guest") {
     return <GuestOverview />;
   }
 
-  if (role === "Host") {
+  if (role === "HOST" || role === "Host") {
     return <HostOverview />;
   }
   
-  if (role === "Super Admin") {
+  if (role === "SUPER_ADMIN" || role === "Super Admin") {
     return <AdminOverview />;
   }
 
-  if (role === "Agent") {
+  if (role === "AGENT" || role === "Agent") {
     return <AgentOverview />;
   }
 

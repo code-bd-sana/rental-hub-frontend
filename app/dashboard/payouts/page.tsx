@@ -6,7 +6,7 @@ export default function DashboardPayoutsPage() {
   const authData = typeof window !== "undefined" ? localStorage.getItem("roamly_auth") : null;
   const role = authData ? JSON.parse(authData).role : null;
 
-  if (role === "Host") {
+  if (role === "HOST" || role === "Host") {
     return <HostPayouts />;
   }
 

@@ -24,7 +24,7 @@ function SidebarNav({
   };
 
   return (
-    <aside className="flex flex-col flex-none w-55 bg-[#172554] text-white p-5 rounded-r-[22px]">
+    <aside className="sticky top-0 h-screen overflow-y-auto flex flex-col flex-none w-55 bg-[#172554] text-white p-5 rounded-r-[22px]">
       <Link href="/" className="text-2xl font-bold mb-1.5">
         <span
           className="block text-white text-[20px] mb-1 font-bold"
@@ -184,7 +184,7 @@ export default function DashboardLayout({
     <div className="flex gap-0 min-h-screen font-sans bg-[#f8fafc]">
       <Suspense
         fallback={
-          <aside className="flex-none w-55 bg-[#172554] p-5 rounded-r-[22px]"></aside>
+          <aside className="sticky top-0 h-screen overflow-y-auto flex-none w-55 bg-[#172554] p-5 rounded-r-[22px]"></aside>
         }
       >
         <SidebarNav role={role!} displayRole={displayRole} />

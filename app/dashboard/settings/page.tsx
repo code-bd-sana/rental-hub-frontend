@@ -2,6 +2,7 @@
 
 import { HostSettings } from "@/components/dashboard/HostDashboard";
 import { GuestSettings } from "@/components/dashboard/GuestDashboard";
+import { AdminSettings } from "@/components/dashboard/AdminSettings";
 
 export default function DashboardSettingsPage() {
   const authData = typeof window !== "undefined" ? localStorage.getItem("roamly_auth") : null;
@@ -13,6 +14,10 @@ export default function DashboardSettingsPage() {
 
   if (role === "GUEST" || role === "Guest") {
     return <GuestSettings />;
+  }
+
+  if (role === "SUPER_ADMIN" || role === "Super_Admin") {
+    return <AdminSettings />;
   }
 
   return (

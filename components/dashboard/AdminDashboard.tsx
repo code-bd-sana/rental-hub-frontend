@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { listingApi } from "../../lib/api/listings";
+import ListingFormModal from './ListingFormModal';
+import ListingViewModal from './ListingViewModal';
 
 export function AdminOverview() {
   return (
@@ -133,6 +135,26 @@ export function AdminListings() {
   const [listings, setListings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewListing, setViewListing] = useState<any>(null);
+  const [editListing, setEditListing] = useState<any>(null);
+  const [deleteListingId, setDeleteListingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const confirmDelete = async () => {
+    if (!deleteListingId) return;
+    setIsDeleting(true);
+    try {
+      const res = await listingApi.deleteListing(deleteListingId);
+      if (res.success) {
+        await fetchListings();
+      }
+    } catch (error) {
+      console.error('Failed to delete listing:', error);
+      alert('Failed to delete listing. Please try again.');
+    } finally {
+      setIsDeleting(false);
+      setDeleteListingId(null);
+    }
+  };
 
   useEffect(() => {
     fetchListings();
@@ -205,7 +227,41 @@ export function AdminListings() {
                     {lst.approvalStatus === 'SUSPENDED' && <span className="bg-[#fef2f2] text-[#ef4444] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]">Suspended</span>}
                   </td>
                   <td className="p-[12px_16px] border-b border-[#e7e1d6] text-right">
-                    <button onClick={() => setViewListing(lst)} className="border border-[#e7e1d6] bg-white text-[#172554] rounded-[9px] px-2.75 py-1.5 text-[12px] font-semibold hover:bg-[#f8fafc] transition-colors cursor-pointer shadow-sm">View</button>
+                    <div className='flex items-center justify-end gap-3'>
+                      <button
+                        onClick={() => setViewListing(lst)}
+                        className='text-[#6b7b79] hover:text-[#2563eb] transition-colors cursor-pointer'
+                        title='View Preview'
+                      >
+                        <svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+                          <path d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z' />
+                          <circle cx='12' cy='12' r='3' />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => setEditListing(lst)}
+                        className='text-[#6b7b79] hover:text-[#1e9e72] transition-colors cursor-pointer'
+                        title='Edit'
+                      >
+                        <svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+                          <path d='M12 20h9' />
+                          <path d='M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z' />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => setDeleteListingId(lst.id)}
+                        className='text-[#6b7b79] hover:text-[#dc2626] transition-colors cursor-pointer'
+                        title='Delete'
+                      >
+                        <svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+                          <path d='M3 6h18' />
+                          <path d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' />
+                          <path d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' />
+                          <line x1='10' y1='11' x2='10' y2='17' />
+                          <line x1='14' y1='11' x2='14' y2='17' />
+                        </svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -218,45 +274,52 @@ export function AdminListings() {
         </table>
       </div>
 
-      {/* View Modal */}
-      {viewListing && (
-        <div className="fixed inset-0 bg-[#15201f]/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-[0_20px_60px_rgba(11,79,74,0.15)] animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center p-6 border-b border-[#e7e1d6]">
-              <h2 className="text-[22px] font-bold text-[#172554]" style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
-                Listing Details
-              </h2>
-              <button onClick={() => setViewListing(null)} className="text-[#6b7b79] hover:text-[#15201f] transition-colors cursor-pointer">
-                ✕
-              </button>
+      <ListingFormModal
+        isOpen={!!editListing}
+        onClose={() => setEditListing(null)}
+        listingToEdit={editListing}
+        onSuccess={() => {
+          fetchListings();
+          setEditListing(null);
+        }}
+      />
+
+      {/* Delete Confirmation Modal */}
+      {deleteListingId && (
+        <div className='fixed inset-0 bg-[rgba(21,32,31,0.5)] z-[100] flex items-center justify-center p-4 backdrop-blur-sm'>
+          <div className='bg-white rounded-2xl max-w-[400px] w-full shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden animate-in zoom-in-95 duration-200'>
+            <div className='p-6'>
+              <h3 className='font-bold text-[18px] text-[#15201f] mb-2'>Delete Listing</h3>
+              <p className='text-[14px] text-[#6b7b79]'>Are you sure you want to delete this listing? This action cannot be undone.</p>
             </div>
-            <div className="p-6 overflow-y-auto">
-              <div className="space-y-4 text-[14px]">
-                <div><span className="font-bold text-[#15201f]">Title:</span> {viewListing.title}</div>
-                <div><span className="font-bold text-[#15201f]">Category:</span> {viewListing.category}</div>
-                <div><span className="font-bold text-[#15201f]">Country:</span> {viewListing.country || 'N/A'}</div>
-                <div><span className="font-bold text-[#15201f]">Description:</span> {viewListing.description || 'N/A'}</div>
-                <div><span className="font-bold text-[#15201f]">Current Status:</span> {viewListing.approvalStatus}</div>
-              </div>
-            </div>
-            <div className="p-6 border-t border-[#e7e1d6] flex justify-end gap-3 bg-[#faf9f5] rounded-b-3xl">
-              <button onClick={() => setViewListing(null)} className="px-5 py-2.5 rounded-xl font-bold text-[14px] border border-[#e7e1d6] bg-white text-[#15201f] hover:bg-[#f8fafc] transition-colors cursor-pointer">
-                Close
+            <div className='p-4 border-t border-[#e7e1d6] flex justify-end gap-3 bg-[#f8fafc]'>
+              <button
+                onClick={() => !isDeleting && setDeleteListingId(null)}
+                disabled={isDeleting}
+                className='px-4 py-2 text-[14px] font-semibold text-[#15201f] hover:bg-[#e7e1d6] rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
+              >
+                Cancel
               </button>
-              {viewListing.approvalStatus !== 'REJECTED' && (
-                <button onClick={() => handleUpdateStatus(viewListing.id, 'REJECTED')} className="px-5 py-2.5 rounded-xl font-bold text-[14px] bg-[#fef2f2] text-[#ef4444] hover:bg-[#fee2e2] transition-colors cursor-pointer">
-                  Reject
-                </button>
-              )}
-              {viewListing.approvalStatus !== 'APPROVED' && (
-                <button onClick={() => handleUpdateStatus(viewListing.id, 'APPROVED')} className="px-5 py-2.5 rounded-xl font-bold text-[14px] bg-[#1e9e72] text-white hover:bg-[#16855f] transition-colors cursor-pointer">
-                  Approve
-                </button>
-              )}
+              <button
+                onClick={confirmDelete}
+                disabled={isDeleting}
+                className='px-4 py-2 text-[14px] font-semibold bg-[#ef4444] text-white hover:bg-[#dc2626] rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[70px]'
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
             </div>
           </div>
         </div>
       )}
+
+      <ListingViewModal
+        isOpen={!!viewListing}
+        onClose={() => setViewListing(null)}
+        listing={viewListing}
+        isAdmin={true}
+        onApprove={(id) => handleUpdateStatus(id, 'APPROVED')}
+        onReject={(id) => handleUpdateStatus(id, 'REJECTED')}
+      />
     </div>
   );
 }

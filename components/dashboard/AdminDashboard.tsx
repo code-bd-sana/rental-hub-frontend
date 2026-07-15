@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { listingApi } from "../../lib/api/listings";
 
 export function AdminOverview() {
   return (
@@ -129,6 +130,38 @@ export function AdminClaims() {
 }
 
 export function AdminListings() {
+  const [listings, setListings] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [viewListing, setViewListing] = useState<any>(null);
+
+  useEffect(() => {
+    fetchListings();
+  }, []);
+
+  const fetchListings = async () => {
+    try {
+      setIsLoading(true);
+      const res = await listingApi.getAllListings({ status: 'ALL' });
+      if (res.success) {
+        setListings(res.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch listings:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdateStatus = async (id: string, status: string) => {
+    try {
+      await listingApi.approveListing(id, status);
+      await fetchListings();
+      setViewListing(null);
+    } catch (error) {
+      console.error('Failed to update status:', error);
+    }
+  };
+
   return (
     <div className="animate-in fade-in duration-300">
       <h2 className="text-[26px] font-bold mb-1 text-[#172554]" style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
@@ -155,30 +188,75 @@ export function AdminListings() {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td className="p-[12px_16px] border-b border-[#e7e1d6] text-[#15201f]">Ocho Rios Grill</td>
-              <td className="p-[12px_16px] border-b border-[#e7e1d6] text-[#6b7b79]">Restaurant</td>
-              <td className="p-[12px_16px] border-b border-[#e7e1d6] text-[#6b7b79]">Jamaica</td>
-              <td className="p-[12px_16px] border-b border-[#e7e1d6]"><span className="bg-[#dff3ec] text-[#1e9e72] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]">Live</span></td>
-              <td className="p-[12px_16px] border-b border-[#e7e1d6] text-right"><button className="border border-[#e7e1d6] bg-white text-[#172554] rounded-[9px] px-2.75 py-1.5 text-[12px] font-semibold hover:bg-[#f8fafc]">View</button></td>
-            </tr>
-            <tr>
-              <td className="p-[12px_16px] border-b border-[#e7e1d6] text-[#15201f]">The Cliff Hotel</td>
-              <td className="p-[12px_16px] border-b border-[#e7e1d6] text-[#6b7b79]">Stay</td>
-              <td className="p-[12px_16px] border-b border-[#e7e1d6] text-[#6b7b79]">Jamaica</td>
-              <td className="p-[12px_16px] border-b border-[#e7e1d6]"><span className="bg-[#dff3ec] text-[#1e9e72] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]">Live</span></td>
-              <td className="p-[12px_16px] border-b border-[#e7e1d6] text-right"><button className="border border-[#e7e1d6] bg-white text-[#172554] rounded-[9px] px-2.75 py-1.5 text-[12px] font-semibold hover:bg-[#f8fafc]">View</button></td>
-            </tr>
-            <tr>
-              <td className="p-[12px_16px] text-[#15201f]">Oistins Fish Fry</td>
-              <td className="p-[12px_16px] text-[#6b7b79]">Restaurant</td>
-              <td className="p-[12px_16px] text-[#6b7b79]">Barbados</td>
-              <td className="p-[12px_16px]"><span className="bg-[#e6eefb] text-[#2a5db0] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]">Pending</span></td>
-              <td className="p-[12px_16px] text-right"><button className="border border-[#e7e1d6] bg-white text-[#172554] rounded-[9px] px-2.75 py-1.5 text-[12px] font-semibold hover:bg-[#f8fafc]">View</button></td>
-            </tr>
+            {isLoading ? (
+              <tr>
+                <td colSpan={5} className="p-8 text-center text-[#6b7b79]">Loading listings...</td>
+              </tr>
+            ) : listings.length > 0 ? (
+              listings.map((lst) => (
+                <tr key={lst.id} className="hover:bg-[#f8fafc] transition-colors">
+                  <td className="p-[12px_16px] border-b border-[#e7e1d6] text-[#15201f] font-semibold">{lst.title}</td>
+                  <td className="p-[12px_16px] border-b border-[#e7e1d6] text-[#6b7b79]">{lst.category}</td>
+                  <td className="p-[12px_16px] border-b border-[#e7e1d6] text-[#6b7b79]">{lst.country || 'N/A'}</td>
+                  <td className="p-[12px_16px] border-b border-[#e7e1d6]">
+                    {lst.approvalStatus === 'APPROVED' && <span className="bg-[#dff3ec] text-[#1e9e72] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]">Live</span>}
+                    {lst.approvalStatus === 'PENDING' && <span className="bg-[#e6eefb] text-[#2a5db0] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]">Pending</span>}
+                    {lst.approvalStatus === 'REJECTED' && <span className="bg-[#fef2f2] text-[#ef4444] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]">Rejected</span>}
+                    {lst.approvalStatus === 'SUSPENDED' && <span className="bg-[#fef2f2] text-[#ef4444] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]">Suspended</span>}
+                  </td>
+                  <td className="p-[12px_16px] border-b border-[#e7e1d6] text-right">
+                    <button onClick={() => setViewListing(lst)} className="border border-[#e7e1d6] bg-white text-[#172554] rounded-[9px] px-2.75 py-1.5 text-[12px] font-semibold hover:bg-[#f8fafc] transition-colors cursor-pointer shadow-sm">View</button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="p-8 text-center text-[#6b7b79]">No listings found.</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
+
+      {/* View Modal */}
+      {viewListing && (
+        <div className="fixed inset-0 bg-[#15201f]/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-[0_20px_60px_rgba(11,79,74,0.15)] animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center p-6 border-b border-[#e7e1d6]">
+              <h2 className="text-[22px] font-bold text-[#172554]" style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
+                Listing Details
+              </h2>
+              <button onClick={() => setViewListing(null)} className="text-[#6b7b79] hover:text-[#15201f] transition-colors cursor-pointer">
+                ✕
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto">
+              <div className="space-y-4 text-[14px]">
+                <div><span className="font-bold text-[#15201f]">Title:</span> {viewListing.title}</div>
+                <div><span className="font-bold text-[#15201f]">Category:</span> {viewListing.category}</div>
+                <div><span className="font-bold text-[#15201f]">Country:</span> {viewListing.country || 'N/A'}</div>
+                <div><span className="font-bold text-[#15201f]">Description:</span> {viewListing.description || 'N/A'}</div>
+                <div><span className="font-bold text-[#15201f]">Current Status:</span> {viewListing.approvalStatus}</div>
+              </div>
+            </div>
+            <div className="p-6 border-t border-[#e7e1d6] flex justify-end gap-3 bg-[#faf9f5] rounded-b-3xl">
+              <button onClick={() => setViewListing(null)} className="px-5 py-2.5 rounded-xl font-bold text-[14px] border border-[#e7e1d6] bg-white text-[#15201f] hover:bg-[#f8fafc] transition-colors cursor-pointer">
+                Close
+              </button>
+              {viewListing.approvalStatus !== 'REJECTED' && (
+                <button onClick={() => handleUpdateStatus(viewListing.id, 'REJECTED')} className="px-5 py-2.5 rounded-xl font-bold text-[14px] bg-[#fef2f2] text-[#ef4444] hover:bg-[#fee2e2] transition-colors cursor-pointer">
+                  Reject
+                </button>
+              )}
+              {viewListing.approvalStatus !== 'APPROVED' && (
+                <button onClick={() => handleUpdateStatus(viewListing.id, 'APPROVED')} className="px-5 py-2.5 rounded-xl font-bold text-[14px] bg-[#1e9e72] text-white hover:bg-[#16855f] transition-colors cursor-pointer">
+                  Approve
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import GlobalCard from '../shared/GlobalCard';
+import { listingApi } from '../../lib/api/listings';
 
 export function HostOverview() {
   return (
@@ -93,33 +94,32 @@ export function HostOverview() {
 }
 
 export function HostListings() {
-  const [listings, setListings] = useState([
-    {
-      id: 'LST-1',
-      title: 'Ocho Rios Grill',
-      category: 'Restaurant',
-      country: 'Jamaica',
-      status: 'Live',
-      hours: 'Daily 12pm to 11pm',
-      phone: '+1 876 000 0004',
-    },
-    {
-      id: 'LST-2',
-      title: 'Ocho Rios Grill Catering',
-      category: 'Restaurant',
-      country: 'Jamaica',
-      status: 'Pending review',
-      hours: 'Mon to Fri 9am to 5pm',
-      phone: '+1 876 000 0004',
-    },
-  ]);
+  const [listings, setListings] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchListings();
+  }, []);
+
+  const fetchListings = async () => {
+    try {
+      setIsLoading(true);
+      const res = await listingApi.getMyListings();
+      if (res.success) {
+        setListings(res.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch listings:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const [isAdding, setIsAdding] = useState(false);
   const [editListing, setEditListing] = useState<Record<string, unknown> | null>(null);
   const [viewListing, setViewListing] = useState<Record<string, unknown> | null>(null);
   const [deleteListingId, setDeleteListingId] = useState<string | null>(null);
 
-  // Form state
   const [formData, setFormData] = useState({
     title: '',
     category: 'Stay',
@@ -127,6 +127,19 @@ export function HostListings() {
     hours: '',
     phone: '',
     status: 'Pending review',
+    pricePerNight: 0,
+    amenities: '',
+    dailyRate: 0,
+    carType: 'SUV',
+    seats: 4,
+    transmission: 'Automatic',
+    serviceType: 'Spa',
+    packageName: 'Standard',
+    packagePrice: 0,
+    foodName: '',
+    foodDesc: '',
+    foodPrice: 0,
+    foodImage: '',
   });
 
   const handleOpenAdd = () => {
@@ -137,18 +150,44 @@ export function HostListings() {
       hours: '',
       phone: '',
       status: 'Pending review',
+      pricePerNight: 0,
+      amenities: '',
+      dailyRate: 0,
+      carType: 'SUV',
+      seats: 4,
+      transmission: 'Automatic',
+      serviceType: 'Spa',
+      packageName: 'Standard',
+      packagePrice: 0,
+      foodName: '',
+      foodDesc: '',
+      foodPrice: 0,
+      foodImage: '',
     });
     setIsAdding(true);
   };
 
-  const handleOpenEdit = (lst: Record<string, unknown>) => {
+  const handleOpenEdit = (lst: any) => {
     setFormData({
-      title: (lst.title as string) || '',
-      category: (lst.category as string) || '',
-      country: (lst.country as string) || '',
-      hours: (lst.hours as string) || '',
-      phone: (lst.phone as string) || '',
-      status: (lst.status as string) || '',
+      title: lst.title || '',
+      category: lst.category === 'STAY' ? 'Stay' : lst.category === 'CAR' ? 'Car' : 'Service',
+      country: lst.country || 'Jamaica',
+      hours: lst.description?.includes('Hours:') ? lst.description.split(',')[0].replace('Hours: ', '').trim() : '',
+      phone: lst.description?.includes('Phone:') ? lst.description.split(',')[1]?.replace('Phone: ', '').trim() : '',
+      status: lst.approvalStatus === 'APPROVED' ? 'Live' : lst.approvalStatus === 'PENDING' ? 'Pending review' : 'Draft',
+      pricePerNight: lst.stayDetails?.pricePerNight || 0,
+      amenities: lst.stayDetails?.amenities?.join(', ') || '',
+      dailyRate: lst.carDetails?.dailyRate || 0,
+      carType: lst.carDetails?.carType || 'SUV',
+      seats: lst.carDetails?.seats || 4,
+      transmission: lst.carDetails?.transmission || 'Automatic',
+      serviceType: lst.serviceDetails?.serviceType || 'Spa',
+      packageName: lst.serviceDetails?.packages?.[0]?.name || 'Standard',
+      packagePrice: lst.serviceDetails?.packages?.[0]?.price || 0,
+      foodName: lst.foodDetails?.items?.[0]?.name || '',
+      foodDesc: lst.foodDetails?.items?.[0]?.description || '',
+      foodPrice: lst.foodDetails?.items?.[0]?.price || 0,
+      foodImage: lst.foodDetails?.items?.[0]?.imageUrl || '',
     });
     setEditListing(lst);
   };
@@ -157,27 +196,76 @@ export function HostListings() {
     setFormData({ ...formData, [field]: value });
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editListing) {
-      setListings(
-        listings.map((l) =>
-          l.id === editListing.id
-            ? { ...formData, id: editListing.id as string, status: formData.status }
-            : l,
-        ),
-      );
-      setEditListing(null);
-    } else {
-      setListings([...listings, { ...formData, id: `LST-${Date.now()}` }]);
+    try {
+      let mappedCategory = 'STAY';
+      let categoryDetails: any = {};
+
+      if (formData.category === 'Stay') {
+        mappedCategory = 'STAY';
+        categoryDetails = { stayDetails: { pricePerNight: Number(formData.pricePerNight), amenities: formData.amenities.split(',').map(s => s.trim()).filter(Boolean) } };
+      } else if (formData.category === 'Car') {
+        mappedCategory = 'CAR';
+        categoryDetails = { carDetails: { dailyRate: Number(formData.dailyRate), carType: formData.carType, seats: Number(formData.seats), transmission: formData.transmission } };
+      } else {
+        mappedCategory = formData.category === 'Food' ? 'FOOD' : 'SERVICE';
+        categoryDetails = {
+          serviceDetails: formData.category === 'Service' ? {
+            serviceType: formData.serviceType,
+            packages: [
+              {
+                name: formData.packageName,
+                price: Number(formData.packagePrice)
+              }
+            ]
+          } : undefined,
+          foodDetails: formData.category === 'Food' ? {
+            items: [
+              {
+                name: formData.foodName,
+                description: formData.foodDesc,
+                price: Number(formData.foodPrice),
+                imageUrl: formData.foodImage || undefined,
+              }
+            ]
+          } : undefined
+        };
+      }
+
+      const payload = {
+        title: formData.title,
+        category: mappedCategory,
+        country: formData.country,
+        description: `Hours: ${formData.hours}, Phone: ${formData.phone}`,
+        ...categoryDetails
+      };
+
+      if (editListing) {
+        await listingApi.updateListing(editListing.id as string, payload);
+      } else {
+        await listingApi.createListing(payload);
+      }
+      
+      await fetchListings();
       setIsAdding(false);
+      setEditListing(null);
+    } catch (error) {
+      console.error('Failed to save listing:', error);
+      alert('Failed to save listing. Please try again.');
     }
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteListingId) {
-      setListings(listings.filter((l) => l.id !== deleteListingId));
-      setDeleteListingId(null);
+      try {
+        await listingApi.deleteListing(deleteListingId);
+        await fetchListings();
+        setDeleteListingId(null);
+      } catch (error) {
+        console.error('Failed to delete listing:', error);
+        alert('Failed to delete listing. Please try again.');
+      }
     }
   };
 
@@ -232,36 +320,44 @@ export function HostListings() {
               </tr>
             </thead>
             <tbody>
-              {listings.map((lst) => (
-                <tr key={lst.id} className='hover:bg-[#f8fafc] transition-colors'>
-                  <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
-                    <div className='font-semibold text-[#15201f]'>{lst.title}</div>
-                    <div className='text-[12px] text-[#6b7b79]'>{lst.category}</div>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className='p-8 text-center text-[#6b7b79]'>
+                    Loading listings...
                   </td>
-                  <td className='p-[12px_16px] border-b border-[#e7e1d6] text-[#6b7b79]'>
-                    {lst.country}
-                  </td>
-                  <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
-                    <div className='text-[#15201f]'>{lst.hours}</div>
-                    <div className='text-[12px] text-[#6b7b79]'>{lst.phone}</div>
-                  </td>
-                  <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
-                    {lst.status === 'Live' && (
-                      <span className='bg-[#dff3ec] text-[#1e9e72] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]'>
-                        Live
-                      </span>
-                    )}
-                    {lst.status === 'Pending review' && (
-                      <span className='bg-[#e6eefb] text-[#2a5db0] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]'>
-                        Pending review
-                      </span>
-                    )}
-                    {lst.status === 'Draft' && (
-                      <span className='bg-[#f1f5f9] text-[#64748b] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]'>
-                        Draft
-                      </span>
-                    )}
-                  </td>
+                </tr>
+              ) : listings.length > 0 ? (
+                listings.map((lst) => (
+                  <tr key={lst.id} className='hover:bg-[#f8fafc] transition-colors'>
+                    <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
+                      <div className='font-semibold text-[#15201f]'>{lst.title}</div>
+                      <div className='text-[12px] text-[#6b7b79]'>
+                        {lst.category === 'SERVICE' ? lst.serviceDetails?.serviceType : lst.category}
+                      </div>
+                    </td>
+                    <td className='p-[12px_16px] border-b border-[#e7e1d6] text-[#6b7b79]'>
+                      {lst.country || 'N/A'}
+                    </td>
+                    <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
+                      <div className='text-[#15201f] text-xs truncate max-w-[200px]'>{lst.description || 'N/A'}</div>
+                    </td>
+                    <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
+                      {lst.approvalStatus === 'APPROVED' && (
+                        <span className='bg-[#dff3ec] text-[#1e9e72] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]'>
+                          Live
+                        </span>
+                      )}
+                      {lst.approvalStatus === 'PENDING' && (
+                        <span className='bg-[#e6eefb] text-[#2a5db0] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]'>
+                          Pending review
+                        </span>
+                      )}
+                      {lst.approvalStatus === 'REJECTED' && (
+                        <span className='bg-[#fef2f2] text-[#ef4444] text-[11px] font-bold px-2.25 py-0.75 rounded-[20px] uppercase tracking-[0.5px]'>
+                          Rejected
+                        </span>
+                      )}
+                    </td>
                   <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
                     <div className='flex items-center justify-center gap-3'>
                       <button
@@ -325,8 +421,8 @@ export function HostListings() {
                     </div>
                   </td>
                 </tr>
-              ))}
-              {listings.length === 0 && (
+              ))
+              ) : (
                 <tr>
                   <td colSpan={5} className='p-8 text-center text-[#6b7b79]'>
                     No listings found. Add one to get started.
@@ -384,44 +480,62 @@ export function HostListings() {
                       className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] bg-white focus:outline-none focus:border-[#2563eb] transition-colors'
                     >
                       <option value='Stay'>Stay</option>
-                      <option value='Car rental'>Car rental</option>
-                      <option value='Restaurant'>Restaurant</option>
-                      <option value='Spa'>Spa</option>
-                      <option value='Barbershop'>Barbershop</option>
-                      <option value='Tour guide'>Tour guide</option>
+                      <option value='Car'>Car</option>
+                      <option value='Service'>Service</option>
+                      <option value='Food'>Food</option>
                     </select>
                   </div>
                 </div>
-                <div>
-                  <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
-                    Country
-                  </label>
-                  <select
-                    value={formData.country}
-                    onChange={(e) => handleFormChange('country', e.target.value)}
-                    className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] bg-white focus:outline-none focus:border-[#2563eb] transition-colors'
-                  >
-                    <option value='Jamaica'>Jamaica</option>
-                    <option value='Barbados'>Barbados</option>
-                    <option value='Bahamas'>Bahamas</option>
-                    <option value='Trinidad and Tobago'>Trinidad and Tobago</option>
-                    <option value='United States'>United States</option>
-                  </select>
-                </div>
-                <div className='grid grid-cols-2 gap-4'>
+                <div className={formData.category === 'Service' ? 'grid grid-cols-2 gap-4' : ''}>
+                  {formData.category === 'Service' && (
+                    <div>
+                      <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                        Service Type
+                      </label>
+                      <select
+                        value={formData.serviceType}
+                        onChange={(e) => handleFormChange('serviceType', e.target.value)}
+                        className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] bg-white focus:outline-none focus:border-[#2563eb] transition-colors'
+                      >
+                        <option value='Spa'>Spa</option>
+                        <option value='Salon'>Salon</option>
+                        <option value='Barbar'>Barbar</option>
+                      </select>
+                    </div>
+                  )}
                   <div>
                     <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
-                      Hours / Check-in
+                      Country
                     </label>
-                    <input
-                      required
-                      value={formData.hours}
-                      onChange={(e) => handleFormChange('hours', e.target.value)}
-                      placeholder='e.g. Daily 9am to 5pm'
-                      className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
-                    />
+                    <select
+                      value={formData.country}
+                      onChange={(e) => handleFormChange('country', e.target.value)}
+                      className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] bg-white focus:outline-none focus:border-[#2563eb] transition-colors'
+                    >
+                      <option value='Jamaica'>Jamaica</option>
+                      <option value='Barbados'>Barbados</option>
+                      <option value='Bahamas'>Bahamas</option>
+                      <option value='Trinidad and Tobago'>Trinidad and Tobago</option>
+                      <option value='United States'>United States</option>
+                    </select>
                   </div>
-                  <div>
+                </div>
+                <div className='grid grid-cols-2 gap-4'>
+                  {formData.category !== 'Car' && formData.category !== 'Food' && (
+                    <div>
+                      <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                        Hours / Check-in
+                      </label>
+                      <input
+                        required
+                        value={formData.hours}
+                        onChange={(e) => handleFormChange('hours', e.target.value)}
+                        placeholder='e.g. Daily 9am to 5pm'
+                        className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                      />
+                    </div>
+                  )}
+                  <div className={(formData.category === 'Car' || formData.category === 'Food') ? 'col-span-2' : ''}>
                     <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
                       Phone Number
                     </label>
@@ -448,8 +562,181 @@ export function HostListings() {
                     <option value='Draft'>Draft</option>
                   </select>
                 </div>
+
+                {/* Dynamic Fields based on Category */}
+                {formData.category === 'Stay' && (
+                  <div className='grid grid-cols-2 gap-4'>
+                    <div>
+                      <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                        Price Per Night
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        value={formData.pricePerNight}
+                        onChange={(e) => handleFormChange('pricePerNight', e.target.value)}
+                        className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                      />
+                    </div>
+                    <div>
+                      <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                        Amenities (comma separated)
+                      </label>
+                      <input
+                        value={formData.amenities}
+                        onChange={(e) => handleFormChange('amenities', e.target.value)}
+                        placeholder='WiFi, Pool, AC'
+                        className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {formData.category === 'Car' && (
+                  <>
+                    <div className='grid grid-cols-2 gap-4'>
+                      <div>
+                        <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                          Daily Rate
+                        </label>
+                        <input
+                          type="number"
+                          required
+                          value={formData.dailyRate}
+                          onChange={(e) => handleFormChange('dailyRate', e.target.value)}
+                          className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                        />
+                      </div>
+                      <div>
+                        <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                          Car Type
+                        </label>
+                        <input
+                          required
+                          value={formData.carType}
+                          onChange={(e) => handleFormChange('carType', e.target.value)}
+                          placeholder='SUV, Sedan, etc.'
+                          className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                        />
+                      </div>
+                    </div>
+                    <div className='grid grid-cols-2 gap-4'>
+                      <div>
+                        <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                          Seats
+                        </label>
+                        <input
+                          type="number"
+                          required
+                          value={formData.seats}
+                          onChange={(e) => handleFormChange('seats', e.target.value)}
+                          className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                        />
+                      </div>
+                      <div>
+                        <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                          Transmission
+                        </label>
+                        <select
+                          value={formData.transmission}
+                          onChange={(e) => handleFormChange('transmission', e.target.value)}
+                          className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] bg-white focus:outline-none focus:border-[#2563eb] transition-colors'
+                        >
+                          <option value='Automatic'>Automatic</option>
+                          <option value='Manual'>Manual</option>
+                        </select>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {formData.category === 'Service' && (
+                  <>
+                    <div className='grid grid-cols-2 gap-4'>
+                      <div>
+                        <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                          Package Name
+                        </label>
+                        <input
+                          required
+                          value={formData.packageName}
+                          onChange={(e) => handleFormChange('packageName', e.target.value)}
+                          placeholder='e.g. Standard Service'
+                          className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                        />
+                      </div>
+                      <div>
+                        <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                          Package Price
+                        </label>
+                        <input
+                          type="number"
+                          required
+                          value={formData.packagePrice}
+                          onChange={(e) => handleFormChange('packagePrice', e.target.value)}
+                          className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {formData.category === 'Food' && (
+                  <>
+                    <div>
+                      <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                        Food Item Name
+                      </label>
+                      <input
+                        required
+                        value={formData.foodName}
+                        onChange={(e) => handleFormChange('foodName', e.target.value)}
+                        placeholder='e.g. Wings Platter'
+                        className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                      />
+                    </div>
+                    <div className='grid grid-cols-2 gap-4 mt-4'>
+                      <div>
+                        <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                          Description
+                        </label>
+                        <input
+                          value={formData.foodDesc}
+                          onChange={(e) => handleFormChange('foodDesc', e.target.value)}
+                          placeholder='e.g. Crispy glazed wings on fresh greens'
+                          className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                        />
+                      </div>
+                      <div>
+                        <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                          Price
+                        </label>
+                        <input
+                          type="number"
+                          required
+                          value={formData.foodPrice}
+                          onChange={(e) => handleFormChange('foodPrice', e.target.value)}
+                          className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                        />
+                      </div>
+                    </div>
+                    <div className='mt-4'>
+                      <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
+                        Photo URL
+                      </label>
+                      <input
+                        type="url"
+                        value={formData.foodImage}
+                        onChange={(e) => handleFormChange('foodImage', e.target.value)}
+                        placeholder='https://example.com/wings.jpg'
+                        className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
+                      />
+                    </div>
+                  </>
+                )}
+
               </div>
-              <div className='p-5 border-t border-[#e7e1d6] bg-[#f8fafc] flex justify-end gap-3'>
+              <div className='p-6 border-t border-[#e7e1d6] flex justify-end gap-3 bg-[#faf9f5]'>
                 <button
                   type='button'
                   onClick={() => {

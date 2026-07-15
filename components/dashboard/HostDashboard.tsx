@@ -135,6 +135,16 @@ export function HostListings() {
     carType: 'SUV',
     seats: 4,
     transmission: 'Automatic',
+    doors: 4,
+    largeBags: 2,
+    smallBags: 1,
+    features: '',
+    includedItems: '',
+    pickupLocations: '',
+    returnLocations: '',
+    fuelOptions: [{ title: '', description: '', price: 0, isOneOff: false }],
+    protectionPlans: [{ title: '', description: '', pricePerDay: 0, deposit: 0, isRecommended: false }],
+    carExtras: [{ name: '', description: '', pricePerDay: 0 }],
     serviceType: 'Spa',
     packages: [{ name: '', price: 0, imageUrl: '' }],
     availableTimeSlots: '',
@@ -156,6 +166,16 @@ export function HostListings() {
       carType: 'SUV',
       seats: 4,
       transmission: 'Automatic',
+      doors: 4,
+      largeBags: 2,
+      smallBags: 1,
+      features: '',
+      includedItems: '',
+      pickupLocations: '',
+      returnLocations: '',
+      fuelOptions: [{ title: '', description: '', price: 0, isOneOff: false }],
+      protectionPlans: [{ title: '', description: '', pricePerDay: 0, deposit: 0, isRecommended: false }],
+      carExtras: [{ name: '', description: '', pricePerDay: 0 }],
       serviceType: 'Spa',
       packages: [{ name: '', price: 0, imageUrl: '' }],
       availableTimeSlots: '',
@@ -179,6 +199,16 @@ export function HostListings() {
       carType: lst.carDetails?.carType || 'SUV',
       seats: lst.carDetails?.seats || 4,
       transmission: lst.carDetails?.transmission || 'Automatic',
+      doors: lst.carDetails?.doors || 4,
+      largeBags: lst.carDetails?.bags?.large || 2,
+      smallBags: lst.carDetails?.bags?.small || 1,
+      features: lst.carDetails?.features?.join(', ') || '',
+      includedItems: lst.carDetails?.includedItems?.join(', ') || '',
+      pickupLocations: lst.carDetails?.pickupLocations?.join(', ') || '',
+      returnLocations: lst.carDetails?.returnLocations?.join(', ') || '',
+      fuelOptions: lst.carDetails?.fuelOptions?.length ? lst.carDetails.fuelOptions : [{ title: '', description: '', price: 0, isOneOff: false }],
+      protectionPlans: lst.carDetails?.protectionPlans?.length ? lst.carDetails.protectionPlans : [{ title: '', description: '', pricePerDay: 0, deposit: 0, isRecommended: false }],
+      carExtras: lst.carDetails?.extras?.length ? lst.carDetails.extras : [{ name: '', description: '', pricePerDay: 0 }],
       serviceType: lst.serviceDetails?.serviceType || 'Spa',
       packages: lst.serviceDetails?.packages?.length ? lst.serviceDetails.packages.map((p: any) => ({ name: p.name, price: p.price, imageUrl: p.imageUrl || '' })) : [{ name: '', price: 0, imageUrl: '' }],
       availableTimeSlots: lst.serviceDetails?.availableTimeSlots?.join(', ') || '',
@@ -262,6 +292,31 @@ export function HostListings() {
     setFormData({ ...formData, foodItems: newItems });
   };
 
+  const handleFuelOptionChange = (index: number, field: string, value: any) => {
+    const newOpts = [...formData.fuelOptions];
+    newOpts[index] = { ...newOpts[index], [field]: value };
+    setFormData({ ...formData, fuelOptions: newOpts });
+  };
+  const addFuelOption = () => setFormData({ ...formData, fuelOptions: [...formData.fuelOptions, { title: '', description: '', price: 0, isOneOff: false }] });
+  const removeFuelOption = (index: number) => { const newOpts = [...formData.fuelOptions]; newOpts.splice(index, 1); setFormData({ ...formData, fuelOptions: newOpts }); };
+
+  const handleProtectionPlanChange = (index: number, field: string, value: any) => {
+    const newPlans = [...formData.protectionPlans];
+    newPlans[index] = { ...newPlans[index], [field]: value };
+    setFormData({ ...formData, protectionPlans: newPlans });
+  };
+  const addProtectionPlan = () => setFormData({ ...formData, protectionPlans: [...formData.protectionPlans, { title: '', description: '', pricePerDay: 0, deposit: 0, isRecommended: false }] });
+  const removeProtectionPlan = (index: number) => { const newPlans = [...formData.protectionPlans]; newPlans.splice(index, 1); setFormData({ ...formData, protectionPlans: newPlans }); };
+
+  const handleCarExtraChange = (index: number, field: string, value: any) => {
+    const newExtras = [...formData.carExtras];
+    newExtras[index] = { ...newExtras[index], [field]: value };
+    setFormData({ ...formData, carExtras: newExtras });
+  };
+  const addCarExtra = () => setFormData({ ...formData, carExtras: [...formData.carExtras, { name: '', description: '', pricePerDay: 0 }] });
+  const removeCarExtra = (index: number) => { const newExtras = [...formData.carExtras]; newExtras.splice(index, 1); setFormData({ ...formData, carExtras: newExtras }); };
+
+
   const removeMainImage = (url: string) => {
     setFormData({ ...formData, images: formData.images.filter(img => img !== url) });
   };
@@ -303,7 +358,23 @@ export function HostListings() {
         categoryDetails = { stayDetails: { pricePerNight: Number(formData.pricePerNight), amenities: formData.amenities.split(',').map(s => s.trim()).filter(Boolean) } };
       } else if (formData.category === 'Car') {
         mappedCategory = 'CAR';
-        categoryDetails = { carDetails: { dailyRate: Number(formData.dailyRate), carType: formData.carType, seats: Number(formData.seats), transmission: formData.transmission } };
+        categoryDetails = { 
+          carDetails: { 
+            dailyRate: Number(formData.dailyRate), 
+            carType: formData.carType, 
+            seats: Number(formData.seats), 
+            transmission: formData.transmission,
+            doors: Number(formData.doors),
+            bags: { large: Number(formData.largeBags), small: Number(formData.smallBags) },
+            features: formData.features.split(',').map(s => s.trim()).filter(Boolean),
+            includedItems: formData.includedItems.split(',').map(s => s.trim()).filter(Boolean),
+            pickupLocations: formData.pickupLocations.split(',').map(s => s.trim()).filter(Boolean),
+            returnLocations: formData.returnLocations.split(',').map(s => s.trim()).filter(Boolean),
+            fuelOptions: formData.fuelOptions.map(f => ({ ...f, price: Number(f.price) })),
+            protectionPlans: formData.protectionPlans.map(p => ({ ...p, pricePerDay: Number(p.pricePerDay), deposit: Number(p.deposit) })),
+            extras: formData.carExtras.map(e => ({ ...e, pricePerDay: Number(e.pricePerDay) }))
+          } 
+        };
       } else {
         mappedCategory = formData.category === 'Food' ? 'FOOD' : 'SERVICE';
         categoryDetails = {
@@ -688,61 +759,184 @@ export function HostListings() {
                 )}
 
                 {formData.category === 'Car' && (
-                  <>
-                    <div className='grid grid-cols-2 gap-4'>
-                      <div>
-                        <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
-                          Daily Rate
-                        </label>
-                        <input
-                          type="number"
-                          required
-                          value={formData.dailyRate}
-                          onChange={(e) => handleFormChange('dailyRate', e.target.value)}
-                          className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
-                        />
+                  <div className='space-y-6'>
+                    {/* Basic Specs */}
+                    <div>
+                      <h4 className='text-[14px] font-bold text-[#15201f] mb-3 border-b pb-2'>Basic Specifications</h4>
+                      <div className='grid grid-cols-2 gap-4 mb-4'>
+                        <div>
+                          <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>Daily Rate (USD)</label>
+                          <input type="number" required value={formData.dailyRate} onChange={(e) => handleFormChange('dailyRate', e.target.value)} className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors' />
+                        </div>
+                        <div>
+                          <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>Car Type</label>
+                          <input required value={formData.carType} onChange={(e) => handleFormChange('carType', e.target.value)} placeholder='SUV, Sedan, etc.' className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors' />
+                        </div>
                       </div>
-                      <div>
-                        <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
-                          Car Type
-                        </label>
-                        <input
-                          required
-                          value={formData.carType}
-                          onChange={(e) => handleFormChange('carType', e.target.value)}
-                          placeholder='SUV, Sedan, etc.'
-                          className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
-                        />
-                      </div>
-                    </div>
-                    <div className='grid grid-cols-2 gap-4'>
-                      <div>
-                        <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
-                          Seats
-                        </label>
-                        <input
-                          type="number"
-                          required
-                          value={formData.seats}
-                          onChange={(e) => handleFormChange('seats', e.target.value)}
-                          className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors'
-                        />
-                      </div>
-                      <div>
-                        <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>
-                          Transmission
-                        </label>
-                        <select
-                          value={formData.transmission}
-                          onChange={(e) => handleFormChange('transmission', e.target.value)}
-                          className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] bg-white focus:outline-none focus:border-[#2563eb] transition-colors'
-                        >
-                          <option value='Automatic'>Automatic</option>
-                          <option value='Manual'>Manual</option>
-                        </select>
+                      <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+                        <div>
+                          <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>Seats</label>
+                          <input type="number" required value={formData.seats} onChange={(e) => handleFormChange('seats', e.target.value)} className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors' />
+                        </div>
+                        <div>
+                          <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>Doors</label>
+                          <input type="number" value={formData.doors} onChange={(e) => handleFormChange('doors', e.target.value)} className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors' />
+                        </div>
+                        <div>
+                          <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>Transmission</label>
+                          <select value={formData.transmission} onChange={(e) => handleFormChange('transmission', e.target.value)} className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] bg-white focus:outline-none focus:border-[#2563eb] transition-colors'>
+                            <option value='Automatic'>Automatic</option>
+                            <option value='Manual'>Manual</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
-                  </>
+
+                    {/* Bags & Amenities */}
+                    <div>
+                      <h4 className='text-[14px] font-bold text-[#15201f] mb-3 border-b pb-2'>Details & Features</h4>
+                      <div className='grid grid-cols-2 gap-4 mb-4'>
+                        <div>
+                          <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>Large Bags</label>
+                          <input type="number" value={formData.largeBags} onChange={(e) => handleFormChange('largeBags', e.target.value)} className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors' />
+                        </div>
+                        <div>
+                          <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>Small Bags</label>
+                          <input type="number" value={formData.smallBags} onChange={(e) => handleFormChange('smallBags', e.target.value)} className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors' />
+                        </div>
+                      </div>
+                      <div className='grid grid-cols-1 gap-4'>
+                        <div>
+                          <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>Features (Comma separated)</label>
+                          <input value={formData.features} onChange={(e) => handleFormChange('features', e.target.value)} placeholder='Unlimited mileage, Air conditioning' className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors' />
+                        </div>
+                        <div>
+                          <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>Included Items (Comma separated)</label>
+                          <input value={formData.includedItems} onChange={(e) => handleFormChange('includedItems', e.target.value)} placeholder='Free cancellation, Damage cover' className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors' />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Locations */}
+                    <div>
+                      <h4 className='text-[14px] font-bold text-[#15201f] mb-3 border-b pb-2'>Locations</h4>
+                      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                        <div>
+                          <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>Pickup Locations (Comma separated)</label>
+                          <input value={formData.pickupLocations} onChange={(e) => handleFormChange('pickupLocations', e.target.value)} placeholder='Airport, Downtown' className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors' />
+                        </div>
+                        <div>
+                          <label className='block text-[12px] font-bold text-[#15201f] mb-1.5'>Return Locations (Comma separated)</label>
+                          <input value={formData.returnLocations} onChange={(e) => handleFormChange('returnLocations', e.target.value)} placeholder='Same as pickup' className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors' />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Fuel Options */}
+                    <div>
+                      <div className='flex justify-between items-center mb-2 border-b pb-2'>
+                        <h4 className='text-[14px] font-bold text-[#15201f]'>Fuel Options</h4>
+                        <button type="button" onClick={addFuelOption} className='text-[#2563eb] text-[12px] font-bold hover:underline'>+ Add Option</button>
+                      </div>
+                      <div className='space-y-3'>
+                        {formData.fuelOptions.map((opt, index) => (
+                          <div key={index} className='border border-[#e7e1d6] rounded-xl p-4 bg-[#f8fafc] relative'>
+                            {formData.fuelOptions.length > 1 && (
+                              <button type="button" onClick={() => removeFuelOption(index)} className='absolute top-2 right-2 text-red-500 text-lg leading-none'>&times;</button>
+                            )}
+                            <div className='grid grid-cols-2 gap-3 mb-2'>
+                              <div>
+                                <label className='block text-[11px] font-bold text-[#6b7b79] mb-1'>Title</label>
+                                <input value={opt.title} onChange={(e) => handleFuelOptionChange(index, 'title', e.target.value)} placeholder='Return full' className='w-full border border-[#e7e1d6] rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:border-[#2563eb]' />
+                              </div>
+                              <div>
+                                <label className='block text-[11px] font-bold text-[#6b7b79] mb-1'>Price (0 for Free)</label>
+                                <input type="number" value={opt.price} onChange={(e) => handleFuelOptionChange(index, 'price', e.target.value)} className='w-full border border-[#e7e1d6] rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:border-[#2563eb]' />
+                              </div>
+                            </div>
+                            <div className='mb-2'>
+                              <label className='block text-[11px] font-bold text-[#6b7b79] mb-1'>Description</label>
+                              <input value={opt.description} onChange={(e) => handleFuelOptionChange(index, 'description', e.target.value)} placeholder='Bring it back full.' className='w-full border border-[#e7e1d6] rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:border-[#2563eb]' />
+                            </div>
+                            <label className='flex items-center gap-2 text-[12px] text-[#15201f]'>
+                              <input type="checkbox" checked={opt.isOneOff} onChange={(e) => handleFuelOptionChange(index, 'isOneOff', e.target.checked)} />
+                              Is this a one-off charge?
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Protection Plans */}
+                    <div>
+                      <div className='flex justify-between items-center mb-2 border-b pb-2'>
+                        <h4 className='text-[14px] font-bold text-[#15201f]'>Protection Plans</h4>
+                        <button type="button" onClick={addProtectionPlan} className='text-[#2563eb] text-[12px] font-bold hover:underline'>+ Add Plan</button>
+                      </div>
+                      <div className='space-y-3'>
+                        {formData.protectionPlans.map((plan, index) => (
+                          <div key={index} className='border border-[#e7e1d6] rounded-xl p-4 bg-[#f8fafc] relative'>
+                            {formData.protectionPlans.length > 1 && (
+                              <button type="button" onClick={() => removeProtectionPlan(index)} className='absolute top-2 right-2 text-red-500 text-lg leading-none'>&times;</button>
+                            )}
+                            <div className='grid grid-cols-3 gap-3 mb-2'>
+                              <div>
+                                <label className='block text-[11px] font-bold text-[#6b7b79] mb-1'>Title</label>
+                                <input value={plan.title} onChange={(e) => handleProtectionPlanChange(index, 'title', e.target.value)} placeholder='Basic protection' className='w-full border border-[#e7e1d6] rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:border-[#2563eb]' />
+                              </div>
+                              <div>
+                                <label className='block text-[11px] font-bold text-[#6b7b79] mb-1'>Price/Day</label>
+                                <input type="number" value={plan.pricePerDay} onChange={(e) => handleProtectionPlanChange(index, 'pricePerDay', e.target.value)} className='w-full border border-[#e7e1d6] rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:border-[#2563eb]' />
+                              </div>
+                              <div>
+                                <label className='block text-[11px] font-bold text-[#6b7b79] mb-1'>Deposit Hold</label>
+                                <input type="number" value={plan.deposit} onChange={(e) => handleProtectionPlanChange(index, 'deposit', e.target.value)} className='w-full border border-[#e7e1d6] rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:border-[#2563eb]' />
+                              </div>
+                            </div>
+                            <div className='mb-2'>
+                              <label className='block text-[11px] font-bold text-[#6b7b79] mb-1'>Description</label>
+                              <input value={plan.description} onChange={(e) => handleProtectionPlanChange(index, 'description', e.target.value)} className='w-full border border-[#e7e1d6] rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:border-[#2563eb]' />
+                            </div>
+                            <label className='flex items-center gap-2 text-[12px] text-[#15201f]'>
+                              <input type="checkbox" checked={plan.isRecommended} onChange={(e) => handleProtectionPlanChange(index, 'isRecommended', e.target.checked)} />
+                              Mark as Recommended
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Extras */}
+                    <div>
+                      <div className='flex justify-between items-center mb-2 border-b pb-2'>
+                        <h4 className='text-[14px] font-bold text-[#15201f]'>Extras & Add-ons</h4>
+                        <button type="button" onClick={addCarExtra} className='text-[#2563eb] text-[12px] font-bold hover:underline'>+ Add Extra</button>
+                      </div>
+                      <div className='space-y-3'>
+                        {formData.carExtras.map((extra, index) => (
+                          <div key={index} className='border border-[#e7e1d6] rounded-xl p-4 bg-[#f8fafc] relative'>
+                            {formData.carExtras.length > 1 && (
+                              <button type="button" onClick={() => removeCarExtra(index)} className='absolute top-2 right-2 text-red-500 text-lg leading-none'>&times;</button>
+                            )}
+                            <div className='grid grid-cols-2 gap-3 mb-2'>
+                              <div>
+                                <label className='block text-[11px] font-bold text-[#6b7b79] mb-1'>Extra Name</label>
+                                <input value={extra.name} onChange={(e) => handleCarExtraChange(index, 'name', e.target.value)} placeholder='Baby seat' className='w-full border border-[#e7e1d6] rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:border-[#2563eb]' />
+                              </div>
+                              <div>
+                                <label className='block text-[11px] font-bold text-[#6b7b79] mb-1'>Price/Day</label>
+                                <input type="number" value={extra.pricePerDay} onChange={(e) => handleCarExtraChange(index, 'pricePerDay', e.target.value)} className='w-full border border-[#e7e1d6] rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:border-[#2563eb]' />
+                              </div>
+                            </div>
+                            <div>
+                              <label className='block text-[11px] font-bold text-[#6b7b79] mb-1'>Description</label>
+                              <input value={extra.description} onChange={(e) => handleCarExtraChange(index, 'description', e.target.value)} placeholder='For infants, ages 0 to 1 year' className='w-full border border-[#e7e1d6] rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:border-[#2563eb]' />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 )}
 
                 {formData.category === 'Service' && (

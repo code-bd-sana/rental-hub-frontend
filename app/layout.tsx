@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "../components/shared/Header";
 import Footer from "../components/shared/Footer";
 import { ModalProvider } from "../components/shared/ModalProvider";
+import { Providers } from "./providers";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -23,13 +24,15 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${plusJakartaSans.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <ModalProvider>
-          <Header />
-          <div className="flex-1">
-            {children}
-          </div>
-          <Footer />
-        </ModalProvider>
+        <Providers>
+          <ModalProvider>
+            <Header />
+            <div className="flex-1">
+              {children}
+            </div>
+            <Footer />
+          </ModalProvider>
+        </Providers>
       </body>
     </html>
   );

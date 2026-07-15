@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../../lib/api/client';
 
 interface HostDocument {
@@ -38,49 +39,44 @@ interface HostProfile {
 }
 
 export default function ClaimsPage() {
-  const [hosts, setHosts] = useState<HostProfile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const queryClient = useQueryClient();
+  const [errorMsg, setErrorMsg] = useState('');
 
   // Modal State
   const [selectedHost, setSelectedHost] = useState<HostProfile | null>(null);
-  const [actionLoading, setActionLoading] = useState(false);
 
-  const fetchHosts = async () => {
-    try {
+  const { data: hosts = [], isLoading: loading, error: queryError } = useQuery({
+    queryKey: ['hosts'],
+    queryFn: async () => {
       const response = await apiClient.get('/users/hosts');
-      setHosts(response.data.data);
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || 'Failed to fetch host claims.');
-    } finally {
-      setLoading(false);
+      return response.data.data as HostProfile[];
     }
-  };
+  });
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchHosts();
-  }, []);
+  const actionMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string, status: string }) => {
+      await apiClient.patch(`/users/host/${id}/approve`, { status });
+      return status;
+    },
+    onSuccess: (status) => {
+      queryClient.invalidateQueries({ queryKey: ['hosts'] });
+      if (selectedHost) {
+        setSelectedHost(null); // Close modal on success
+      }
+    },
+    onError: (err: unknown) => {
+      const error = err as { response?: { data?: { message?: string } } };
+      alert(error.response?.data?.message || 'Failed to update status.');
+    }
+  });
 
   const handleUpdateStatus = async (status: string) => {
     if (!selectedHost) return;
-    setActionLoading(true);
-    try {
-      await apiClient.patch(`/users/host/${selectedHost.id}/approve`, { status });
-      // Update local state without full reload
-      setHosts((prev) =>
-        prev.map((h) => (h.id === selectedHost.id ? { ...h, approvalStatus: status as HostProfile['approvalStatus'] } : h)),
-      );
-      setSelectedHost({ ...selectedHost, approvalStatus: status as HostProfile['approvalStatus'] });
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      alert(error.response?.data?.message || 'Failed to update status.');
-    } finally {
-      setActionLoading(false);
-      setSelectedHost(null); // Close modal on success
-    }
+    actionMutation.mutate({ id: selectedHost.id, status });
   };
+
+  const actionLoading = actionMutation.isPending;
+  const error = errorMsg || (queryError as any)?.response?.data?.message || (queryError as Error)?.message || '';
 
   const formatHostType = (type: string) => {
     return type

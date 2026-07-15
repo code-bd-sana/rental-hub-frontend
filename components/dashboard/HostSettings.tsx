@@ -1,11 +1,11 @@
 'use client';
 
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api/client';
 import React, { useEffect, useState } from 'react';
 
 export function HostSettings() {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const queryClient = useQueryClient();
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -26,39 +26,65 @@ export function HostSettings() {
     confirmPassword: '',
   });
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const { data } = await apiClient.get('/users/me');
-        const user = data.data;
-        const hp = user.hostProfile || {};
+  const { data: profileData, isLoading: loading } = useQuery({
+    queryKey: ['profile'],
+    queryFn: async () => {
+      const { data } = await apiClient.get('/users/me');
+      return data.data;
+    }
+  });
 
-        setFormData((prev) => ({
-          ...prev,
-          name: user.name || '',
-          email: user.email || '',
-          phone: user.phone || '',
-          businessName: hp.businessName || '',
-          address: hp.address || '',
-          city: hp.city || '',
-          state: hp.state || '',
-          country: hp.country || '',
-          payoutAccount: hp.payoutAccount || '',
-          currency: hp.billingCurrency || 'USD',
-        }));
-      } catch (err: unknown) {
-        console.error(err);
-        setError('Failed to load profile data.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
-  }, []);
+  useEffect(() => {
+    if (profileData) {
+      const hp = profileData.hostProfile || {};
+      setFormData((prev) => ({
+        ...prev,
+        name: profileData.name || '',
+        email: profileData.email || '',
+        phone: profileData.phone || '',
+        businessName: hp.businessName || '',
+        address: hp.address || '',
+        city: hp.city || '',
+        state: hp.state || '',
+        country: hp.country || '',
+        payoutAccount: hp.payoutAccount || '',
+        currency: hp.billingCurrency || 'USD',
+      }));
+    }
+  }, [profileData]);
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  const saveMutation = useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      await apiClient.patch('/users/me', payload);
+
+      if (formData.newPassword) {
+        await apiClient.post('/auth/change-password', {
+          oldPassword: formData.currentPassword,
+          newPassword: formData.newPassword,
+        });
+      }
+    },
+    onSuccess: () => {
+      setSuccessMsg('Settings saved successfully!');
+      if (formData.newPassword) {
+        setFormData((prev) => ({
+          ...prev,
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        }));
+      }
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+    },
+    onError: (err: unknown) => {
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      setError(axiosError.response?.data?.message || 'Failed to save settings.');
+    },
+  });
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,44 +100,23 @@ export function HostSettings() {
       return;
     }
 
-    setSaving(true);
-    try {
-      const payload: Record<string, unknown> = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        businessName: formData.businessName,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        country: formData.country,
-        payoutAccount: formData.payoutAccount,
-        billingCurrency: formData.currency,
-      };
+    const payload: Record<string, unknown> = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      businessName: formData.businessName,
+      address: formData.address,
+      city: formData.city,
+      state: formData.state,
+      country: formData.country,
+      payoutAccount: formData.payoutAccount,
+      billingCurrency: formData.currency,
+    };
 
-      await apiClient.patch('/users/me', payload);
-
-      if (formData.newPassword) {
-        await apiClient.post('/auth/change-password', {
-          oldPassword: formData.currentPassword,
-          newPassword: formData.newPassword,
-        });
-        setFormData((prev) => ({
-          ...prev,
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: '',
-        }));
-      }
-
-      setSuccessMsg('Settings saved successfully!');
-    } catch (err: unknown) {
-      const axiosError = err as { response?: { data?: { message?: string } } };
-      setError(axiosError.response?.data?.message || 'Failed to save settings.');
-    } finally {
-      setSaving(false);
-    }
+    saveMutation.mutate(payload);
   };
+
+  const saving = saveMutation.isPending;
 
   if (loading) {
     return <div className='p-8 text-[#6b7b79] animate-pulse'>Loading settings...</div>;

@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api/client';
 
 export function AdminSettings() {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const queryClient = useQueryClient();
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -18,31 +18,51 @@ export function AdminSettings() {
     confirmPassword: ''
   });
 
+  const { data: profileData, isLoading: loading } = useQuery({
+    queryKey: ['profile'],
+    queryFn: async () => {
+      const { data } = await apiClient.get('/users/me');
+      return data.data;
+    }
+  });
+
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const { data } = await apiClient.get('/users/me');
-        const user = data.data;
-        
-        setFormData(prev => ({
-          ...prev,
-          name: user.name || '',
-          email: user.email || '',
-          phone: user.phone || '',
-        }));
-      } catch (err: unknown) {
-        console.error(err);
-        setError('Failed to load profile data.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
-  }, []);
+    if (profileData) {
+      setFormData(prev => ({
+        ...prev,
+        name: profileData.name || '',
+        email: profileData.email || '',
+        phone: profileData.phone || '',
+      }));
+    }
+  }, [profileData]);
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  const saveMutation = useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      await apiClient.patch('/users/me', payload);
+      if (formData.newPassword) {
+        await apiClient.post('/auth/change-password', {
+          oldPassword: formData.currentPassword,
+          newPassword: formData.newPassword
+        });
+      }
+    },
+    onSuccess: () => {
+      setSuccessMsg('Settings saved successfully!');
+      if (formData.newPassword) {
+        setFormData(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
+      }
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+    },
+    onError: (err: unknown) => {
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      setError(axiosError.response?.data?.message || 'Failed to save settings.');
+    }
+  });
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,29 +78,16 @@ export function AdminSettings() {
       return;
     }
 
-    setSaving(true);
-    try {
-      const payload: Record<string, unknown> = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-      };
-      
-      await apiClient.patch('/users/me', payload);
-
-      if (formData.newPassword) {
-         await apiClient.post('/auth/change-password', { oldPassword: formData.currentPassword, newPassword: formData.newPassword });
-         setFormData(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
-      }
-
-      setSuccessMsg('Settings saved successfully!');
-    } catch (err: unknown) {
-      const axiosError = err as { response?: { data?: { message?: string } } };
-      setError(axiosError.response?.data?.message || 'Failed to save settings.');
-    } finally {
-      setSaving(false);
-    }
+    const payload: Record<string, unknown> = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+    };
+    
+    saveMutation.mutate(payload);
   };
+
+  const saving = saveMutation.isPending;
 
   if (loading) {
     return <div className="p-8 text-[#6b7b79] animate-pulse">Loading settings...</div>;

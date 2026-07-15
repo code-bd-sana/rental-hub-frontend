@@ -1,117 +1,208 @@
-"use client";
+'use client';
 
-import { useState, useEffect, Suspense } from "react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import GlobalCard from "../../components/shared/GlobalCard";
-import { DIR_DATA } from "../../lib/data/directoryData";
+import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useMemo, useState } from 'react';
+import GlobalCard from '../../components/shared/GlobalCard';
+import { listingApi } from '../../lib/api/listings';
 
 function DirectoryContent() {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const currentCountry = searchParams.get("country") || "Jamaica";
-  const items = DIR_DATA[currentCountry] || [];
-  const availableCountries = Object.keys(DIR_DATA);
+
+  const currentCountry = searchParams.get('country') || 'All';
+  const currentCategory = searchParams.get('category') || 'All';
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState("Visitor");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [listings, setListings] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const authData = localStorage.getItem("roamly_auth");
+    const authData = localStorage.getItem('roamly_auth');
     if (authData) {
       try {
         const parsed = JSON.parse(authData);
         if (parsed?.isAuthenticated) {
           // eslint-disable-next-line react-hooks/set-state-in-effect
           setIsLoggedIn(true);
-          setUserRole(parsed.role || "Guest");
         }
       } catch (e) {
-        console.warn("Failed to parse auth data from localStorage", e);
+        console.warn('Failed to parse auth data from localStorage', e);
       }
     }
   }, []);
 
-  return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans pb-16">
-      {/* Header Area */}
-      <div className="bg-white border-b border-[#e7e1d6] py-3">
-        <div className="max-w-7xl mx-auto flex justify-between items-center px-4 sm:px-6 lg:px-8">
-          <div className="font-bold text-[22px] tracking-[0.5px] text-[#172554]" style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
-            Roam<b className="text-[#2563eb]">ly</b>
-          </div>
-          <div className="flex gap-3 items-center">
-            <Link href="/countries" className="text-[#172554] text-[14px] font-semibold hover:underline">Countries</Link>
-            <span className={`${isLoggedIn ? 'bg-[#1e9e72]' : 'bg-[#2563eb]'} text-white rounded-3xl px-4 py-2.25 font-semibold text-[14px]`}>
-              {userRole}
-            </span>
-          </div>
-        </div>
-      </div>
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        setIsLoading(true);
+        const res = await listingApi.getAllListings({ status: 'APPROVED' });
+        if (res.success) {
+          setListings(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch listings:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchListings();
+  }, []);
 
-      <div className="max-w-7xl mx-auto pt-6 px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4">
-          <h2 className="text-[28px] md:text-3xl font-bold text-[#15201f]" style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
-            Directory 
+  // Compute unique filters dynamically
+  const availableCountries = useMemo(() => {
+    const countries = listings.map((l) => l.country).filter(Boolean);
+    return ['All', ...Array.from(new Set(countries))];
+  }, [listings]);
+
+  const availableCategories = useMemo(() => {
+    const categories = listings.map((l) => l.category).filter(Boolean);
+    return ['All', ...Array.from(new Set(categories))];
+  }, [listings]);
+
+  // Apply filters
+  const filteredListings = useMemo(() => {
+    return listings.filter((l) => {
+      const matchCountry = currentCountry === 'All' || l.country === currentCountry;
+      const matchCategory = currentCategory === 'All' || l.category === currentCategory;
+      return matchCountry && matchCategory;
+    });
+  }, [listings, currentCountry, currentCategory]);
+
+  const updateFilter = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (value === 'All') {
+      params.delete(key);
+    } else {
+      params.set(key, value);
+    }
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  return (
+    <div className='min-h-screen bg-[#f8fafc] font-sans pb-16'>
+      <div className='max-w-7xl mx-auto pt-6 px-4 sm:px-6 lg:px-8'>
+        <div className='flex flex-col sm:flex-row sm:items-end justify-between mb-4'>
+          <h2
+            className='text-[28px] md:text-3xl font-bold text-[#15201f]'
+            style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
+          >
+            Directory
           </h2>
-          <span className="text-sm font-semibold text-[#6b7b79] mt-1 sm:mt-0 uppercase tracking-wide">
-            {currentCountry}
+          <span className='text-sm font-semibold text-[#6b7b79] mt-1 sm:mt-0 uppercase tracking-wide'>
+            {currentCountry !== 'All' ? currentCountry : 'Global'}
           </span>
         </div>
 
-        {/* Country Select Chips */}
-        <div className="flex gap-2 overflow-x-auto pb-3 mb-4 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
+        {/* Country Filters */}
+        <div className='flex gap-2 overflow-x-auto pb-3 mb-2 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar'>
           {availableCountries.map((c) => (
-            <Link
+            <button
               key={c}
-              href={`/directory?country=${encodeURIComponent(c)}`}
-              className={`flex-none border rounded-3xl px-3.5 py-2 text-[14px] font-semibold transition-colors ${
+              onClick={() => updateFilter('country', c)}
+              className={`flex-none border rounded-[20px] px-4 py-2 text-[14px] font-semibold transition-colors cursor-pointer ${
                 c === currentCountry
-                  ? "bg-[#1e40af] text-white! border-[#1e40af]"
-                  : "bg-white border-[#e7e1d6] text-[#15201f] hover:bg-[#dbeafe]"
+                  ? 'bg-[#1e40af] text-white border-[#1e40af]'
+                  : 'bg-white border-[#e7e1d6] text-[#15201f] hover:bg-[#dbeafe]'
               }`}
             >
               {c}
-            </Link>
+            </button>
           ))}
         </div>
 
+        {/* Category Filters */}
+        {availableCategories.length > 1 && (
+          <div className='flex gap-2 overflow-x-auto pb-3 mb-4 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar'>
+            {availableCategories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => updateFilter('category', cat)}
+                className={`flex-none border rounded-[20px] px-3.5 py-1.5 text-[13px] font-bold transition-colors cursor-pointer uppercase tracking-[0.5px] ${
+                  cat === currentCategory
+                    ? 'bg-[#1e9e72] text-white border-[#1e9e72]'
+                    : 'bg-white border-[#e7e1d6] text-[#6b7b79] hover:bg-[#dff3ec] hover:text-[#1e9e72]'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Lock Note */}
         {!isLoggedIn && (
-          <div className="bg-[#dbeafe] text-[#1e40af] rounded-xl p-4 text-[13px] font-medium mb-6">
-            Visitor view. Showing photos only, limited to 10 hosts per country. Unlock to see names, hours, contacts and to book.
+          <div className='bg-[#dbeafe] text-[#1e40af] rounded-xl p-4 text-[13px] font-medium mb-6 border border-[#bfdbfe]'>
+            Visitor view. Showing preview photos only. Unlock to see full host names, hours, contact
+            details, and to book instantly!
           </div>
         )}
 
         {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {items.map((item) => (
-            <GlobalCard
-              key={item.seed}
-              title={item.name}
-              category={item.cat}
-              hours={item.hours}
-              phone={item.phone}
-              locked={!isLoggedIn}
-              seed={item.seed}
-            />
-          ))}
-          {items.length === 0 && (
-            <div className="col-span-full text-[#6b7b79] py-8">No hosts found for {currentCountry}.</div>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5'>
+          {isLoading ? (
+            // Loading Skeletons
+            Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className='animate-pulse bg-white border border-[#e7e1d6] rounded-[18px] overflow-hidden shadow-sm'
+              >
+                <div className='aspect-4/3 bg-[#e2e8f0]'></div>
+                <div className='p-4 space-y-3'>
+                  <div className='h-4 bg-[#e2e8f0] rounded-sm w-1/4'></div>
+                  <div className='h-5 bg-[#e2e8f0] rounded-sm w-3/4'></div>
+                  <div className='h-3 bg-[#e2e8f0] rounded-sm w-1/2'></div>
+                </div>
+              </div>
+            ))
+          ) : filteredListings.length > 0 ? (
+            filteredListings.map((listing) => {
+              const heroImage =
+                listing.images?.find((img: any) => img.isHero)?.url || listing.images?.[0]?.url;
+              return (
+                <GlobalCard
+                  key={listing.id}
+                  title={listing.title}
+                  category={listing.category}
+                  imageUrl={heroImage}
+                  hours={undefined} // Hidden or fetched if we had standard hours field
+                  phone={undefined}
+                  locked={!isLoggedIn}
+                  seed={listing.id}
+                />
+              );
+            })
+          ) : (
+            <div className='col-span-full bg-white border border-[#e7e1d6] rounded-2xl p-10 text-center text-[#6b7b79]'>
+              No listings found for the selected filters.
+            </div>
           )}
         </div>
 
         {/* Paywall */}
         {!isLoggedIn && (
-          <div className="bg-[#172554] text-white rounded-[18px] p-6 mt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+          <div className='bg-[#172554] text-white rounded-[18px] p-6 mt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-[0_15px_40px_rgba(23,37,84,0.15)]'>
             <div>
-              <h3 className="text-[22px] mb-1.5" style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>You are seeing a preview</h3>
-              <p className="opacity-90 text-[14px] max-w-107.5">
-                Unlock every host in every country and book your whole trip in one place.
+              <h3
+                className='text-[22px] mb-1.5 font-bold'
+                style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
+              >
+                You are seeing a preview
+              </h3>
+              <p className='opacity-90 text-[14px] max-w-107.5'>
+                Unlock every host in every country and book your whole trip securely in one place.
               </p>
             </div>
-            <div className="text-left md:text-right w-full md:w-auto shrink-0">
-              <div className="text-[28px] font-extrabold">$9.99 <small className="text-[13px] font-semibold opacity-80">/ month</small></div>
-              <Link href="/signup" className="inline-block mt-3 w-full sm:w-auto bg-[#2563eb] text-white text-center rounded-[30px] py-3.5 px-6 font-bold text-[16px] hover:bg-[#1e40af] transition-colors shadow-sm">
+            <div className='text-left md:text-right w-full md:w-auto shrink-0'>
+              <div className='text-[28px] font-extrabold'>
+                $9.99 <small className='text-[13px] font-semibold opacity-80'>/ month</small>
+              </div>
+              <Link
+                href='/signup'
+                className='inline-block mt-3 w-full sm:w-auto bg-[#2563eb] text-white text-center rounded-[30px] py-3.5 px-6 font-bold text-[16px] hover:bg-[#1e40af] transition-colors shadow-sm'
+              >
                 Unlock now (demo)
               </Link>
             </div>
@@ -124,7 +215,13 @@ function DirectoryContent() {
 
 export default function DirectoryPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#f8fafc] flex items-center justify-center font-bold text-gray-500">Loading directory...</div>}>
+    <Suspense
+      fallback={
+        <div className='min-h-screen bg-[#f8fafc] flex items-center justify-center font-bold text-[#6b7b79]'>
+          Loading directory...
+        </div>
+      }
+    >
       <DirectoryContent />
     </Suspense>
   );

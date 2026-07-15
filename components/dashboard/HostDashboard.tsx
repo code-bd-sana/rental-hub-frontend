@@ -119,7 +119,7 @@ export function HostListings() {
   const [isAdding, setIsAdding] = useState(false);
   const [editListing, setEditListing] = useState<Record<string, unknown> | null>(null);
   const [viewListing, setViewListing] = useState<Record<string, unknown> | null>(null);
-  const [deleteListingId, setDeleteListingId] = useState<string | null>(null);
+
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -422,18 +422,7 @@ export function HostListings() {
     }
   };
 
-  const confirmDelete = async () => {
-    if (deleteListingId) {
-      try {
-        await listingApi.deleteListing(deleteListingId);
-        await fetchListings();
-        setDeleteListingId(null);
-      } catch (error) {
-        console.error('Failed to delete listing:', error);
-        alert('Failed to delete listing. Please try again.');
-      }
-    }
-  };
+
 
   const isFormOpen = isAdding || !!editListing;
 
@@ -564,26 +553,7 @@ export function HostListings() {
                           <path d='M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z' />
                         </svg>
                       </button>
-                      <button
-                        onClick={() => setDeleteListingId(lst.id)}
-                        className='text-[#6b7b79] hover:text-[#dc2626] transition-colors cursor-pointer'
-                        title='Delete'
-                      >
-                        <svg
-                          width='18'
-                          height='18'
-                          viewBox='0 0 24 24'
-                          fill='none'
-                          stroke='currentColor'
-                          strokeWidth='2'
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                        >
-                          <path d='M3 6h18' />
-                          <path d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' />
-                          <path d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' />
-                        </svg>
-                      </button>
+
                     </div>
                   </td>
                 </tr>
@@ -603,7 +573,7 @@ export function HostListings() {
       {/* Add / Edit Form Modal */}
       {isFormOpen && (
         <div className='fixed inset-0 bg-[rgba(21,32,31,0.5)] z-100 flex items-center justify-center p-4 backdrop-blur-sm'>
-          <div className='bg-white rounded-2xl max-w-lg w-full shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden animate-in zoom-in-95 duration-200'>
+          <div className='bg-white rounded-2xl max-w-3xl w-full shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden animate-in zoom-in-95 duration-200'>
             <div className='p-5 border-b border-[#e7e1d6] flex justify-between items-center bg-[#f8fafc]'>
               <h3
                 className='font-bold text-[18px] text-[#15201f]'
@@ -1192,7 +1162,7 @@ export function HostListings() {
       {/* View Preview Modal */}
       {viewListing && (
         <div className='fixed inset-0 bg-[rgba(21,32,31,0.5)] z-100 flex items-center justify-center p-4 backdrop-blur-sm'>
-          <div className='bg-white rounded-2xl max-w-sm w-full shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden animate-in zoom-in-95 duration-200'>
+          <div className='bg-white rounded-2xl max-w-lg w-full shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden animate-in zoom-in-95 duration-200'>
             <div className='p-5 border-b border-[#e7e1d6] flex justify-between items-center bg-[#f8fafc]'>
               <h3
                 className='font-bold text-[18px] text-[#15201f]'
@@ -1231,55 +1201,7 @@ export function HostListings() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
-      {deleteListingId && (
-        <div className='fixed inset-0 bg-[rgba(21,32,31,0.5)] z-100 flex items-center justify-center p-4 backdrop-blur-sm'>
-          <div className='bg-white rounded-2xl max-w-sm w-full shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden animate-in zoom-in-95 duration-200'>
-            <div className='p-6 text-center'>
-              <div className='w-14 h-14 rounded-full bg-[#fee2e2] flex items-center justify-center mx-auto mb-4 text-[#ef4444]'>
-                <svg
-                  width='24'
-                  height='24'
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  stroke='currentColor'
-                  strokeWidth='2'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                >
-                  <path d='M3 6h18' />
-                  <path d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' />
-                  <path d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' />
-                </svg>
-              </div>
-              <h3
-                className='font-bold text-[20px] text-[#15201f] mb-2'
-                style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
-              >
-                Delete Listing
-              </h3>
-              <p className='text-[14px] text-[#6b7b79] leading-relaxed'>
-                Are you sure you want to delete this listing? This action cannot be undone and will
-                remove it from the directory immediately.
-              </p>
-            </div>
-            <div className='p-5 border-t border-[#e7e1d6] bg-[#f8fafc] flex justify-center gap-3'>
-              <button
-                onClick={() => setDeleteListingId(null)}
-                className='px-6 py-2.5 rounded-xl font-bold text-[14px] text-[#6b7b79] hover:bg-[#e7e1d6] transition-colors cursor-pointer w-full'
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className='bg-[#ef4444] text-white px-6 py-2.5 rounded-xl font-bold text-[14px] hover:bg-[#dc2626] transition-colors shadow-sm cursor-pointer w-full'
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }

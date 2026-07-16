@@ -86,7 +86,7 @@ export default function GlobalCard({
               <Link
                 href={seed ? `/directory/${seed}` : '#'}
                 prefetch={false}
-                className='flex-1 text-center rounded-xl p-2.25 font-semibold text-[13px] bg-[#1e40af] text-white hover:bg-[#172554] transition-colors block'
+                className='flex-1 text-center rounded-xl p-2.25 font-semibold text-[13px] bg-[#1e40af] text-white! hover:bg-[#172554] transition-colors block'
               >
                 View page
               </Link>

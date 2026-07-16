@@ -47,7 +47,8 @@ export default function Header() {
               alt='Rentals Hub'
               width={140}
               height={48}
-              className='w-auto h-12 object-contain block'
+              priority={true}
+              className='object-contain block'
             />
           </Link>
           <nav className='flex gap-3 ml-auto max-[900px]:hidden'>

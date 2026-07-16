@@ -120,6 +120,8 @@ function StayDetailsView({ listing }: { listing: any }) {
                 src={heroImage.url}
                 alt='Hero'
                 fill
+                priority
+                sizes='(max-width: 768px) 100vw, 50vw'
                 className='object-cover group-hover:scale-[1.02] transition-transform duration-500'
               />
             </div>
@@ -137,6 +139,7 @@ function StayDetailsView({ listing }: { listing: any }) {
                   src={img.url}
                   alt={`Gallery ${i}`}
                   fill
+                  sizes='(max-width: 768px) 0vw, 25vw'
                   className='object-cover group-hover:scale-[1.05] transition-transform duration-500'
                 />
               </div>

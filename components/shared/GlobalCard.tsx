@@ -58,10 +58,10 @@ export default function GlobalCard({ title, category, imageUrl, icon, hours, pho
             </Link>
           ) : (
             <>
-              <button className="flex-1 rounded-xl p-2.25 font-semibold text-[13px] bg-[#1e40af] text-white hover:bg-[#172554] transition-colors">
+              <Link href={seed ? `/directory/${seed}` : "#"} className="flex-1 text-center rounded-xl p-2.25 font-semibold text-[13px] bg-[#1e40af] text-white hover:bg-[#172554] transition-colors block">
                 View page
-              </button>
-              <Link href={seed ? `/booking?id=${seed}` : "#"} className="flex-1 text-center rounded-xl p-2.25 font-semibold text-[13px] bg-white border border-[#e7e1d6] text-[#172554] hover:bg-[#f8fafc] transition-colors">
+              </Link>
+              <Link href={seed ? `/booking?id=${seed}` : "#"} className="flex-1 text-center rounded-xl p-2.25 font-semibold text-[13px] bg-white border border-[#e7e1d6] text-[#172554] hover:bg-[#f8fafc] transition-colors block">
                 Book
               </Link>
             </>

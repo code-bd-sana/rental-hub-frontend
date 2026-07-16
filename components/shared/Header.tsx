@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Header() {
   const pathname = usePathname();
@@ -13,17 +13,19 @@ export default function Header() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const authDataString = localStorage.getItem('roamly_auth');
+      let isAuth = false;
       if (authDataString) {
         try {
           const authData = JSON.parse(authDataString);
           if (authData?.accessToken || authData?.isAuthenticated) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setIsAuthenticated(true);
+            isAuth = true;
           }
         } catch (e) {
           console.error('Failed to parse auth data', e);
         }
       }
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsAuthenticated(isAuth);
     }
   }, [pathname]);
 

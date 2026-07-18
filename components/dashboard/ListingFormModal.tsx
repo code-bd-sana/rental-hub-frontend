@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../../lib/api/client';
 import { listingApi } from '../../lib/api/listings';
+import { countryApi } from '../../lib/api/countries';
 
 export default function ListingFormModal({
   isOpen,
@@ -14,11 +15,26 @@ export default function ListingFormModal({
   onSuccess: () => void;
 }) {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [countries, setCountries] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const res = await countryApi.getAllCountries();
+        if (res.success) {
+          setCountries(res.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch countries", err);
+      }
+    };
+    fetchCountries();
+  }, []);
 
   const [formData, setFormData] = useState({
     title: '',
     category: 'Stay',
-    country: 'Jamaica',
+    country: '',
     hours: '',
     phone: '',
     status: 'Pending review',
@@ -49,7 +65,7 @@ export default function ListingFormModal({
     setFormData({
       title: '',
       category: 'Stay',
-      country: 'Jamaica',
+      country: countries.length > 0 ? countries[0].name : '',
       hours: '',
       phone: '',
       status: 'Pending review',
@@ -81,7 +97,7 @@ export default function ListingFormModal({
     setFormData({
       title: lst.title || '',
       category: lst.category === 'STAY' ? 'Stay' : lst.category === 'CAR' ? 'Car' : 'Service',
-      country: lst.country || 'Jamaica',
+      country: lst.country || (countries.length > 0 ? countries[0].name : ''),
       hours: lst.description?.includes('Hours:') ? lst.description.split(',')[0].replace('Hours: ', '').trim() : '',
       phone: lst.description?.includes('Phone:') ? lst.description.split(',')[1]?.replace('Phone: ', '').trim() : '',
       status: lst.approvalStatus === 'APPROVED' ? 'Live' : lst.approvalStatus === 'PENDING' ? 'Pending review' : 'Draft',
@@ -401,11 +417,10 @@ export default function ListingFormModal({
                       onChange={(e) => handleFormChange('country', e.target.value)}
                       className='w-full border border-[#e7e1d6] rounded-xl px-4 py-2.5 text-[14px] bg-white focus:outline-none focus:border-[#2563eb] transition-colors'
                     >
-                      <option value='Jamaica'>Jamaica</option>
-                      <option value='Barbados'>Barbados</option>
-                      <option value='Bahamas'>Bahamas</option>
-                      <option value='Trinidad and Tobago'>Trinidad and Tobago</option>
-                      <option value='United States'>United States</option>
+                      <option value="">Select Country</option>
+                      {countries.map(c => (
+                        <option key={c.id} value={c.name}>{c.name}</option>
+                      ))}
                     </select>
                   </div>
                 </div>

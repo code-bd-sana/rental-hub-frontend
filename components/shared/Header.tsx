@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Header() {
   const pathname = usePathname();
@@ -13,17 +13,19 @@ export default function Header() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const authDataString = localStorage.getItem('roamly_auth');
+      let isAuth = false;
       if (authDataString) {
         try {
           const authData = JSON.parse(authDataString);
           if (authData?.accessToken || authData?.isAuthenticated) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setIsAuthenticated(true);
+            isAuth = true;
           }
         } catch (e) {
           console.error('Failed to parse auth data', e);
         }
       }
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsAuthenticated(isAuth);
     }
   }, [pathname]);
 
@@ -45,7 +47,8 @@ export default function Header() {
               alt='Rentals Hub'
               width={140}
               height={48}
-              className='w-auto h-12 object-contain block'
+              priority={true}
+              className='object-contain block'
             />
           </Link>
           <nav className='flex gap-3 ml-auto max-[900px]:hidden'>
@@ -57,6 +60,9 @@ export default function Header() {
             </Link>
             <Link href='/directory' className={navClass(pathname.startsWith('/directory'))}>
               Directory
+            </Link>
+            <Link href='/claim' className={navClass(pathname.startsWith('/claim'))}>
+              Claim Business
             </Link>
           </nav>
           {isAuthenticated ? (
@@ -119,6 +125,9 @@ export default function Header() {
             className={mobileNavClass}
           >
             Directory
+          </Link>
+          <Link href='/claim' onClick={() => setMobileMenuOpen(false)} className={mobileNavClass}>
+            Claim Business
           </Link>
 
           {/* <button

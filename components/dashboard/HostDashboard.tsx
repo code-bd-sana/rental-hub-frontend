@@ -100,10 +100,6 @@ export function HostListings() {
   const [listings, setListings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchListings();
-  }, []);
-
   const fetchListings = async () => {
     try {
       setIsLoading(true);
@@ -117,6 +113,10 @@ export function HostListings() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchListings();
+  }, []);
 
   const [isAdding, setIsAdding] = useState(false);
   const [editListing, setEditListing] = useState<Record<string, unknown> | null>(null);

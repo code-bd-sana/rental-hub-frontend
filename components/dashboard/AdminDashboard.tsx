@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { listingApi } from "../../lib/api/listings";
 import ListingFormModal from './ListingFormModal';
 import ListingViewModal from './ListingViewModal';
+import { TeamAndAccess } from './TeamAndAccess';
 
 export function AdminOverview() {
   return (
@@ -425,6 +426,73 @@ export function AdminGuests() {
           </tbody>
         </table>
       </div>
+    </div>
+  );
+}
+
+
+type AdminTab = 'Overview' | 'Claims' | 'Listings' | 'Countries' | 'Guests' | 'Team and access' | 'Load directory' | 'Bookings';
+
+export default function AdminDashboard() {
+  const [activeTab, setActiveTab] = useState<AdminTab>('Overview');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const tabs: AdminTab[] = [
+    'Overview',
+    'Claims',
+    'Listings',
+    'Countries',
+    'Guests',
+    'Team and access',
+    'Load directory',
+    'Bookings'
+  ];
+
+  return (
+    <div className="flex h-screen bg-[#f8fafc] font-sans">
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#15201f] text-white transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex flex-col h-full">
+          <div className="p-6">
+            <h1 className="text-[24px] font-bold tracking-tight text-white flex items-center gap-2">
+              Roam<span className="text-[#2563eb]">ly</span>
+            </h1>
+            <p className="text-[#6b7b79] text-[10px] tracking-[1px] uppercase mt-1">Super Admin / Director</p>
+          </div>
+          <nav className="flex-1 px-4 space-y-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => { setActiveTab(tab); setIsMobileMenuOpen(false); }}
+                className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 text-[14px] font-semibold ${
+                  activeTab === tab
+                    ? 'bg-[#1f2d2c] text-white shadow-sm'
+                    : 'text-[#8c9c9a] hover:bg-[#1f2d2c]/50 hover:text-white'
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </aside>
+      <main className="flex-1 overflow-y-auto">
+        <div className="md:hidden p-4 bg-white border-b border-[#e7e1d6] flex justify-between items-center sticky top-0 z-30">
+          <h1 className="text-[20px] font-bold text-[#172554]">Roamly</h1>
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-[#15201f] hover:bg-[#f8fafc] rounded-lg">
+            ☰
+          </button>
+        </div>
+        <div className="p-6 md:p-10 max-w-7xl mx-auto min-h-full">
+          {activeTab === 'Overview' && <AdminOverview />}
+          {activeTab === 'Claims' && <AdminClaims />}
+          {activeTab === 'Listings' && <AdminOverview />}
+          {activeTab === 'Guests' && <AdminGuests />}
+          {activeTab === 'Team and access' && <TeamAndAccess />}
+        </div>
+      </main>
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 bg-[#15201f]/20 z-30 md:hidden backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
+      )}
     </div>
   );
 }

@@ -245,17 +245,17 @@ export function TeamAndAccess() {
                 <option value="SUPER_ADMIN">Super Admin</option>
               </select>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-[13px] font-bold text-[#15201f] mb-2">Assign countries</label>
-            <input 
-              type="text" 
-              value={countriesStr}
-              onChange={e => setCountriesStr(e.target.value)}
-              placeholder="For example Jamaica, Barbados"
-              className="w-full border border-[#e7e1d6] rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors bg-[#f8fafc]"
-            />
+            <div>
+              <label className="block text-[13px] font-bold text-[#15201f] mb-2">Assign countries</label>
+              <input 
+                type="text" 
+                value={countriesStr}
+                onChange={e => setCountriesStr(e.target.value)}
+                placeholder="For example Jamaica, Barbados"
+                className="w-full border border-[#e7e1d6] rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors bg-[#f8fafc]"
+              />
+            </div>
           </div>
 
           <div>

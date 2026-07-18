@@ -111,6 +111,12 @@ function SidebarNav({
               >
                 Guests
               </Link>
+              <Link
+                href="/dashboard/team"
+                className={navClass("/dashboard/team")}
+              >
+                Team and access
+              </Link>
             </>
           )}
           {role !== "AGENT" && (

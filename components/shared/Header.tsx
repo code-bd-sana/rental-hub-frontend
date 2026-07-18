@@ -61,6 +61,9 @@ export default function Header() {
             <Link href='/directory' className={navClass(pathname.startsWith('/directory'))}>
               Directory
             </Link>
+            <Link href='/claim' className={navClass(pathname.startsWith('/claim'))}>
+              Claim Business
+            </Link>
           </nav>
           {isAuthenticated ? (
             <Link
@@ -122,6 +125,9 @@ export default function Header() {
             className={mobileNavClass}
           >
             Directory
+          </Link>
+          <Link href='/claim' onClick={() => setMobileMenuOpen(false)} className={mobileNavClass}>
+            Claim Business
           </Link>
 
           {/* <button

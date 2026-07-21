@@ -1,5 +1,7 @@
 "use client";
 
+import { ROLES } from '@/constants/roles';
+
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../../lib/api/client';
 
@@ -23,7 +25,7 @@ export function TeamAndAccess() {
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('AGENT');
+  const [role, setRole] = useState<string>(ROLES.AGENT);
   const [countriesStr, setCountriesStr] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState<AdminPermission[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -67,7 +69,7 @@ export function TeamAndAccess() {
   const resetForm = () => {
     setName('');
     setEmail('');
-    setRole('AGENT');
+    setRole(ROLES.AGENT);
     setCountriesStr('');
     setSelectedPermissions([]);
     setEditingId(null);
@@ -190,10 +192,10 @@ export function TeamAndAccess() {
                       <div className="text-[12px] text-[#6b7b79]">{member.email}</div>
                     </td>
                     <td className="py-4 px-5">
-                      {member.role === 'SUPER_ADMIN' ? 'Super admin' : member.role === 'LOADER' ? 'Content Loader' : 'Agent'}
+                      {member.role === ROLES.SUPER_ADMIN ? 'Super admin' : member.role === ROLES.LOADER ? 'Content Loader' : 'Agent'}
                     </td>
                     <td className="py-4 px-5">
-                      {member.role === 'SUPER_ADMIN' ? (
+                      {member.role === ROLES.SUPER_ADMIN ? (
                         <span className="text-[#6b7b79]">All countries</span>
                       ) : member.agentProfile?.assignedCountries?.length ? (
                         member.agentProfile.assignedCountries.join(', ')
@@ -207,7 +209,7 @@ export function TeamAndAccess() {
                       </span>
                     </td>
                     <td className="py-4 px-5 text-right">
-                      {member.role !== 'SUPER_ADMIN' ? (
+                      {member.role !== ROLES.SUPER_ADMIN ? (
                         <div className="flex items-center justify-end gap-2">
                           <button 
                             onClick={() => handleEditClick(member)}
@@ -275,9 +277,9 @@ export function TeamAndAccess() {
                 onChange={e => setRole(e.target.value)}
                 className="w-full border border-[#e7e1d6] rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors bg-[#f8fafc]"
               >
-                <option value="AGENT">Agent</option>
-                <option value="LOADER">Content Loader</option>
-                <option value="SUPER_ADMIN">Super Admin</option>
+                <option value={ROLES.AGENT}>Agent</option>
+                <option value={ROLES.LOADER}>Content Loader</option>
+                <option value={ROLES.SUPER_ADMIN}>Super Admin</option>
               </select>
             </div>
 

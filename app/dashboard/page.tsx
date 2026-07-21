@@ -1,5 +1,7 @@
 "use client";
 
+import { ROLES } from '@/constants/roles';
+
 import { HostOverview } from "@/components/dashboard/HostDashboard";
 import { AdminOverview } from "@/components/dashboard/AdminDashboard";
 import { AgentOverview } from "@/components/dashboard/AgentDashboard";
@@ -9,19 +11,19 @@ export default function DashboardPage() {
   const authData = typeof window !== "undefined" ? localStorage.getItem("roamly_auth") : null;
   const role = authData ? JSON.parse(authData).role : null;
 
-  if (role === "GUEST" || role === "Guest") {
+  if (role === ROLES.GUEST || role === "Guest") {
     return <GuestOverview />;
   }
 
-  if (role === "HOST" || role === "Host") {
+  if (role === ROLES.HOST || role === "Host") {
     return <HostOverview />;
   }
   
-  if (role === "SUPER_ADMIN" || role === "Super Admin") {
+  if (role === ROLES.SUPER_ADMIN ) {
     return <AdminOverview />;
   }
 
-  if (role === "AGENT" || role === "Agent") {
+  if (role === ROLES.AGENT || role === "Agent") {
     return <AgentOverview />;
   }
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { ROLES } from '@/constants/roles';
+
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../../lib/api/client';
 
@@ -29,11 +31,11 @@ export function Settings() {
         setName(name || '');
         setEmail(email || '');
         setPhone(phone || '');
-        if (role === 'SUPER_ADMIN') setRole('Administrator');
-        else if (role === 'LOADER') setRole('Content Loader');
-        else if (role === 'AGENT') setRole('Agent');
-        else if (role === 'HOST') setRole('Host');
-        else if (role === 'GUEST') setRole('Guest');
+        if (role === ROLES.SUPER_ADMIN) setRole('Administrator');
+        else if (role === ROLES.LOADER) setRole('Content Loader');
+        else if (role === ROLES.AGENT) setRole('Agent');
+        else if (role === ROLES.HOST) setRole('Host');
+        else if (role === ROLES.GUEST) setRole('Guest');
       }
     } catch (error) {
       console.error('Failed to fetch profile', error);

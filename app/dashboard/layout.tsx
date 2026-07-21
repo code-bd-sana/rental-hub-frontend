@@ -1,5 +1,7 @@
 'use client';
 
+import { ROLES } from '@/constants/roles';
+
 import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -32,9 +34,9 @@ function SidebarNav({ role, displayRole }: { role: string; displayRole: string }
       <nav className='flex flex-col flex-1'>
         <div className='flex flex-col gap-1'>
           <Link href='/dashboard' className={navClass('/dashboard')}>
-            {role === 'AGENT' ? 'My workspace' : 'Overview'}
+            {role === ROLES.AGENT ? 'My workspace' : 'Overview'}
           </Link>
-          {role === 'GUEST' && (
+          {role === ROLES.GUEST && (
             <>
               <Link
                 href='/dashboard/booking-history'
@@ -44,7 +46,7 @@ function SidebarNav({ role, displayRole }: { role: string; displayRole: string }
               </Link>
             </>
           )}
-          {role === 'HOST' && (
+          {role === ROLES.HOST && (
             <>
               <Link href='/dashboard/listings' className={navClass('/dashboard/listings')}>
                 My listings
@@ -57,12 +59,12 @@ function SidebarNav({ role, displayRole }: { role: string; displayRole: string }
               </Link>
             </>
           )}
-          {role === 'AGENT' && (
+          {role === ROLES.AGENT && (
             <button className='bg-transparent text-white text-left w-full px-3.25 py-2.75 rounded-[11px] text-[14px] font-semibold opacity-80 flex justify-between items-center hover:bg-[rgba(255,255,255,0.14)] hover:opacity-100 transition-colors'>
               Load directory
             </button>
           )}
-          {role === 'SUPER_ADMIN' && (
+          {role === ROLES.SUPER_ADMIN && (
             <>
               <Link href='/dashboard/claims' className={navClass('/dashboard/claims')}>
                 Claims
@@ -84,11 +86,9 @@ function SidebarNav({ role, displayRole }: { role: string; displayRole: string }
               </Link>
             </>
           )}
-          {role !== 'AGENT' && (
             <Link href='/dashboard/settings' className={navClass('/dashboard/settings')}>
               Settings
             </Link>
-          )}
         </div>
 
         <div className='mt-auto border-t border-[rgba(255,255,255,0.1)] pt-4'>

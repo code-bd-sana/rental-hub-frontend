@@ -1,5 +1,7 @@
 "use client";
 
+import { ROLES } from '@/constants/roles';
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -50,9 +52,9 @@ export default function LoginPage() {
       );
 
       // Route based on role
-      if (user.role === 'SUPER_ADMIN' || user.role === 'AGENT') {
+      if (user.role === ROLES.SUPER_ADMIN || user.role === ROLES.AGENT) {
         router.push("/dashboard");
-      } else if (user.role === 'HOST') {
+      } else if (user.role === ROLES.HOST) {
         router.push("/dashboard"); // Later we can route to specific host dashboard
       } else {
         router.push("/directory"); // Guests go to directory/booking by default

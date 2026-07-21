@@ -1,12 +1,14 @@
 "use client";
 
+import { ROLES } from '@/constants/roles';
+
 import { AdminCountries } from "@/components/dashboard/AdminDashboard";
 
 export default function DashboardCountriesPage() {
   const authData = typeof window !== "undefined" ? localStorage.getItem("roamly_auth") : null;
   const role = authData ? JSON.parse(authData).role : null;
 
-  if (role === "SUPER_ADMIN" || role === "Super Admin") {
+  if (role === ROLES.SUPER_ADMIN ) {
     return <AdminCountries />;
   }
 

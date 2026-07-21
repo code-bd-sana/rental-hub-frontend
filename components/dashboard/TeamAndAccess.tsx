@@ -4,6 +4,7 @@ import { ROLES } from '@/constants/roles';
 
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../../lib/api/client';
+import { countryApi } from '../../lib/api/countries';
 
 type AdminPermission = 'LOAD_DIRECTORY' | 'APPROVE_CLAIMS' | 'MANAGE_GUESTS' | 'MANAGE_TEAM' | 'VIEW_REVENUE';
 
@@ -26,9 +27,11 @@ export function TeamAndAccess() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<string>(ROLES.AGENT);
-  const [countriesStr, setCountriesStr] = useState('');
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+  const [availableCountries, setAvailableCountries] = useState<{id: string; name: string}[]>([]);
   const [selectedPermissions, setSelectedPermissions] = useState<AdminPermission[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -40,9 +43,16 @@ export function TeamAndAccess() {
     { label: 'View revenue', value: 'VIEW_REVENUE' },
   ];
 
-  useEffect(() => {
-    fetchMembers();
-  }, []);
+  const fetchCountries = async () => {
+    try {
+      const res = await countryApi.getAllCountries();
+      if (res.success) {
+        setAvailableCountries(res.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch countries:', error);
+    }
+  };
 
   const fetchMembers = async () => {
     try {
@@ -58,6 +68,13 @@ export function TeamAndAccess() {
     }
   };
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchMembers();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchCountries();
+  }, []);
+
   const handleTogglePermission = (perm: AdminPermission) => {
     if (selectedPermissions.includes(perm)) {
       setSelectedPermissions(selectedPermissions.filter(p => p !== perm));
@@ -70,7 +87,7 @@ export function TeamAndAccess() {
     setName('');
     setEmail('');
     setRole(ROLES.AGENT);
-    setCountriesStr('');
+    setSelectedCountries([]);
     setSelectedPermissions([]);
     setEditingId(null);
   };
@@ -80,7 +97,7 @@ export function TeamAndAccess() {
     setName(member.name);
     setEmail(member.email);
     setRole(member.role);
-    setCountriesStr(member.agentProfile?.assignedCountries?.join(', ') || '');
+    setSelectedCountries(member.agentProfile?.assignedCountries || []);
     setSelectedPermissions(member.agentProfile?.permissions || []);
     
     // Scroll to form smoothly
@@ -99,7 +116,7 @@ export function TeamAndAccess() {
 
     try {
       setIsSubmitting(true);
-      const assignedCountries = countriesStr.split(',').map(c => c.trim()).filter(c => c);
+      const assignedCountries = selectedCountries;
       
       if (editingId) {
         const payload = {
@@ -284,14 +301,70 @@ export function TeamAndAccess() {
             </div>
 
             <div>
-              <label className="block text-[13px] font-bold text-[#15201f] mb-2">Assign countries</label>
-              <input 
-                type="text" 
-                value={countriesStr}
-                onChange={e => setCountriesStr(e.target.value)}
-                placeholder="For example Jamaica, Barbados"
-                className="w-full border border-[#e7e1d6] rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors bg-[#f8fafc]"
-              />
+              <label className="block text-[13px] font-bold text-[#15201f] mb-3">Assign countries</label>
+              
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="w-full text-left border border-[#e7e1d6] rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors bg-[#f8fafc] flex justify-between items-center"
+                >
+                  <span className={selectedCountries.length > 0 ? "text-[#15201f] font-semibold" : "text-gray-400"}>
+                    {selectedCountries.length > 0 
+                      ? `${selectedCountries.length} countr${selectedCountries.length > 1 ? 'ies' : 'y'} selected` 
+                      : 'Select countries'}
+                  </span>
+                  <svg className={`w-5 h-5 text-gray-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {isDropdownOpen && (
+                  <div className="absolute z-10 w-full mt-2 bg-white border border-[#e7e1d6] rounded-xl shadow-lg max-h-60 overflow-y-auto py-1">
+                    {availableCountries.length === 0 ? (
+                      <div className="px-4 py-3 text-sm text-gray-500">Loading countries...</div>
+                    ) : (
+                      <div className="p-2 space-y-1">
+                        {availableCountries.map(country => (
+                          <label key={country.id} className="flex items-center px-3 py-2 hover:bg-[#f8fafc] rounded-lg cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={selectedCountries.includes(country.name)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedCountries([...selectedCountries, country.name]);
+                                } else {
+                                  setSelectedCountries(selectedCountries.filter(c => c !== country.name));
+                                }
+                              }}
+                              className="w-4 h-4 text-[#2563eb] border-gray-300 rounded focus:ring-[#2563eb]"
+                            />
+                            <span className="ml-3 text-[14px] text-[#15201f] font-medium">{country.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {/* Selected Chips */}
+              {selectedCountries.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {selectedCountries.map(c => (
+                    <span key={c} className="inline-flex items-center px-3 py-1 rounded-full text-[12px] font-semibold bg-[#e0e7ff] text-[#3730a3]">
+                      {c}
+                      <button 
+                        type="button" 
+                        onClick={() => setSelectedCountries(selectedCountries.filter(sc => sc !== c))} 
+                        className="ml-2 text-[#3730a3] hover:text-indigo-900 focus:outline-none"
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

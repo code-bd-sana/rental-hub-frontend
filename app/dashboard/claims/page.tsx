@@ -1,7 +1,8 @@
 'use client';
 
+import { ROLES } from '@/constants/roles';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../../lib/api/client';
 
 interface HostDocument {
@@ -40,25 +41,35 @@ interface HostProfile {
 
 export default function ClaimsPage() {
   const queryClient = useQueryClient();
-  const [errorMsg, setErrorMsg] = useState('');
+
+  const authData = typeof window !== 'undefined' ? localStorage.getItem('roamly_auth') : null;
+  const parsedAuth = authData ? JSON.parse(authData) : null;
+  const role = parsedAuth?.role;
+  const permissions = parsedAuth?.permissions || [];
+  const hasAccess = role === ROLES.SUPER_ADMIN || permissions.includes('APPROVE_CLAIMS');
 
   // Modal State
   const [selectedHost, setSelectedHost] = useState<HostProfile | null>(null);
 
-  const { data: hosts = [], isLoading: loading, error: queryError } = useQuery({
+  const {
+    data: hosts = [],
+    isLoading: loading,
+    error: queryError,
+  } = useQuery({
     queryKey: ['hosts'],
     queryFn: async () => {
       const response = await apiClient.get('/users/hosts');
       return response.data.data as HostProfile[];
-    }
+    },
+    enabled: hasAccess,
   });
 
   const actionMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string, status: string }) => {
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
       await apiClient.patch(`/users/host/${id}/approve`, { status });
       return status;
     },
-    onSuccess: (status) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hosts'] });
       if (selectedHost) {
         setSelectedHost(null); // Close modal on success
@@ -67,7 +78,7 @@ export default function ClaimsPage() {
     onError: (err: unknown) => {
       const error = err as { response?: { data?: { message?: string } } };
       alert(error.response?.data?.message || 'Failed to update status.');
-    }
+    },
   });
 
   const handleUpdateStatus = async (status: string) => {
@@ -76,7 +87,19 @@ export default function ClaimsPage() {
   };
 
   const actionLoading = actionMutation.isPending;
-  const error = errorMsg || (queryError as any)?.response?.data?.message || (queryError as Error)?.message || '';
+  const error =
+    (queryError as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+    (queryError as Error)?.message ||
+    '';
+
+  if (!hasAccess) {
+    return (
+      <div className='animate-in fade-in duration-300'>
+        <h2 className='text-[26px] font-bold mb-1 text-[#172554]'>Claims</h2>
+        <p className='text-[14px] text-[#6b7b79] mb-4.5'>You do not have access to claims.</p>
+      </div>
+    );
+  }
 
   const formatHostType = (type: string) => {
     return type

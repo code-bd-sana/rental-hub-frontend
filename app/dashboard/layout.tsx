@@ -2,11 +2,19 @@
 
 import { ROLES } from '@/constants/roles';
 
-import React, { useEffect, useState, Suspense } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import React, { Suspense, useEffect, useState } from 'react';
 
-function SidebarNav({ role, displayRole }: { role: string; displayRole: string }) {
+function SidebarNav({
+  role,
+  displayRole,
+  permissions = [],
+}: {
+  role: string;
+  displayRole: string;
+  permissions?: string[];
+}) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -34,7 +42,7 @@ function SidebarNav({ role, displayRole }: { role: string; displayRole: string }
       <nav className='flex flex-col flex-1'>
         <div className='flex flex-col gap-1'>
           <Link href='/dashboard' className={navClass('/dashboard')}>
-            {role === ROLES.AGENT ? 'My workspace' : 'Overview'}
+            {role === ROLES.AGENT || role === ROLES.LOADER ? 'My workspace' : 'Overview'}
           </Link>
           {role === ROLES.GUEST && (
             <>
@@ -59,10 +67,29 @@ function SidebarNav({ role, displayRole }: { role: string; displayRole: string }
               </Link>
             </>
           )}
-          {role === ROLES.AGENT && (
-            <button className='bg-transparent text-white text-left w-full px-3.25 py-2.75 rounded-[11px] text-[14px] font-semibold opacity-80 flex justify-between items-center hover:bg-[rgba(255,255,255,0.14)] hover:opacity-100 transition-colors'>
-              Load directory
-            </button>
+          {(role === ROLES.AGENT || role === ROLES.LOADER) && (
+            <>
+              {permissions.includes('LOAD_DIRECTORY') && (
+                <button className='bg-transparent text-white text-left w-full px-3.25 py-2.75 rounded-[11px] text-[14px] font-semibold opacity-80 flex justify-between items-center hover:bg-[rgba(255,255,255,0.14)] hover:opacity-100 transition-colors'>
+                  Load directory
+                </button>
+              )}
+              {permissions.includes('APPROVE_CLAIMS') && (
+                <Link href='/dashboard/claims' className={navClass('/dashboard/claims')}>
+                  Claims
+                </Link>
+              )}
+              {permissions.includes('MANAGE_GUESTS') && (
+                <Link href='/dashboard/guests' className={navClass('/dashboard/guests')}>
+                  Guests
+                </Link>
+              )}
+              {permissions.includes('MANAGE_TEAM') && (
+                <Link href='/dashboard/team' className={navClass('/dashboard/team')}>
+                  Team and access
+                </Link>
+              )}
+            </>
           )}
           {role === ROLES.SUPER_ADMIN && (
             <>
@@ -78,17 +105,14 @@ function SidebarNav({ role, displayRole }: { role: string; displayRole: string }
               <Link href='/dashboard/guests' className={navClass('/dashboard/guests')}>
                 Guests
               </Link>
-              <Link
-                href="/dashboard/team"
-                className={navClass("/dashboard/team")}
-              >
+              <Link href='/dashboard/team' className={navClass('/dashboard/team')}>
                 Team and access
               </Link>
             </>
           )}
-            <Link href='/dashboard/settings' className={navClass('/dashboard/settings')}>
-              Settings
-            </Link>
+          <Link href='/dashboard/settings' className={navClass('/dashboard/settings')}>
+            Settings
+          </Link>
         </div>
 
         <div className='mt-auto border-t border-[rgba(255,255,255,0.1)] pt-4'>
@@ -109,6 +133,7 @@ function SidebarNav({ role, displayRole }: { role: string; displayRole: string }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [role, setRole] = useState<string | null>(null);
+  const [permissions, setPermissions] = useState<string[]>([]);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
   const router = useRouter();
 
@@ -127,6 +152,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setRole(parsed.role);
+
+      setPermissions(parsed.permissions || []);
+
       setIsAuthChecking(false);
     } catch (e) {
       console.warn('Failed to parse auth data:', e);
@@ -151,7 +179,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <aside className='sticky top-0 h-screen overflow-y-auto flex-none w-55 bg-[#172554] p-5 rounded-r-[22px]'></aside>
         }
       >
-        <SidebarNav role={role!} displayRole={displayRole} />
+        <SidebarNav role={role!} displayRole={displayRole} permissions={permissions} />
       </Suspense>
       <main className='flex-1 p-6 md:p-[22px_26px] min-w-0'>{children}</main>
     </div>

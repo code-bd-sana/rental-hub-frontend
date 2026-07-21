@@ -48,7 +48,7 @@ export function Settings() {
 
     try {
       // 1. Update Profile
-      const res = await apiClient.patch('/users/me', { name, email, phone });
+      const res = await apiClient.patch('/users/me', { name, phone });
       
       // 2. Update Password if fields are filled
       if (oldPassword || newPassword || confirmPassword) {
@@ -135,10 +135,10 @@ export function Settings() {
                 </label>
                 <input 
                   type="email" 
-                  required
+                  disabled
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full border border-[#e7e1d6] rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors"
+                  className="w-full border border-[#e7e1d6] rounded-xl px-4 py-3 text-[14px] bg-[#f8fafc] text-[#6b7b79] cursor-not-allowed focus:outline-none transition-colors"
                 />
               </div>
               

@@ -26,6 +26,7 @@ export function TeamAndAccess() {
   const [role, setRole] = useState('AGENT');
   const [countriesStr, setCountriesStr] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState<AdminPermission[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -63,7 +64,31 @@ export function TeamAndAccess() {
     }
   };
 
-  const handleAddAgent = async (e: React.FormEvent) => {
+  const resetForm = () => {
+    setName('');
+    setEmail('');
+    setRole('AGENT');
+    setCountriesStr('');
+    setSelectedPermissions([]);
+    setEditingId(null);
+  };
+
+  const handleEditClick = (member: TeamMember) => {
+    setEditingId(member.id);
+    setName(member.name);
+    setEmail(member.email);
+    setRole(member.role);
+    setCountriesStr(member.agentProfile?.assignedCountries?.join(', ') || '');
+    setSelectedPermissions(member.agentProfile?.permissions || []);
+    
+    // Scroll to form smoothly
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: 'smooth'
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email) {
       alert("Name and email are required");
@@ -74,29 +99,34 @@ export function TeamAndAccess() {
       setIsSubmitting(true);
       const assignedCountries = countriesStr.split(',').map(c => c.trim()).filter(c => c);
       
-      const payload = {
-        name,
-        email,
-        role,
-        assignedCountries,
-        permissions: selectedPermissions
-      };
-
-      const res = await apiClient.post('/admin/team', payload);
-      if (res.data.success) {
-        // Reset form
-        setName('');
-        setEmail('');
-        setRole('AGENT');
-        setCountriesStr('');
-        setSelectedPermissions([]);
-        
-        // Refresh list
-        fetchMembers();
+      if (editingId) {
+        const payload = {
+          role,
+          assignedCountries,
+          permissions: selectedPermissions
+        };
+        const res = await apiClient.patch(`/admin/team/${editingId}`, payload);
+        if (res.data.success) {
+          resetForm();
+          fetchMembers();
+        }
+      } else {
+        const payload = {
+          name,
+          email,
+          role,
+          assignedCountries,
+          permissions: selectedPermissions
+        };
+        const res = await apiClient.post('/admin/team', payload);
+        if (res.data.success) {
+          resetForm();
+          fetchMembers();
+        }
       }
     } catch (error: any) {
-      console.error('Failed to add agent:', error);
-      alert(error.response?.data?.message || 'Failed to add agent');
+      console.error('Failed to save agent:', error);
+      alert(error.response?.data?.message || 'Failed to save agent');
     } finally {
       setIsSubmitting(false);
     }
@@ -179,7 +209,10 @@ export function TeamAndAccess() {
                     <td className="py-4 px-5 text-right">
                       {member.role !== 'SUPER_ADMIN' ? (
                         <div className="flex items-center justify-end gap-2">
-                          <button className="px-3 py-1.5 rounded-lg border border-[#e7e1d6] text-[12px] font-semibold text-[#15201f] hover:bg-[#f8fafc] transition-colors">
+                          <button 
+                            onClick={() => handleEditClick(member)}
+                            className="px-3 py-1.5 rounded-lg border border-[#e7e1d6] text-[12px] font-semibold text-[#15201f] hover:bg-[#f8fafc] transition-colors"
+                          >
                             Edit access
                           </button>
                           <button 
@@ -204,20 +237,21 @@ export function TeamAndAccess() {
       {/* Form Section */}
       <div className="bg-white rounded-2xl border border-[#e7e1d6] shadow-sm p-6">
         <h3 className="text-[18px] font-bold text-[#172554] mb-6" style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
-          Add an agent
+          {editingId ? 'Edit access' : 'Add an agent'}
         </h3>
         
-        <form onSubmit={handleAddAgent} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-[13px] font-bold text-[#15201f] mb-2">Name</label>
               <input 
                 type="text" 
                 required
+                disabled={!!editingId}
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Agent name"
-                className="w-full border border-[#e7e1d6] rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors bg-[#f8fafc]"
+                className="w-full border border-[#e7e1d6] rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors bg-[#f8fafc] disabled:opacity-60 disabled:cursor-not-allowed"
               />
             </div>
             
@@ -226,10 +260,11 @@ export function TeamAndAccess() {
               <input 
                 type="email" 
                 required
+                disabled={!!editingId}
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="Agent email"
-                className="w-full border border-[#e7e1d6] rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors bg-[#f8fafc]"
+                className="w-full border border-[#e7e1d6] rounded-xl px-4 py-3 text-[14px] focus:outline-none focus:border-[#2563eb] transition-colors bg-[#f8fafc] disabled:opacity-60 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -281,13 +316,25 @@ export function TeamAndAccess() {
             </p>
           </div>
 
-          <button 
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-[#2563eb] text-white font-bold py-3.5 px-4 rounded-xl hover:bg-[#1d4ed8] transition-colors disabled:opacity-50"
-          >
-            {isSubmitting ? 'Adding agent...' : 'Add agent'}
-          </button>
+          <div className="flex gap-4">
+            <button 
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 bg-[#2563eb] text-white font-bold py-3.5 px-4 rounded-xl hover:bg-[#1d4ed8] transition-colors disabled:opacity-50"
+            >
+              {isSubmitting ? (editingId ? 'Saving changes...' : 'Adding agent...') : (editingId ? 'Save changes' : 'Add agent')}
+            </button>
+            {editingId && (
+              <button 
+                type="button"
+                onClick={resetForm}
+                disabled={isSubmitting}
+                className="flex-1 bg-white border border-[#e7e1d6] text-[#15201f] font-bold py-3.5 px-4 rounded-xl hover:bg-[#f8fafc] transition-colors disabled:opacity-50"
+              >
+                Cancel edit
+              </button>
+            )}
+          </div>
         </form>
       </div>
     </div>

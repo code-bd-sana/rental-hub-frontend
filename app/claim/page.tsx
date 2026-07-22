@@ -1,6 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
-
-import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -12,6 +11,9 @@ interface Listing {
   location?: string;
   category: string;
   images?: { url: string }[];
+  country?: string;
+  businessNumber?: string;
+  address?: string;
 }
 
 export default function ClaimBusinessPage() {
@@ -35,37 +37,47 @@ export default function ClaimBusinessPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Fetch some directory data for search
-    const fetchListings = async () => {
+    // Fetch unclaimed directories
+    const fetchDirectories = async () => {
       try {
-        const res = await apiClient.get('/listings');
+        const res = await apiClient.get('/directory?status=UNCLAIMED');
         const data = res.data?.data || res.data || [];
         if (data.length > 0) {
-          setListings(data);
+          const mapped = data.map(
+            (d: {
+              id: string;
+              businessName: string;
+              address: string;
+              country: string;
+              businessNumber: string;
+              primaryImage?: string;
+            }) => ({
+              id: d.id,
+              title: d.businessName,
+              location: d.address,
+              category: 'BUSINESS',
+              country: d.country,
+              businessNumber: d.businessNumber,
+              address: d.address,
+              images: d.primaryImage
+                ? [
+                    {
+                      url: `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'}${d.primaryImage.startsWith('/') ? '' : '/'}${d.primaryImage}`,
+                    },
+                  ]
+                : [],
+            }),
+          );
+          setListings(mapped);
         } else {
-          setListings([
-            {
-              id: 'mock1',
-              title: 'Oceanview Villa',
-              location: 'Bali, Indonesia',
-              category: 'STAY',
-            },
-            { id: 'mock2', title: 'Gourmet Kitchen', location: 'Paris, France', category: 'FOOD' },
-            { id: 'mock3', title: 'Luxury Rides', location: 'Miami, USA', category: 'CAR' },
-            { id: 'mock4', title: 'Urban Retreat', location: 'New York, USA', category: 'STAY' },
-          ]);
+          setListings([]);
         }
       } catch (err) {
-        console.error('Failed to load listings', err);
-        setListings([
-          { id: 'mock1', title: 'Oceanview Villa', location: 'Bali, Indonesia', category: 'STAY' },
-          { id: 'mock2', title: 'Gourmet Kitchen', location: 'Paris, France', category: 'FOOD' },
-          { id: 'mock3', title: 'Luxury Rides', location: 'Miami, USA', category: 'CAR' },
-          { id: 'mock4', title: 'Urban Retreat', location: 'New York, USA', category: 'STAY' },
-        ]);
+        console.error('Failed to load directories', err);
+        setListings([]);
       }
     };
-    fetchListings();
+    fetchDirectories();
   }, []);
 
   useEffect(() => {
@@ -100,7 +112,9 @@ export default function ClaimBusinessPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!idCard || !proofOwnership || !businessRegistration) {
-      toast.error('Please upload all 3 required documents (ID, Proof of Ownership, and Registration).');
+      toast.error(
+        'Please upload all 3 required documents (ID, Proof of Ownership, and Registration).',
+      );
       return;
     }
     setLoading(true);
@@ -160,22 +174,75 @@ export default function ClaimBusinessPage() {
                 filteredListings.map((listing) => (
                   <div
                     key={listing.id}
-                    className='bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-3 shadow-sm hover:shadow-md transition-shadow'
+                    className='bg-white border border-[#f1f5f9] rounded-2xl overflow-hidden shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all flex flex-col group'
                   >
-                    <div className='flex gap-3 items-center'>
-                      <div className='w-14 h-14 bg-gray-100 rounded-lg overflow-hidden flex-none relative'>
-                        {listing.images?.[0] ? (
-                          <Image
-                            src={listing.images[0].url}
-                            alt={listing.title}
-                            fill
-                            sizes='56px'
-                            className='object-cover'
-                          />
-                        ) : (
-                          <div className='w-full h-full flex items-center justify-center text-gray-400 bg-[#dbeafe]'>
+                    <div className='relative h-48 w-full bg-gray-100 overflow-hidden'>
+                      {listing.images?.[0] ? (
+                        <img
+                          src={listing.images[0].url}
+                          alt={listing.title}
+                          className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-500'
+                        />
+                      ) : (
+                        <div className='w-full h-full flex items-center justify-center text-[#2563eb] bg-[#dbeafe]'>
+                          <svg
+                            className='w-8 h-8'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                            stroke='currentColor'
+                          >
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              strokeWidth={1.5}
+                              d='M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
+                            />
+                          </svg>
+                        </div>
+                      )}
+                      <div className='absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-bold text-[#1e40af] shadow-sm tracking-wide'>
+                        {listing.country || listing.category}
+                      </div>
+                    </div>
+
+                    <div className='p-5 flex flex-col grow'>
+                      <h3
+                        className='font-extrabold text-[#172554] text-lg leading-tight mb-4 truncate'
+                        title={listing.title}
+                      >
+                        {listing.title}
+                      </h3>
+
+                      <div className='space-y-3 mb-6 text-sm text-[#6b7b79] grow'>
+                        <div className='flex items-start gap-2.5'>
+                          <svg
+                            className='w-4.5 h-4.5 mt-0.5 shrink-0 text-gray-400'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                            stroke='currentColor'
+                          >
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              strokeWidth={1.5}
+                              d='M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z'
+                            />
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              strokeWidth={1.5}
+                              d='M15 11a3 3 0 11-6 0 3 3 0 016 0z'
+                            />
+                          </svg>
+                          <span className='line-clamp-2 leading-relaxed'>
+                            {listing.address || listing.location}
+                          </span>
+                        </div>
+
+                        {listing.businessNumber && (
+                          <div className='flex items-center gap-2.5'>
                             <svg
-                              className='w-6 h-6 text-[#2563eb]'
+                              className='w-4.5 h-4.5 shrink-0 text-gray-400'
                               fill='none'
                               viewBox='0 0 24 24'
                               stroke='currentColor'
@@ -183,31 +250,35 @@ export default function ClaimBusinessPage() {
                               <path
                                 strokeLinecap='round'
                                 strokeLinejoin='round'
-                                strokeWidth={2}
-                                d='M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
+                                strokeWidth={1.5}
+                                d='M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z'
                               />
                             </svg>
+                            <span className='truncate'>{listing.businessNumber}</span>
                           </div>
                         )}
                       </div>
-                      <div className='min-w-0'>
-                        <h3 className='font-bold text-[#1e293b] text-[15px] truncate'>
-                          {listing.title}
-                        </h3>
-                        <p className='text-gray-500 text-[13px] truncate'>
-                          {listing.location || 'Unknown Location'}
-                        </p>
-                        <span className='inline-block bg-[#dbeafe] text-[#1e40af] text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 uppercase tracking-wide'>
-                          {listing.category}
-                        </span>
-                      </div>
+
+                      <button
+                        onClick={() => handleClaimSelect(listing)}
+                        className='w-full bg-[#172554] text-white py-2.5 rounded-xl font-bold text-[13px] hover:bg-[#2563eb] transition-colors mt-auto shadow-sm flex items-center justify-center gap-2'
+                      >
+                        Claim this business
+                        <svg
+                          className='w-4 h-4'
+                          fill='none'
+                          viewBox='0 0 24 24'
+                          stroke='currentColor'
+                        >
+                          <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            strokeWidth={2}
+                            d='M14 5l7 7m0 0l-7 7m7-7H3'
+                          />
+                        </svg>
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleClaimSelect(listing)}
-                      className='w-full bg-[#2563eb] text-white py-2 rounded-lg font-bold text-[13px] hover:bg-[#1e40af] transition-colors mt-auto'
-                    >
-                      Claim this business
-                    </button>
                   </div>
                 ))
               ) : (

@@ -1,223 +1,196 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
-import { ROLES } from '@/constants/roles';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { apiClient } from '../../../lib/api/client';
 
-interface HostDocument {
-  id: string;
-  documentType: string;
-  fileUrl: string;
-  uploadedAt: string;
-}
-
-interface HostUser {
-  id: string;
+interface User {
   name: string;
   email: string;
-  phone: string;
-  role: string;
-  isActive: boolean;
 }
 
-interface HostProfile {
+interface DirectoryListing {
   id: string;
-  userId: string;
-  user: HostUser;
-  hostTypes: string[];
-  businessName: string | null;
-  location: string | null;
+  businessName: string;
+  country: string;
+  businessNumber: string | null;
   address: string | null;
-  country: string | null;
-  city: string | null;
-  state: string | null;
-  registrationNumber: string | null;
-  description: string | null;
-  approvalStatus: 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
-  documents: HostDocument[];
-  createdAt: string;
+  primaryImage: string | null;
 }
 
-export default function ClaimsPage() {
+interface ClaimRequest {
+  id: string;
+  directoryListingId: string;
+  userId: string;
+  idCardUrl: string;
+  proofOfOwnershipUrl: string;
+  businessRegistration: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt: string;
+  user: User;
+  directoryListing: DirectoryListing;
+}
+
+export default function ClaimsDashboardPage() {
   const queryClient = useQueryClient();
 
-  const authData = typeof window !== 'undefined' ? localStorage.getItem('roamly_auth') : null;
-  const parsedAuth = authData ? JSON.parse(authData) : null;
-  const role = parsedAuth?.role;
-  const permissions = parsedAuth?.permissions || [];
-  const hasAccess = role === ROLES.SUPER_ADMIN || permissions.includes('APPROVE_CLAIMS');
-
-  // Modal State
-  const [selectedHost, setSelectedHost] = useState<HostProfile | null>(null);
+  const [selectedClaim, setSelectedClaim] = useState<ClaimRequest | null>(null);
+  const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('PENDING');
 
   const {
-    data: hosts = [],
-    isLoading: loading,
-    error: queryError,
+    data: claims = [],
+    isLoading,
+    error,
   } = useQuery({
-    queryKey: ['hosts'],
+    queryKey: ['claims'],
     queryFn: async () => {
-      const response = await apiClient.get('/users/hosts');
-      return response.data.data as HostProfile[];
+      const response = await apiClient.get('/claims');
+      return response.data.data as ClaimRequest[];
     },
-    enabled: hasAccess,
   });
 
   const actionMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      await apiClient.patch(`/users/host/${id}/approve`, { status });
-      return status;
+    mutationFn: async ({ id, action }: { id: string; action: 'approve' | 'reject' }) => {
+      await apiClient.patch(`/claims/${id}/${action}`);
+      return action;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['hosts'] });
-      if (selectedHost) {
-        setSelectedHost(null); // Close modal on success
-      }
+    onSuccess: (action) => {
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+      toast.success(`Claim ${action}d successfully`);
+      setSelectedClaim(null);
     },
     onError: (err: unknown) => {
-      const error = err as { response?: { data?: { message?: string } } };
-      alert(error.response?.data?.message || 'Failed to update status.');
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        toast.error(axiosErr.response?.data?.message || 'Failed to update claim');
+      } else {
+        toast.error('Failed to update claim');
+      }
     },
   });
 
-  const handleUpdateStatus = async (status: string) => {
-    if (!selectedHost) return;
-    actionMutation.mutate({ id: selectedHost.id, status });
+  const handleAction = (id: string, action: 'approve' | 'reject') => {
+    actionMutation.mutate({ id, action });
   };
 
-  const actionLoading = actionMutation.isPending;
-  const error =
-    (queryError as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-    (queryError as Error)?.message ||
-    '';
+  const filteredClaims = claims.filter((claim) =>
+    filter === 'ALL' ? true : claim.status === filter,
+  );
 
-  if (!hasAccess) {
+  if (isLoading) {
     return (
-      <div className='animate-in fade-in duration-300'>
-        <h2 className='text-[26px] font-bold mb-1 text-[#172554]'>Claims</h2>
-        <p className='text-[14px] text-[#6b7b79] mb-4.5'>You do not have access to claims.</p>
+      <div className='flex items-center justify-center min-h-100'>
+        <div className='w-8 h-8 border-4 border-[#2563eb] border-t-transparent rounded-full animate-spin'></div>
       </div>
     );
   }
 
-  const formatHostType = (type: string) => {
-    return type
-      .split('_')
-      .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
-      .join(' ');
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return (
-          <span className='bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold border border-amber-200 shadow-sm'>
-            Pending Review
-          </span>
-        );
-      case 'APPROVED':
-        return (
-          <span className='bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200 shadow-sm'>
-            Approved
-          </span>
-        );
-      case 'REJECTED':
-        return (
-          <span className='bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold border border-red-200 shadow-sm'>
-            Rejected
-          </span>
-        );
-      case 'SUSPENDED':
-        return (
-          <span className='bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold border border-slate-200 shadow-sm'>
-            Suspended
-          </span>
-        );
-      default:
-        return (
-          <span className='bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-bold'>
-            {status}
-          </span>
-        );
-    }
-  };
+  if (error) {
+    return (
+      <div className='bg-red-50 text-red-600 p-4 rounded-xl'>
+        Failed to load claims. Please try again.
+      </div>
+    );
+  }
 
   return (
-    <div className='animate-in fade-in duration-500'>
-      <div className='flex justify-between items-end mb-8'>
+    <div className='animate-in fade-in duration-500 max-w-6xl mx-auto'>
+      <div className='flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4'>
         <div>
           <h1
-            className='text-3xl font-extrabold text-[#172554] tracking-tight mb-2'
+            className='text-3xl font-bold text-[#172554] mb-2'
             style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
           >
-            Host Claims
+            Business Claims
           </h1>
-          <p className='text-[#6b7b79] text-[15px] max-w-2xl'>
-            Review and manage incoming host applications. Approving a host grants them access to the
-            dashboard to list their properties.
-          </p>
+          <p className='text-gray-500'>Review and manage business ownership claims.</p>
+        </div>
+
+        <div className='bg-white p-1 rounded-lg border border-gray-200 inline-flex shadow-sm'>
+          {['ALL', 'PENDING', 'APPROVED', 'REJECTED'].map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f as 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED')}
+              className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${
+                filter === f
+                  ? 'bg-[#f1f5f9] text-[#0f172a]'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              {f.charAt(0) + f.slice(1).toLowerCase()}
+            </button>
+          ))}
         </div>
       </div>
 
-      {error && (
-        <div className='mb-6 p-4 text-sm text-red-600 bg-red-50 rounded-xl font-medium border border-red-100'>
-          {error}
-        </div>
-      )}
-
-      <div className='bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#f1f5f9] overflow-hidden'>
+      <div className='bg-white border border-[#f1f5f9] rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] overflow-hidden'>
         <div className='overflow-x-auto'>
-          <table className='w-full text-left text-sm'>
-            <thead className='bg-[#f8fafc] text-[#6b7b79] font-semibold text-[13px] uppercase tracking-wider border-b border-[#f1f5f9]'>
-              <tr>
-                <th className='px-6 py-4'>Host Name</th>
-                <th className='px-6 py-4'>Business / Types</th>
-                <th className='px-6 py-4'>Location</th>
-                <th className='px-6 py-4'>Status</th>
-                <th className='px-6 py-4 text-right'>Action</th>
+          <table className='w-full text-left border-collapse'>
+            <thead>
+              <tr className='bg-[#f8fafc] border-b border-gray-100'>
+                <th className='p-5 text-sm font-bold text-[#1e293b] uppercase tracking-wider'>
+                  Business
+                </th>
+                <th className='p-5 text-sm font-bold text-[#1e293b] uppercase tracking-wider'>
+                  Claimant
+                </th>
+                <th className='p-5 text-sm font-bold text-[#1e293b] uppercase tracking-wider'>
+                  Status
+                </th>
+                <th className='p-5 text-sm font-bold text-[#1e293b] uppercase tracking-wider'>
+                  Date
+                </th>
+                <th className='p-5 text-sm font-bold text-[#1e293b] uppercase tracking-wider text-right'>
+                  Action
+                </th>
               </tr>
             </thead>
-            <tbody className='divide-y divide-[#f1f5f9]'>
-              {loading ? (
+            <tbody className='divide-y divide-gray-100'>
+              {filteredClaims.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className='px-6 py-12 text-center text-[#6b7b79]'>
-                    <div className='inline-block w-8 h-8 border-4 border-[#2563eb] border-t-transparent rounded-full animate-spin'></div>
-                  </td>
-                </tr>
-              ) : hosts.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className='px-6 py-12 text-center text-[#6b7b79] font-medium'>
-                    No host claims found.
+                  <td colSpan={5} className='p-8 text-center text-gray-500'>
+                    No claims found for this filter.
                   </td>
                 </tr>
               ) : (
-                hosts.map((host) => (
-                  <tr key={host.id} className='hover:bg-[#f8fafc] transition-colors group'>
-                    <td className='px-6 py-4'>
-                      <div className='font-bold text-[#172554]'>{host.user?.name || 'Unknown'}</div>
-                      <div className='text-[#6b7b79] text-xs mt-0.5'>
-                        {host.user?.email || 'Unknown'}
+                filteredClaims.map((claim) => (
+                  <tr key={claim.id} className='hover:bg-gray-50 transition-colors'>
+                    <td className='p-5'>
+                      <div className='font-bold text-[#0f172a]'>
+                        {claim.directoryListing.businessName}
                       </div>
+                      <div className='text-sm text-gray-500'>{claim.directoryListing.country}</div>
                     </td>
-                    <td className='px-6 py-4'>
-                      <div className='font-semibold text-[#15201f]'>
-                        {host.businessName || 'Individual'}
-                      </div>
-                      <div className='text-[#6b7b79] text-xs mt-0.5 max-w-50 truncate'>
-                        {host.hostTypes?.map(formatHostType).join(', ') || 'Unspecified'}
-                      </div>
+                    <td className='p-5'>
+                      <div className='font-bold text-[#0f172a]'>{claim.user.name}</div>
+                      <div className='text-sm text-gray-500'>{claim.user.email}</div>
                     </td>
-                    <td className='px-6 py-4 text-[#15201f] font-medium'>
-                      {host.city || host.country
-                        ? `${host.city || ''}, ${host.country || ''}`.replace(/^, /, '')
-                        : 'N/A'}
+                    <td className='p-5'>
+                      {claim.status === 'PENDING' && (
+                        <span className='bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold'>
+                          Pending
+                        </span>
+                      )}
+                      {claim.status === 'APPROVED' && (
+                        <span className='bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold'>
+                          Approved
+                        </span>
+                      )}
+                      {claim.status === 'REJECTED' && (
+                        <span className='bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold'>
+                          Rejected
+                        </span>
+                      )}
                     </td>
-                    <td className='px-6 py-4'>{getStatusBadge(host.approvalStatus)}</td>
-                    <td className='px-6 py-4 text-right'>
+                    <td className='p-5 text-sm text-gray-600'>
+                      {new Date(claim.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className='p-5 text-right'>
                       <button
-                        onClick={() => setSelectedHost(host)}
-                        className='text-[#2563eb] font-bold text-[13px] hover:text-[#1e40af] bg-blue-50 px-3 py-1.5 rounded-lg transition-all hover:bg-blue-100'
+                        onClick={() => setSelectedClaim(claim)}
+                        className='px-4 py-2 bg-white border border-gray-200 text-sm font-bold text-[#0f172a] rounded-lg hover:bg-gray-50 transition-colors shadow-sm'
                       >
                         Review
                       </button>
@@ -230,197 +203,157 @@ export default function ClaimsPage() {
         </div>
       </div>
 
-      {/* Details Modal */}
-      {selectedHost && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#172554]/30 backdrop-blur-sm animate-in fade-in duration-200'>
-          <div className='bg-white rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]'>
-            <div className='flex justify-between items-center p-6 border-b border-[#f1f5f9]'>
+      {/* Review Modal */}
+      {selectedClaim && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#172554]/40 backdrop-blur-sm animate-in fade-in duration-200'>
+          <div className='bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl p-8 animate-in zoom-in-95 duration-200 flex flex-col'>
+            <div className='flex justify-between items-start mb-6'>
               <div>
                 <h2
-                  className='text-2xl font-bold text-[#172554]'
+                  className='text-2xl font-bold text-[#1e293b] mb-1'
                   style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
                 >
-                  Review Application
+                  Review Claim Request
                 </h2>
-                <div className='text-sm text-[#6b7b79] mt-1'>
-                  Submitted on {new Date(selectedHost.createdAt).toLocaleDateString()}
-                </div>
+                <p className='text-gray-500 text-[14px]'>
+                  Review documents submitted by {selectedClaim.user.name} for{' '}
+                  {selectedClaim.directoryListing.businessName}.
+                </p>
               </div>
               <button
-                onClick={() => setSelectedHost(null)}
-                className='p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-500 transition-colors'
+                onClick={() => setSelectedClaim(null)}
+                className='text-gray-400 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full p-2 transition-colors'
               >
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  className='h-5 w-5'
-                  viewBox='0 0 20 20'
-                  fill='currentColor'
-                >
+                <svg className='w-5 h-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
                   <path
-                    fillRule='evenodd'
-                    d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
-                    clipRule='evenodd'
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M6 18L18 6M6 6l12 12'
                   />
                 </svg>
               </button>
             </div>
 
-            <div className='p-6 overflow-y-auto bg-[#f8fafc]'>
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                {/* User Info */}
-                <div className='bg-white p-5 rounded-2xl border border-[#f1f5f9] shadow-sm'>
-                  <h3 className='text-xs font-bold uppercase tracking-wider text-[#6b7b79] mb-4'>
-                    Contact Information
+            <div className='grid sm:grid-cols-2 gap-8 mb-8'>
+              <div className='space-y-6'>
+                <div>
+                  <h3 className='text-sm font-bold text-gray-400 uppercase tracking-wider mb-2'>
+                    Claimant Info
                   </h3>
-                  <div className='space-y-3 text-[14px]'>
-                    <div className='flex justify-between border-b border-gray-50 pb-2'>
-                      <span className='text-gray-500'>Name</span>
-                      <span className='font-semibold text-[#15201f]'>
-                        {selectedHost.user?.name || 'N/A'}
-                      </span>
+                  <div className='bg-gray-50 p-4 rounded-xl'>
+                    <div className='font-bold text-[#0f172a]'>{selectedClaim.user.name}</div>
+                    <div className='text-sm text-gray-500'>{selectedClaim.user.email}</div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className='text-sm font-bold text-gray-400 uppercase tracking-wider mb-2'>
+                    Business Info
+                  </h3>
+                  <div className='bg-gray-50 p-4 rounded-xl'>
+                    <div className='font-bold text-[#0f172a]'>
+                      {selectedClaim.directoryListing.businessName}
                     </div>
-                    <div className='flex justify-between border-b border-gray-50 pb-2'>
-                      <span className='text-gray-500'>Email</span>
-                      <span className='font-semibold text-[#15201f]'>
-                        {selectedHost.user?.email || 'N/A'}
-                      </span>
+                    <div className='text-sm text-gray-500'>
+                      {selectedClaim.directoryListing.address}
                     </div>
-                    <div className='flex justify-between pb-1'>
-                      <span className='text-gray-500'>Phone</span>
-                      <span className='font-semibold text-[#15201f]'>
-                        {selectedHost.user?.phone || 'N/A'}
-                      </span>
+                    <div className='text-sm text-gray-500'>
+                      Country: {selectedClaim.directoryListing.country}
                     </div>
                   </div>
                 </div>
-
-                {/* Business Info */}
-                <div className='bg-white p-5 rounded-2xl border border-[#f1f5f9] shadow-sm'>
-                  <h3 className='text-xs font-bold uppercase tracking-wider text-[#6b7b79] mb-4'>
-                    Business Details
+                <div>
+                  <h3 className='text-sm font-bold text-gray-400 uppercase tracking-wider mb-2'>
+                    Registration Number
                   </h3>
-                  <div className='space-y-3 text-[14px]'>
-                    <div className='flex justify-between border-b border-gray-50 pb-2'>
-                      <span className='text-gray-500'>Business Name</span>
-                      <span className='font-semibold text-[#15201f]'>
-                        {selectedHost.businessName || 'None'}
-                      </span>
-                    </div>
-                    <div className='flex justify-between border-b border-gray-50 pb-2'>
-                      <span className='text-gray-500'>Reg. Number</span>
-                      <span className='font-semibold text-[#15201f]'>
-                        {selectedHost.registrationNumber || 'None'}
-                      </span>
-                    </div>
-                    <div className='flex justify-between border-b border-gray-50 pb-2'>
-                      <span className='text-gray-500'>Types</span>
-                      <span className='font-semibold text-[#15201f] text-right max-w-50 wrap-break-word'>
-                        {selectedHost.hostTypes?.map(formatHostType).join(', ') || 'None'}
-                      </span>
-                    </div>
-                    <div className='flex justify-between pb-1'>
-                      <span className='text-gray-500'>Address</span>
-                      <span className='font-semibold text-[#15201f] text-right max-w-37.5'>
-                        {selectedHost.address
-                          ? `${selectedHost.address}, ${selectedHost.city || ''}, ${selectedHost.country || ''}`
-                          : 'N/A'}
-                      </span>
-                    </div>
+                  <div className='bg-[#dbeafe] text-[#1e40af] p-4 rounded-xl font-mono font-bold text-lg text-center border border-blue-200 shadow-inner'>
+                    {selectedClaim.businessRegistration}
                   </div>
                 </div>
+              </div>
 
-                {/* Documents */}
-                <div className='bg-white p-5 rounded-2xl border border-[#f1f5f9] shadow-sm md:col-span-2'>
-                  <h3 className='text-xs font-bold uppercase tracking-wider text-[#6b7b79] mb-4 flex items-center justify-between'>
-                    Uploaded Documents
-                    <span className='bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-[10px]'>
-                      {selectedHost.documents?.length || 0} Files
-                    </span>
+              <div className='space-y-6'>
+                <div>
+                  <h3 className='text-sm font-bold text-gray-400 uppercase tracking-wider mb-2'>
+                    1. ID Card
                   </h3>
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'}${selectedClaim.idCardUrl.startsWith('/') ? '' : '/'}${selectedClaim.idCardUrl}`}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='block border-2 border-gray-200 rounded-xl overflow-hidden hover:border-[#2563eb] transition-colors group aspect-video relative bg-gray-100'
+                  >
+                    <img
+                      src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'}${selectedClaim.idCardUrl.startsWith('/') ? '' : '/'}${selectedClaim.idCardUrl}`}
+                      alt='ID Card'
+                      className='w-full h-full object-cover group-hover:opacity-90 transition-opacity'
+                      onError={(e) => {
+                        e.currentTarget.src = '';
+                        e.currentTarget.className = 'hidden';
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                    <div className='hidden absolute inset-0 items-center justify-center font-bold text-gray-500'>
+                      View Document (PDF/Doc)
+                    </div>
+                  </a>
+                </div>
 
-                  {!selectedHost.documents || selectedHost.documents.length === 0 ? (
-                    <div className='text-center py-6 text-sm text-gray-400 italic bg-gray-50 rounded-xl border border-dashed border-gray-200'>
-                      No documents uploaded.
+                <div>
+                  <h3 className='text-sm font-bold text-gray-400 uppercase tracking-wider mb-2'>
+                    2. Proof of Ownership
+                  </h3>
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'}${selectedClaim.proofOfOwnershipUrl.startsWith('/') ? '' : '/'}${selectedClaim.proofOfOwnershipUrl}`}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='block border-2 border-gray-200 rounded-xl overflow-hidden hover:border-[#2563eb] transition-colors group aspect-video relative bg-gray-100'
+                  >
+                    <img
+                      src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'}${selectedClaim.proofOfOwnershipUrl.startsWith('/') ? '' : '/'}${selectedClaim.proofOfOwnershipUrl}`}
+                      alt='Proof of Ownership'
+                      className='w-full h-full object-cover group-hover:opacity-90 transition-opacity'
+                      onError={(e) => {
+                        e.currentTarget.src = '';
+                        e.currentTarget.className = 'hidden';
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                    <div className='hidden absolute inset-0 items-center justify-center font-bold text-gray-500'>
+                      View Document (PDF/Doc)
                     </div>
-                  ) : (
-                    <div className='grid grid-cols-2 sm:grid-cols-3 gap-4'>
-                      {selectedHost.documents.map((doc) => (
-                        <a
-                          key={doc.id}
-                          href={
-                            doc.fileUrl.startsWith('http')
-                              ? doc.fileUrl
-                              : `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'}${doc.fileUrl.startsWith('/') ? '' : '/'}${doc.fileUrl}`
-                          }
-                          target='_blank'
-                          rel='noreferrer'
-                          className='flex flex-col items-center justify-center p-4 bg-[#f8fafc] border border-[#e7e1d6] rounded-xl hover:border-[#2563eb] hover:bg-blue-50 transition-colors group'
-                        >
-                          <svg
-                            xmlns='http://www.w3.org/2000/svg'
-                            className='h-8 w-8 text-[#6b7b79] group-hover:text-[#2563eb] mb-2 transition-colors'
-                            fill='none'
-                            viewBox='0 0 24 24'
-                            stroke='currentColor'
-                          >
-                            <path
-                              strokeLinecap='round'
-                              strokeLinejoin='round'
-                              strokeWidth={1.5}
-                              d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-                            />
-                          </svg>
-                          <span className='text-xs font-semibold text-[#15201f] text-center w-full truncate px-2'>
-                            {doc.documentType}
-                          </span>
-                          <span className='text-[10px] text-gray-400 mt-1 uppercase'>
-                            Click to view
-                          </span>
-                        </a>
-                      ))}
-                    </div>
-                  )}
+                  </a>
                 </div>
               </div>
             </div>
 
-            <div className='p-5 border-t border-[#f1f5f9] bg-white flex items-center justify-between'>
-              <div>
-                <span className='text-sm text-gray-500 mr-3'>Current Status:</span>
-                {getStatusBadge(selectedHost.approvalStatus)}
-              </div>
-
-              <div className='flex gap-3'>
-                {selectedHost.approvalStatus !== 'REJECTED' && (
+            <div className='mt-auto flex justify-end gap-3 pt-6 border-t border-gray-100'>
+              <button
+                onClick={() => setSelectedClaim(null)}
+                className='px-6 py-3 rounded-xl font-bold text-[15px] bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors'
+              >
+                Close
+              </button>
+              {selectedClaim.status === 'PENDING' && (
+                <>
                   <button
-                    disabled={actionLoading}
-                    onClick={() => handleUpdateStatus('REJECTED')}
-                    className='px-5 py-2.5 rounded-[30px] font-bold text-sm bg-red-50 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50'
+                    onClick={() => handleAction(selectedClaim.id, 'reject')}
+                    disabled={actionMutation.isPending}
+                    className='px-6 py-3 bg-red-50 text-red-600 rounded-xl font-bold text-[15px] hover:bg-red-100 transition-colors disabled:opacity-50'
                   >
                     Reject
                   </button>
-                )}
-
-                {selectedHost.approvalStatus !== 'SUSPENDED' && (
                   <button
-                    disabled={actionLoading}
-                    onClick={() => handleUpdateStatus('SUSPENDED')}
-                    className='px-5 py-2.5 rounded-[30px] font-bold text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors disabled:opacity-50'
+                    onClick={() => handleAction(selectedClaim.id, 'approve')}
+                    disabled={actionMutation.isPending}
+                    className='px-6 py-3 bg-[#10b981] text-white rounded-xl font-bold text-[15px] hover:bg-[#059669] transition-colors shadow-sm disabled:opacity-50'
                   >
-                    Suspend
+                    {actionMutation.isPending && actionMutation.variables?.action === 'approve'
+                      ? 'Approving...'
+                      : 'Approve & Claim'}
                   </button>
-                )}
-
-                {selectedHost.approvalStatus !== 'APPROVED' && (
-                  <button
-                    disabled={actionLoading}
-                    onClick={() => handleUpdateStatus('APPROVED')}
-                    className='px-5 py-2.5 rounded-[30px] font-bold text-sm bg-[#2563eb] text-white shadow-sm hover:bg-[#1e40af] transition-colors disabled:opacity-50'
-                  >
-                    Approve Host
-                  </button>
-                )}
-              </div>
+                </>
+              )}
             </div>
           </div>
         </div>

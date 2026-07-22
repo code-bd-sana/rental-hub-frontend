@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { toast } from "sonner";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { DIR_DATA } from "../../lib/data/directoryData";
@@ -289,7 +290,7 @@ function BookingContent() {
                 <small className="text-[#6b7b79] leading-relaxed block mt-1 text-[13px]">Reserve now and settle in cash or card when you arrive. {(payData.isFood as boolean) && <span className="font-medium text-[#856404]">Food orders need 50% confirmed with the host first.</span>}</small>
               </div>
             </button>
-            <button onClick={() => alert("Chat opened with host!")} className="text-left flex items-start gap-4 p-5 border border-[#e7e1d6] rounded-xl hover:bg-[#f8fafc] transition-colors group">
+            <button onClick={() => toast.success("Chat opened with host!")} className="text-left flex items-start gap-4 p-5 border border-[#e7e1d6] rounded-xl hover:bg-[#f8fafc] transition-colors group">
               <div className="mt-0.5 w-6 h-6 flex items-center justify-center shrink-0 text-[#1e40af] group-hover:scale-110 transition-transform">
                 <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6"><path d="M21 12a8 8 0 01-11.5 7.2L4 20l1-4.2A8 8 0 1121 12z" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round"/></svg>
               </div>

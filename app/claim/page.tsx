@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { apiClient } from '../../lib/api/client';
 
 interface Listing {
@@ -99,7 +100,7 @@ export default function ClaimBusinessPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!idCard || !proofOwnership || !businessRegistration) {
-      alert('Please upload all 3 required documents (ID, Proof of Ownership, and Registration).');
+      toast.error('Please upload all 3 required documents (ID, Proof of Ownership, and Registration).');
       return;
     }
     setLoading(true);

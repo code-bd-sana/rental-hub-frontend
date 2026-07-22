@@ -16,6 +16,8 @@ export const metadata: Metadata = {
   description: "Discover the best properties, cars, and services.",
 };
 
+import { Toaster } from 'sonner';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -26,6 +28,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <Providers>
           <ModalProvider>
+            <Toaster position="top-right" richColors />
             <Header />
             <div className="flex-1">
               {children}

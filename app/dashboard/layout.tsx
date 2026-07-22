@@ -70,9 +70,9 @@ function SidebarNav({
           {(role === ROLES.AGENT || role === ROLES.LOADER) && (
             <>
               {permissions.includes('LOAD_DIRECTORY') && (
-                <button className='bg-transparent text-white text-left w-full px-3.25 py-2.75 rounded-[11px] text-[14px] font-semibold opacity-80 flex justify-between items-center hover:bg-[rgba(255,255,255,0.14)] hover:opacity-100 transition-colors'>
+                <Link href='/dashboard/load-directory' className={navClass('/dashboard/load-directory')}>
                   Load directory
-                </button>
+                </Link>
               )}
               {permissions.includes('APPROVE_CLAIMS') && (
                 <Link href='/dashboard/claims' className={navClass('/dashboard/claims')}>
@@ -93,6 +93,9 @@ function SidebarNav({
           )}
           {role === ROLES.SUPER_ADMIN && (
             <>
+              <Link href='/dashboard/load-directory' className={navClass('/dashboard/load-directory')}>
+                Load directory
+              </Link>
               <Link href='/dashboard/claims' className={navClass('/dashboard/claims')}>
                 Claims
               </Link>

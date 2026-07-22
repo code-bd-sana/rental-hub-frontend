@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import Link from "next/link";
 import { apiClient } from "../../lib/api/client";
 
@@ -35,9 +36,9 @@ export default function SignupPage() {
     if (name && email && password && confirmPassword === password) {
       setStep(2);
     } else if (password !== confirmPassword) {
-      alert("Passwords do not match.");
+      toast.error("Passwords do not match.");
     } else {
-      alert("Please fill all fields.");
+      toast.error("Please fill all fields.");
     }
   };
 

@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Edit2, MapPin, Plus, Trash2, Eye, Calendar, Lock } from 'lucide-react';
 import GlobalCard from '../shared/GlobalCard';
 import { listingApi } from '../../lib/api/listings';
 import ListingFormModal from './ListingFormModal';
 import ListingViewModal from './ListingViewModal';
 import { apiClient } from '../../lib/api/client';
+import { paymentApi } from '../../lib/api/payment';
 
 export function HostOverview() {
   return (
@@ -107,7 +109,10 @@ export function HostListings() {
       if (res.success) {
         setListings(res.data);
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.message?.includes('Payment Required') || error?.status === 402) {
+        setPaymentRequired(true);
+      }
       console.error('Failed to fetch listings:', error);
     } finally {
       setIsLoading(false);
@@ -144,6 +149,43 @@ export function HostListings() {
 
 
   const isFormOpen = isAdding || !!editListing;
+  const [paymentRequired, setPaymentRequired] = useState(false);
+
+  const handlePayNow = async () => {
+    try {
+      const res = await paymentApi.createHostPaymentSession();
+      if (res.success && res.data?.url) {
+        window.location.href = res.data.url;
+      } else {
+        alert('Failed to initialize payment.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error initializing payment.');
+    }
+  };
+
+  if (paymentRequired) {
+    return (
+      <div className='min-h-[60vh] flex items-center justify-center'>
+        <div className='bg-white p-8 rounded-2xl shadow-sm border border-[#e7e1d6] max-w-md text-center'>
+          <div className='flex justify-center mb-4 text-[#6b7b79]'>
+            <Lock size={48} strokeWidth={1.5} />
+          </div>
+          <h2 className='text-2xl font-bold text-[#15201f] mb-3'>Payment Required</h2>
+          <p className='text-[#6b7b79] mb-6'>
+            To access your dashboard and manage bookings, please purchase a 1-month access pass. You will need to renew this manually when it expires.
+          </p>
+          <button 
+            onClick={handlePayNow}
+            className='bg-[#2563eb] text-white px-8 py-3 rounded-xl font-bold text-[16px] hover:bg-[#1e40af] transition-colors w-full'
+          >
+            Pay $39.99 for 1 Month
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='animate-in fade-in duration-300 relative'>

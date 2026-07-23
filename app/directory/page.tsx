@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import GlobalCard from '../../components/shared/GlobalCard';
-import { listingApi } from '../../lib/api/listings';
+import { directoryApi } from '../../lib/api/directory';
+import { paymentApi } from '../../lib/api/payment';
 
 function DirectoryContent() {
   const router = useRouter();
@@ -15,6 +16,7 @@ function DirectoryContent() {
   const currentCategory = searchParams.get('category') || 'All';
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authRole, setAuthRole] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [listings, setListings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,8 +27,7 @@ function DirectoryContent() {
       try {
         const parsed = JSON.parse(authData);
         if (parsed?.isAuthenticated) {
-          // eslint-disable-next-line react-hooks/set-state-in-effect
-          setIsLoggedIn(true);
+          setAuthRole(parsed.role);
         }
       } catch (e) {
         console.warn('Failed to parse auth data from localStorage', e);
@@ -38,18 +39,33 @@ function DirectoryContent() {
     const fetchListings = async () => {
       try {
         setIsLoading(true);
-        const res = await listingApi.getAllListings({ status: 'APPROVED' });
+        const res = await directoryApi.getPublicDirectories();
         if (res.success) {
-          setListings(res.data);
+          setListings(res.data.items);
+          setIsLoggedIn(res.data.hasSubscription);
         }
       } catch (err) {
-        console.error('Failed to fetch listings:', err);
+        console.error('Failed to fetch directories:', err);
       } finally {
         setIsLoading(false);
       }
     };
     fetchListings();
   }, []);
+
+  const handleGuestSubscribe = async () => {
+    try {
+      const res = await paymentApi.createGuestSubscriptionSession();
+      if (res.success && res.data?.url) {
+        window.location.href = res.data.url;
+      } else {
+        alert('Failed to initialize payment.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error initializing payment.');
+    }
+  };
 
   // Compute unique filters dynamically
   const availableCountries = useMemo(() => {
@@ -58,18 +74,16 @@ function DirectoryContent() {
   }, [listings]);
 
   const availableCategories = useMemo(() => {
-    const categories = listings.map((l) => l.category).filter(Boolean);
-    return ['All', ...Array.from(new Set(categories))];
-  }, [listings]);
+    return ['All', 'DIRECTORY'];
+  }, []);
 
   // Apply filters
   const filteredListings = useMemo(() => {
     return listings.filter((l) => {
       const matchCountry = currentCountry === 'All' || l.country === currentCountry;
-      const matchCategory = currentCategory === 'All' || l.category === currentCategory;
-      return matchCountry && matchCategory;
+      return matchCountry;
     });
-  }, [listings, currentCountry, currentCategory]);
+  }, [listings, currentCountry]);
 
   const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams);
@@ -159,16 +173,15 @@ function DirectoryContent() {
             ))
           ) : filteredListings.length > 0 ? (
             filteredListings.map((listing) => {
-              const heroImage =
-                listing.images?.find((img: any) => img.isHero)?.url || listing.images?.[0]?.url;
               return (
                 <GlobalCard
                   key={listing.id}
-                  title={listing.title}
-                  category={listing.category}
-                  imageUrl={heroImage}
-                  hours={undefined} // Hidden or fetched if we had standard hours field
-                  phone={undefined}
+                  title={listing.businessName}
+                  category={'DIRECTORY'}
+                  imageUrl={listing.primaryImage}
+                  status={listing.status}
+                  hours={undefined}
+                  phone={listing.businessNumber}
                   locked={!isLoggedIn}
                   seed={listing.id}
                 />
@@ -199,12 +212,21 @@ function DirectoryContent() {
               <div className='text-[28px] font-extrabold'>
                 $9.99 <small className='text-[13px] font-semibold opacity-80'>/ month</small>
               </div>
-              <Link
-                href='/signup'
-                className='inline-block mt-3 w-full sm:w-auto bg-[#2563eb] text-white text-center rounded-[30px] py-3.5 px-6 font-bold text-[16px] hover:bg-[#1e40af] transition-colors shadow-sm'
-              >
-                Unlock now (demo)
-              </Link>
+              {authRole === 'GUEST' ? (
+                <button
+                  onClick={handleGuestSubscribe}
+                  className='inline-block mt-3 w-full sm:w-auto bg-[#2563eb] text-white text-center rounded-[30px] py-3.5 px-6 font-bold text-[16px] hover:bg-[#1e40af] transition-colors shadow-sm cursor-pointer'
+                >
+                  Unlock now
+                </button>
+              ) : (
+                <Link
+                  href='/signup'
+                  className='inline-block mt-3 w-full sm:w-auto bg-[#2563eb] text-white text-center rounded-[30px] py-3.5 px-6 font-bold text-[16px] hover:bg-[#1e40af] transition-colors shadow-sm'
+                >
+                  Unlock now (Sign up)
+                </Link>
+              )}
             </div>
           </div>
         )}

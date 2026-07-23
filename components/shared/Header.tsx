@@ -64,6 +64,9 @@ export default function Header() {
             <Link href='/claim' className={navClass(pathname.startsWith('/claim'))}>
               Claim Business
             </Link>
+            <Link href='/hosts/onboard' className={navClass(pathname.startsWith('/hosts/onboard'))}>
+              Become a Host
+            </Link>
           </nav>
           {isAuthenticated ? (
             <Link
@@ -128,6 +131,9 @@ export default function Header() {
           </Link>
           <Link href='/claim' onClick={() => setMobileMenuOpen(false)} className={mobileNavClass}>
             Claim Business
+          </Link>
+          <Link href='/hosts/onboard' onClick={() => setMobileMenuOpen(false)} className={mobileNavClass}>
+            Become a Host
           </Link>
 
           {/* <button

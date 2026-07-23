@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { Lock } from 'lucide-react';
 
 export interface GlobalCardProps {
   title: string;
@@ -10,6 +11,7 @@ export interface GlobalCardProps {
   phone?: string;
   locked?: boolean;
   seed?: string;
+  status?: string; // 'UNCLAIMED' or 'CLAIMED'
 }
 
 export default function GlobalCard({
@@ -21,6 +23,7 @@ export default function GlobalCard({
   phone,
   locked,
   seed,
+  status
 }: GlobalCardProps) {
   return (
     <div className='bg-white border border-[#e7e1d6] rounded-[18px] overflow-hidden shadow-[0_10px_30px_rgba(11,79,74,0.1)] relative'>
@@ -40,7 +43,29 @@ export default function GlobalCard({
         )}
         {locked && (
           <div className='absolute top-2.5 right-2.5 bg-[rgba(21,32,31,0.78)] text-white text-[11px] px-2.5 py-1.5 rounded-[20px] flex items-center gap-1 z-10'>
-            🔒 Locked
+            <Lock size={14} className='mr-1.5' strokeWidth={2.5} /> Locked
+          </div>
+        )}
+        
+        {/* Overlay Action Button on the Image */}
+        {!locked && status === 'UNCLAIMED' && (
+          <div className='absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity z-20'>
+            <Link
+              href={`/claim/${seed}`}
+              className='bg-[#facc15] text-[#15201f] text-[15px] font-bold px-6 py-2 rounded-full shadow-lg hover:scale-105 transition-transform'
+            >
+              Claim
+            </Link>
+          </div>
+        )}
+        {!locked && status === 'CLAIMED' && (
+          <div className='absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity z-20'>
+            <Link
+              href={`/booking?id=${seed}`}
+              className='bg-[#1e9e72] text-white text-[15px] font-bold px-6 py-2 rounded-full shadow-lg hover:scale-105 transition-transform'
+            >
+              Book
+            </Link>
           </div>
         )}
       </div>

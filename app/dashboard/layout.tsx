@@ -80,8 +80,8 @@ function SidebarNav({
                 </Link>
               )}
               {permissions.includes('MANAGE_GUESTS') && (
-                <Link href='/dashboard/guests' className={navClass('/dashboard/guests')}>
-                  Guests
+                <Link href='/dashboard/users' className={navClass('/dashboard/users')}>
+                  User Management
                 </Link>
               )}
               {permissions.includes('MANAGE_TEAM') && (
@@ -105,8 +105,8 @@ function SidebarNav({
               <Link href='/dashboard/countries' className={navClass('/dashboard/countries')}>
                 Countries
               </Link>
-              <Link href='/dashboard/guests' className={navClass('/dashboard/guests')}>
-                Guests
+              <Link href='/dashboard/users' className={navClass('/dashboard/users')}>
+                User Management
               </Link>
               <Link href='/dashboard/team' className={navClass('/dashboard/team')}>
                 Team and access

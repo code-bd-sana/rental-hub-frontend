@@ -27,7 +27,7 @@ export default function UserManagementPage() {
   const [limit] = useState(10);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
-  
+
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
@@ -42,7 +42,10 @@ export default function UserManagementPage() {
     queryKey: ['users', page, limit, search, roleFilter],
     queryFn: async () => {
       const response = await apiClient.get(`/users?${queryParams.toString()}`);
-      return response.data as { meta: { total: number; page: number; limit: number }; data: User[] };
+      return response.data as {
+        meta: { total: number; page: number; limit: number };
+        data: User[];
+      };
     },
     enabled: hasAccess,
   });
@@ -64,7 +67,7 @@ export default function UserManagementPage() {
       } else {
         toast.error('Failed to delete user');
       }
-    }
+    },
   });
 
   const handleDeleteClick = (user: User) => {
@@ -105,7 +108,10 @@ export default function UserManagementPage() {
     <div className='animate-in fade-in duration-500 max-w-7xl mx-auto'>
       <div className='flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4'>
         <div>
-          <h1 className='text-3xl font-bold text-[#172554] mb-2' style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
+          <h1
+            className='text-3xl font-bold text-[#172554] mb-2'
+            style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}
+          >
             User Management
           </h1>
           <p className='text-gray-500'>Manage all users, filter by roles, and maintain accounts.</p>
@@ -114,8 +120,18 @@ export default function UserManagementPage() {
 
       <div className='bg-white p-4 rounded-t-2xl border-b border-gray-100 flex flex-col sm:flex-row gap-4 items-center justify-between'>
         <div className='relative w-full sm:max-w-md'>
-          <svg className='absolute left-3 top-2.5 h-5 w-5 text-gray-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' />
+          <svg
+            className='absolute left-3 top-2.5 h-5 w-5 text-gray-400'
+            fill='none'
+            viewBox='0 0 24 24'
+            stroke='currentColor'
+          >
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={2}
+              d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
+            />
           </svg>
           <input
             type='text'
@@ -142,7 +158,7 @@ export default function UserManagementPage() {
       </div>
 
       <div className='bg-white border-x border-b border-[#f1f5f9] rounded-b-2xl shadow-[0_4px_20px_rgb(0,0,0,0.03)] overflow-hidden'>
-        <div className='overflow-x-auto min-h-[400px] relative'>
+        <div className='overflow-x-auto min-h-100 relative'>
           {isLoading ? (
             <div className='absolute inset-0 flex items-center justify-center bg-white/80 z-10'>
               <div className='w-8 h-8 border-4 border-[#2563eb] border-t-transparent rounded-full animate-spin'></div>
@@ -159,10 +175,18 @@ export default function UserManagementPage() {
             <table className='w-full text-left border-collapse'>
               <thead>
                 <tr className='bg-[#f8fafc] border-b border-gray-100'>
-                  <th className='p-5 text-sm font-bold text-[#1e293b] uppercase tracking-wider'>User Info</th>
-                  <th className='p-5 text-sm font-bold text-[#1e293b] uppercase tracking-wider'>Role</th>
-                  <th className='p-5 text-sm font-bold text-[#1e293b] uppercase tracking-wider'>Joined Date</th>
-                  <th className='p-5 text-sm font-bold text-[#1e293b] uppercase tracking-wider text-right'>Action</th>
+                  <th className='p-5 text-sm font-bold text-[#1e293b] uppercase tracking-wider'>
+                    User Info
+                  </th>
+                  <th className='p-5 text-sm font-bold text-[#1e293b] uppercase tracking-wider'>
+                    Role
+                  </th>
+                  <th className='p-5 text-sm font-bold text-[#1e293b] uppercase tracking-wider'>
+                    Joined Date
+                  </th>
+                  <th className='p-5 text-sm font-bold text-[#1e293b] uppercase tracking-wider text-right'>
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody className='divide-y divide-gray-100'>
@@ -180,13 +204,19 @@ export default function UserManagementPage() {
                       </div>
                     </td>
                     <td className='p-5'>
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        user.role === 'SUPER_ADMIN' ? 'bg-purple-100 text-purple-700' :
-                        user.role === 'HOST' ? 'bg-emerald-100 text-emerald-700' :
-                        user.role === 'AGENT' ? 'bg-blue-100 text-blue-700' :
-                        user.role === 'LOADER' ? 'bg-orange-100 text-orange-700' :
-                        'bg-gray-100 text-gray-700'
-                      }`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-bold ${
+                          user.role === 'SUPER_ADMIN'
+                            ? 'bg-purple-100 text-purple-700'
+                            : user.role === 'HOST'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : user.role === 'AGENT'
+                                ? 'bg-blue-100 text-blue-700'
+                                : user.role === 'LOADER'
+                                  ? 'bg-orange-100 text-orange-700'
+                                  : 'bg-gray-100 text-gray-700'
+                        }`}
+                      >
                         {user.role}
                       </span>
                     </td>
@@ -207,22 +237,23 @@ export default function UserManagementPage() {
             </table>
           )}
         </div>
-        
+
         {/* Pagination */}
         <div className='bg-gray-50 p-4 border-t border-gray-100 flex items-center justify-between'>
           <div className='text-sm text-gray-500'>
-            Showing {users.length > 0 ? (page - 1) * limit + 1 : 0} to {Math.min(page * limit, total)} of {total} results
+            Showing {users.length > 0 ? (page - 1) * limit + 1 : 0} to{' '}
+            {Math.min(page * limit, total)} of {total} results
           </div>
           <div className='flex gap-2'>
             <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
               className='px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold hover:bg-white transition-colors disabled:opacity-50 disabled:hover:bg-transparent'
             >
               Previous
             </button>
             <button
-              onClick={() => setPage(p => p + 1)}
+              onClick={() => setPage((p) => p + 1)}
               disabled={page >= totalPages}
               className='px-4 py-2 border border-gray-200 rounded-lg text-sm font-bold hover:bg-white transition-colors disabled:opacity-50 disabled:hover:bg-transparent'
             >
@@ -237,13 +268,25 @@ export default function UserManagementPage() {
         <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#172554]/40 backdrop-blur-sm animate-in fade-in duration-200'>
           <div className='bg-white rounded-3xl w-full max-w-md shadow-2xl p-8 animate-in zoom-in-95 duration-200 text-center'>
             <div className='mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4'>
-              <svg className='h-6 w-6 text-red-600' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' />
+              <svg
+                className='h-6 w-6 text-red-600'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth='2'
+                  d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
+                />
               </svg>
             </div>
             <h3 className='text-xl font-bold text-gray-900 mb-2'>Delete User</h3>
             <p className='text-sm text-gray-500 mb-6'>
-              Are you sure you want to delete <strong className='text-gray-900'>{userToDelete.name}</strong>? This action cannot be undone.
+              Are you sure you want to delete{' '}
+              <strong className='text-gray-900'>{userToDelete.name}</strong>? This action cannot be
+              undone.
             </p>
             <div className='flex justify-center gap-3'>
               <button

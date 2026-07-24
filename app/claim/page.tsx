@@ -2,6 +2,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 import { apiClient } from '../../lib/api/client';
 
 interface Listing {
@@ -16,9 +17,15 @@ interface Listing {
 }
 
 export default function ClaimBusinessPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [listings, setListings] = useState<Listing[]>([]);
   const [filteredListings, setFilteredListings] = useState<Listing[]>([]);
+
+  // Auth and Restrictions State
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [hasApprovedClaim, setHasApprovedClaim] = useState(false);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -72,8 +79,49 @@ export default function ClaimBusinessPage() {
         setListings([]);
       }
     };
-    fetchDirectories();
-  }, []);
+
+    const checkUserStatus = async () => {
+      if (typeof window !== 'undefined') {
+        const authDataString = localStorage.getItem('roamly_auth');
+        if (authDataString) {
+          try {
+            const authData = JSON.parse(authDataString);
+            if (authData?.isAuthenticated && authData?.role === 'HOST') {
+              setHasAccess(true);
+              
+              // Check if user already has an approved claim
+              try {
+                const meRes = await apiClient.get('/claims/me');
+                const claims = meRes.data?.data || [];
+                const approvedClaim = claims.find((c: { status: string }) => c.status === 'APPROVED');
+                if (approvedClaim) {
+                  setHasApprovedClaim(true);
+                } else {
+                  // Only fetch directories if they can actually claim
+                  fetchDirectories();
+                }
+              } catch (err) {
+                console.error('Failed to fetch my claims', err);
+                fetchDirectories(); // fallback to let them see directories
+              }
+            } else {
+              setHasAccess(false);
+              router.push('/login');
+            }
+          } catch {
+            setHasAccess(false);
+            router.push('/login');
+          }
+        } else {
+          setHasAccess(false);
+          router.push('/login');
+        }
+        setIsCheckingAuth(false);
+      }
+    };
+    
+    checkUserStatus();
+  }, [router]);
 
   useEffect(() => {
     if (searchQuery.trim() === '') {
@@ -144,6 +192,40 @@ export default function ClaimBusinessPage() {
       setLoading(false);
     }
   };
+
+  if (isCheckingAuth) {
+    return (
+      <div className='min-h-screen bg-[#f8fafc] flex items-center justify-center'>
+        <div className='w-8 h-8 border-4 border-[#2563eb] border-t-transparent rounded-full animate-spin'></div>
+      </div>
+    );
+  }
+
+  if (!hasAccess) return null; // Will redirect
+
+  if (hasApprovedClaim) {
+    return (
+      <div className='min-h-screen bg-[#f8fafc] py-20 px-4 flex justify-center'>
+        <div className='bg-white p-10 shadow-lg rounded-2xl max-w-lg w-full text-center'>
+          <div className='mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-6'>
+            <svg className='h-8 w-8 text-blue-600' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M5 13l4 4L19 7' />
+            </svg>
+          </div>
+          <h2 className='text-2xl font-bold text-[#1e293b] mb-4'>Business Already Claimed</h2>
+          <p className='text-gray-500 mb-8 leading-relaxed'>
+            You have already claimed a business successfully. Our platform currently allows hosts to manage one verified business per account.
+          </p>
+          <button 
+            onClick={() => router.push('/dashboard')}
+            className='w-full bg-[#2563eb] text-white py-3 rounded-xl font-bold hover:bg-[#1e40af] transition-colors'
+          >
+            Go to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className='min-h-screen bg-[#f8fafc] py-12 px-4 sm:px-6 lg:px-8 font-sans pb-20'>

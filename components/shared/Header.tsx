@@ -9,6 +9,7 @@ export default function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -19,6 +20,9 @@ export default function Header() {
           const authData = JSON.parse(authDataString);
           if (authData?.accessToken || authData?.isAuthenticated) {
             isAuth = true;
+          }
+          if (authData?.role) {
+            setUserRole(authData.role);
           }
         } catch (e) {
           console.error('Failed to parse auth data', e);
@@ -61,9 +65,11 @@ export default function Header() {
             <Link href='/directory' className={navClass(pathname.startsWith('/directory'))}>
               Directory
             </Link>
-            <Link href='/claim' className={navClass(pathname.startsWith('/claim'))}>
-              Claim Business
-            </Link>
+            {isAuthenticated && userRole === 'HOST' && (
+              <Link href='/claim' className={navClass(pathname.startsWith('/claim'))}>
+                Claim Business
+              </Link>
+            )}
             <Link href='/hosts/onboard' className={navClass(pathname.startsWith('/hosts/onboard'))}>
               Become a Host
             </Link>
@@ -129,9 +135,11 @@ export default function Header() {
           >
             Directory
           </Link>
-          <Link href='/claim' onClick={() => setMobileMenuOpen(false)} className={mobileNavClass}>
-            Claim Business
-          </Link>
+          {isAuthenticated && userRole === 'HOST' && (
+            <Link href='/claim' onClick={() => setMobileMenuOpen(false)} className={mobileNavClass}>
+              Claim Business
+            </Link>
+          )}
           <Link href='/hosts/onboard' onClick={() => setMobileMenuOpen(false)} className={mobileNavClass}>
             Become a Host
           </Link>

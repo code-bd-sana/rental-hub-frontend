@@ -42,7 +42,7 @@ export default function UserManagementPage() {
     queryKey: ['users', page, limit, search, roleFilter],
     queryFn: async () => {
       const response = await apiClient.get(`/users?${queryParams.toString()}`);
-      return response.data as {
+      return response.data?.data as {
         meta: { total: number; page: number; limit: number };
         data: User[];
       };

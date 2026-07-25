@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import GlobalCard from '../../components/shared/GlobalCard';
-import { directoryApi } from '../../lib/api/directory';
+import { listingApi } from '../../lib/api/listings';
 import { paymentApi } from '../../lib/api/payment';
 
 function DirectoryContent() {
@@ -27,6 +27,8 @@ function DirectoryContent() {
       try {
         const parsed = JSON.parse(authData);
         if (parsed?.isAuthenticated) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setIsLoggedIn(true);
           setAuthRole(parsed.role);
         }
       } catch (e) {
@@ -39,13 +41,12 @@ function DirectoryContent() {
     const fetchListings = async () => {
       try {
         setIsLoading(true);
-        const res = await directoryApi.getPublicDirectories();
+        const res = await listingApi.getAllListings({ status: 'APPROVED' });
         if (res.success) {
-          setListings(res.data.items);
-          setIsLoggedIn(res.data.hasSubscription);
+          setListings(res.data);
         }
       } catch (err) {
-        console.error('Failed to fetch directories:', err);
+        console.error('Failed to fetch listings:', err);
       } finally {
         setIsLoading(false);
       }
@@ -74,16 +75,24 @@ function DirectoryContent() {
   }, [listings]);
 
   const availableCategories = useMemo(() => {
-    return ['All', 'DIRECTORY'];
-  }, []);
+    const categories = listings.map((l) => {
+      if (l.category === 'SERVICE' && l.serviceDetails?.serviceType) {
+        return l.serviceDetails.serviceType;
+      }
+      return l.category;
+    }).filter(Boolean);
+    return ['All', ...Array.from(new Set(categories))];
+  }, [listings]);
 
   // Apply filters
   const filteredListings = useMemo(() => {
     return listings.filter((l) => {
       const matchCountry = currentCountry === 'All' || l.country === currentCountry;
-      return matchCountry;
+      const lCategory = l.category === 'SERVICE' && l.serviceDetails?.serviceType ? l.serviceDetails.serviceType : l.category;
+      const matchCategory = currentCategory === 'All' || lCategory === currentCategory;
+      return matchCountry && matchCategory;
     });
-  }, [listings, currentCountry]);
+  }, [listings, currentCountry, currentCategory]);
 
   const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams);
@@ -176,12 +185,12 @@ function DirectoryContent() {
               return (
                 <GlobalCard
                   key={listing.id}
-                  title={listing.businessName}
-                  category={'DIRECTORY'}
-                  imageUrl={listing.primaryImage}
-                  status={listing.status}
+                  title={listing.title}
+                  category={listing.category === 'SERVICE' && listing.serviceDetails?.serviceType ? listing.serviceDetails.serviceType : listing.category}
+                  imageUrl={listing.images?.[0]?.url || ''}
+                  status={'CLAIMED'}
                   hours={undefined}
-                  phone={listing.businessNumber}
+                  phone={undefined}
                   locked={!isLoggedIn}
                   seed={listing.id}
                 />

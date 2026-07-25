@@ -320,6 +320,47 @@ export function AdminListings() {
                   </td>
                   <td className='p-[12px_16px] border-b border-[#e7e1d6] text-right'>
                     <div className='flex items-center justify-end gap-3'>
+                      {lst.approvalStatus !== 'APPROVED' && (
+                        <button
+                          onClick={() => handleUpdateStatus(lst.id, 'APPROVED')}
+                          className='text-[#6b7b79] hover:text-[#1e9e72] transition-colors cursor-pointer'
+                          title='Approve'
+                        >
+                          <svg
+                            width='18'
+                            height='18'
+                            viewBox='0 0 24 24'
+                            fill='none'
+                            stroke='currentColor'
+                            strokeWidth='2'
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                          >
+                            <polyline points='20 6 9 17 4 12'></polyline>
+                          </svg>
+                        </button>
+                      )}
+                      {lst.approvalStatus !== 'REJECTED' && (
+                        <button
+                          onClick={() => handleUpdateStatus(lst.id, 'REJECTED')}
+                          className='text-[#6b7b79] hover:text-[#ef4444] transition-colors cursor-pointer'
+                          title='Reject'
+                        >
+                          <svg
+                            width='18'
+                            height='18'
+                            viewBox='0 0 24 24'
+                            fill='none'
+                            stroke='currentColor'
+                            strokeWidth='2'
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                          >
+                            <line x1='18' y1='6' x2='6' y2='18'></line>
+                            <line x1='6' y1='6' x2='18' y2='18'></line>
+                          </svg>
+                        </button>
+                      )}
                       <button
                         onClick={() => setViewListing(lst)}
                         className='text-[#6b7b79] hover:text-[#2563eb] transition-colors cursor-pointer'

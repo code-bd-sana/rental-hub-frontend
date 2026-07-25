@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
 }
 
 export default async function ListingDetailsPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+  const { id } = await params;
   let listingData = null;
 
   try {

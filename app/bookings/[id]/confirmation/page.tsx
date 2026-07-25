@@ -74,34 +74,54 @@ export default function BookingConfirmationPage() {
             {booking.listing?.location || booking.listing?.address || 'Location unknown'}
           </p>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="border border-gray-100 bg-gray-50/50 rounded-xl p-4">
-              <div className="text-[11px] uppercase font-bold text-gray-500 tracking-wider mb-1 flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5" /> Check-in
+          {booking.listing?.category === 'FOOD' || data.orderType === 'FOOD_ORDER' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="border border-gray-100 bg-gray-50/50 rounded-xl p-4">
+                <div className="text-[11px] uppercase font-bold text-gray-500 tracking-wider mb-2 flex items-center gap-1.5">
+                  <Hash className="w-3.5 h-3.5" /> Order Code
+                </div>
+                <div className="font-semibold text-gray-900 text-lg">{booking.otpCode || '-'}</div>
+                <p className="text-xs text-gray-400 mt-1">Show this to the restaurant for pickup</p>
               </div>
-              <div className="font-semibold">{checkIn ? format(checkIn, 'yyyy-MM-dd') : '-'}</div>
-              <div className="text-sm text-gray-500">10:00-12:00</div>
-            </div>
-            <div className="border border-gray-100 bg-gray-50/50 rounded-xl p-4">
-              <div className="text-[11px] uppercase font-bold text-gray-500 tracking-wider mb-1 flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5" /> Check-out
+              <div className="border border-gray-100 bg-gray-50/50 rounded-xl p-4 flex flex-col justify-center">
+                <div className="text-[11px] uppercase font-bold text-gray-500 tracking-wider mb-2 flex items-center gap-1.5">
+                   <Users className="w-3.5 h-3.5" /> Items Ordered
+                </div>
+                <div className="font-semibold text-gray-900">
+                  {data.cart ? data.cart.reduce((sum: number, item: any) => sum + item.qty, 0) : 0} items
+                </div>
               </div>
-              <div className="font-semibold">{checkOut ? format(checkOut, 'yyyy-MM-dd') : '-'}</div>
-              <div className="text-sm text-gray-500">10:00-12:00</div>
             </div>
-            <div className="border border-gray-100 bg-gray-50/50 rounded-xl p-4">
-              <div className="text-[11px] uppercase font-bold text-gray-500 tracking-wider mb-1 flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5" /> Guests
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="border border-gray-100 bg-gray-50/50 rounded-xl p-4">
+                <div className="text-[11px] uppercase font-bold text-gray-500 tracking-wider mb-1 flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5" /> Check-in
+                </div>
+                <div className="font-semibold">{checkIn ? format(checkIn, 'yyyy-MM-dd') : '-'}</div>
+                <div className="text-sm text-gray-500">10:00-12:00</div>
               </div>
-              <div className="font-semibold">{data.guests || 1}</div>
-            </div>
-            <div className="border border-gray-100 bg-gray-50/50 rounded-xl p-4">
-              <div className="text-[11px] uppercase font-bold text-gray-500 tracking-wider mb-1 flex items-center gap-1.5">
-                <Hash className="w-3.5 h-3.5" /> Code
+              <div className="border border-gray-100 bg-gray-50/50 rounded-xl p-4">
+                <div className="text-[11px] uppercase font-bold text-gray-500 tracking-wider mb-1 flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5" /> Check-out
+                </div>
+                <div className="font-semibold">{checkOut ? format(checkOut, 'yyyy-MM-dd') : '-'}</div>
+                <div className="text-sm text-gray-500">10:00-12:00</div>
               </div>
-              <div className="font-semibold text-gray-900">{booking.otpCode || '-'}</div>
+              <div className="border border-gray-100 bg-gray-50/50 rounded-xl p-4">
+                <div className="text-[11px] uppercase font-bold text-gray-500 tracking-wider mb-1 flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5" /> Guests
+                </div>
+                <div className="font-semibold">{data.guests || 1}</div>
+              </div>
+              <div className="border border-gray-100 bg-gray-50/50 rounded-xl p-4">
+                <div className="text-[11px] uppercase font-bold text-gray-500 tracking-wider mb-1 flex items-center gap-1.5">
+                  <Hash className="w-3.5 h-3.5" /> Code
+                </div>
+                <div className="font-semibold text-gray-900">{booking.otpCode || '-'}</div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Price Details */}
@@ -110,7 +130,7 @@ export default function BookingConfirmationPage() {
           
           <div className="space-y-4">
             <div className="flex justify-between text-gray-600">
-              <span>{booking.listing?.category === 'CAR' ? 'Days' : 'Nights'}</span>
+              <span>{booking.listing?.category === 'FOOD' ? 'Items Subtotal' : booking.listing?.category === 'CAR' ? 'Days' : 'Nights'}</span>
               <span>${data.basePrice?.toFixed(2) || '0.00'}</span>
             </div>
             <div className="flex justify-between text-gray-600 pb-4 border-b border-gray-100">
@@ -140,10 +160,12 @@ export default function BookingConfirmationPage() {
 
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center justify-center gap-4">
-          <button className="bg-[#581c87] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#4c1d95] transition-colors flex items-center gap-2">
-            <CalendarPlus className="w-4 h-4" />
-            Add to calendar
-          </button>
+          {booking.listing?.category !== 'FOOD' && (
+            <button className="bg-[#581c87] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#4c1d95] transition-colors flex items-center gap-2">
+              <CalendarPlus className="w-4 h-4" />
+              Add to calendar
+            </button>
+          )}
           <Link 
             href="/dashboard/booking-history"
             className="bg-white border border-gray-200 text-gray-700 px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm"

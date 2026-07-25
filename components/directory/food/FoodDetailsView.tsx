@@ -4,9 +4,15 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { bookingApi } from '@/lib/api/booking';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 export function FoodDetailsView({ listing }: { listing: any }) {
   const [cart, setCart] = useState<any[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const heroImage = listing.images?.find((img: any) => img.isHero) || listing.images?.[0];
 
@@ -21,6 +27,40 @@ export function FoodDetailsView({ listing }: { listing: any }) {
   };
 
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+  const handlePlaceOrder = async () => {
+    if (cart.length === 0) return;
+    
+    try {
+      setIsSubmitting(true);
+      const vat = Math.round(cartTotal * 0.10);
+      const total = cartTotal + vat;
+
+      const payload = {
+        listingId: listing.id,
+        totalAmount: total,
+        depositAmount: 0,
+        bookingData: {
+          orderType: 'FOOD_ORDER',
+          cart,
+          basePrice: cartTotal,
+          vat
+        }
+      };
+
+      const res = await bookingApi.createBooking(payload);
+      if (res.success) {
+        toast.success('Food order placed!');
+        router.push(`/bookings/${res.data.id}/confirmation`);
+      } else {
+        toast.error(res.message || 'Failed to place order');
+        setIsSubmitting(false);
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Error placing order');
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className='min-h-screen bg-[#f8fafc] pb-20'>
@@ -194,10 +234,11 @@ export function FoodDetailsView({ listing }: { listing: any }) {
                 )}
 
                 <button
-                  disabled={cart.length === 0}
-                  className='w-full bg-[#2563eb] disabled:bg-[#93c5fd] text-white py-3.5 rounded-xl font-bold text-[15px] hover:bg-[#1d4ed8] transition-colors shadow-sm'
+                  onClick={handlePlaceOrder}
+                  disabled={cart.length === 0 || isSubmitting}
+                  className='w-full flex justify-center items-center bg-[#2563eb] disabled:bg-[#93c5fd] text-white py-3.5 rounded-xl font-bold text-[15px] hover:bg-[#1d4ed8] transition-colors shadow-sm'
                 >
-                  Place order
+                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Place order'}
                 </button>
               </div>
             </div>

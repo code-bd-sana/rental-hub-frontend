@@ -124,31 +124,49 @@ export default function BookingHistoryPage() {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-xl">
-                    <div>
-                      <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Check-in</div>
-                      <div className="font-semibold text-gray-900">{checkIn ? format(checkIn, 'MMM d, yyyy') : '-'}</div>
+                  {booking.listing?.category === 'FOOD' || data.orderType === 'FOOD_ORDER' ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-xl">
+                      <div>
+                        <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Items</div>
+                        <div className="font-semibold text-gray-900">{data.cart ? data.cart.reduce((sum: number, item: any) => sum + item.qty, 0) : 0}</div>
+                      </div>
+                      <div className="col-span-1"></div>
+                      <div>
+                        <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Total</div>
+                        <div className="font-semibold text-gray-900">${booking.totalAmount?.toFixed(2) || '0.00'}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Order Code</div>
+                        <div className="font-bold text-[#e85d04]">{booking.otpCode || '-'}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Check-out</div>
-                      <div className="font-semibold text-gray-900">{checkOut ? format(checkOut, 'MMM d, yyyy') : '-'}</div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-xl">
+                      <div>
+                        <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Check-in</div>
+                        <div className="font-semibold text-gray-900">{checkIn ? format(checkIn, 'MMM d, yyyy') : '-'}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Check-out</div>
+                        <div className="font-semibold text-gray-900">{checkOut ? format(checkOut, 'MMM d, yyyy') : '-'}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Total</div>
+                        <div className="font-semibold text-gray-900">${booking.totalAmount?.toFixed(2) || '0.00'}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">OTP Code</div>
+                        <div className="font-bold text-[#e85d04]">{booking.otpCode || '-'}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Total</div>
-                      <div className="font-semibold text-gray-900">${booking.totalAmount?.toFixed(2) || '0.00'}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">OTP Code</div>
-                      <div className="font-bold text-[#e85d04]">{booking.otpCode || '-'}</div>
-                    </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Actions */}
                 <div className="flex flex-col gap-2 justify-center border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6 w-full md:w-auto">
                   <Link 
                     href={`/bookings/${booking.id}/confirmation`}
-                    className="w-full md:w-32 bg-gray-900 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors text-center"
+                    className="w-full md:w-32 bg-[#2563eb] text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1d4ed8] transition-colors text-center"
                   >
                     View Details
                   </Link>

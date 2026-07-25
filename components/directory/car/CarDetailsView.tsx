@@ -3,6 +3,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { BookingWidget } from '../BookingWidget';
 import { useState } from 'react';
 
 export function CarDetailsView({ listing }: { listing: any }) {
@@ -456,105 +457,7 @@ export function CarDetailsView({ listing }: { listing: any }) {
 
           {/* Right Column - Sticky Cards */}
           <div className='w-full lg:w-95 flex-none'>
-            {step === 1 && (
-              <div className='sticky top-28 bg-white border border-gray-200 rounded-2xl shadow-xl p-6'>
-                <div className='mb-6 flex items-baseline gap-2'>
-                  <span className='text-2xl font-bold text-[#1e293b]'>${dailyRate.toFixed(2)}</span>
-                  <span className='text-gray-500 text-sm font-medium'>per day</span>
-                </div>
-
-                <div className='border border-gray-300 rounded-xl mb-4 overflow-hidden divide-y divide-gray-300'>
-                  <div className='flex divide-x divide-gray-300'>
-                    <div className='flex-1 p-3 cursor-pointer hover:bg-gray-50 transition-colors'>
-                      <div className='text-[10px] uppercase font-bold text-gray-700 tracking-wider mb-1'>
-                        Pickup
-                      </div>
-                      <div className='text-sm text-gray-500'>Add date</div>
-                    </div>
-                    <div className='flex-1 p-3 cursor-pointer hover:bg-gray-50 transition-colors'>
-                      <div className='text-[10px] uppercase font-bold text-gray-700 tracking-wider mb-1'>
-                        Return
-                      </div>
-                      <div className='text-sm text-gray-500'>Add date</div>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setStep(2)}
-                  className='w-full bg-[#2563eb] text-white py-3.5 rounded-xl font-bold text-[15px] hover:bg-[#1d4ed8] transition-colors shadow-md mb-4'
-                >
-                  Reserve car
-                </button>
-
-                <button className='w-full bg-white text-gray-800 border border-gray-300 py-3 rounded-xl font-bold text-[15px] hover:bg-gray-50 transition-colors flex items-center justify-center gap-2'>
-                  <svg
-                    width='18'
-                    height='18'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='2'
-                  >
-                    <path d='M21 12a8 8 0 0 1-11.5 7.2L4 20l.9-5A8 8 0 1 1 21 12Z' />
-                  </svg>
-                  Message the host
-                </button>
-
-                <p className='text-gray-500 text-[13px] mt-4 leading-relaxed text-center'>
-                  <b>How payment works.</b> You pay a small hold online to confirm. The rest is
-                  settled with the host at pickup.
-                </p>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className='sticky top-28 bg-white border border-gray-200 rounded-2xl shadow-xl p-6'>
-                <div className='p-head border-b border-gray-200 pb-4 mb-4'>
-                  <h3 className='text-xl font-bold text-[#1e293b]'>Your booking</h3>
-                </div>
-
-                <div className='flex flex-col gap-3 mb-6'>
-                  <div className='flex justify-between text-[15px] text-gray-700'>
-                    <span>
-                      ${dailyRate.toFixed(2)} × {days} days
-                    </span>
-                    <span className='font-medium'>${carCost.toFixed(2)}</span>
-                  </div>
-                  {activeProtection.price > 0 && (
-                    <div className='flex justify-between text-[15px] text-gray-700'>
-                      <span>Protection ({activeProtection.name})</span>
-                      <span className='font-medium'>
-                        ${(activeProtection.price * days).toFixed(2)}
-                      </span>
-                    </div>
-                  )}
-                  {extrasCost > 0 && (
-                    <div className='flex justify-between text-[15px] text-gray-700'>
-                      <span>Extras</span>
-                      <span className='font-medium'>${(extrasCost * days).toFixed(2)}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className='flex justify-between items-center border-t border-gray-200 pt-4 mb-6'>
-                  <span className='font-bold text-[#1e293b]'>Total</span>
-                  <span className='font-extrabold text-2xl text-[#1e293b]'>
-                    ${totalCost.toFixed(2)}
-                  </span>
-                </div>
-
-                <button className='w-full bg-[#2563eb] text-white py-3.5 rounded-xl font-bold text-[15px] hover:bg-[#1d4ed8] transition-colors shadow-md mb-3'>
-                  Continue to payment
-                </button>
-                <button
-                  onClick={() => setStep(1)}
-                  className='w-full bg-white text-gray-800 border border-gray-300 py-3 rounded-xl font-bold text-[15px] hover:bg-gray-50 transition-colors'
-                >
-                  Back to car
-                </button>
-              </div>
-            )}
+            <BookingWidget listing={listing} />
           </div>
         </div>
       </div>

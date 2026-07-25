@@ -3,6 +3,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { BookingWidget } from '../BookingWidget';
 
 export function StayDetailsView({ listing }: { listing: any }) {
   const images = listing.images || [];
@@ -133,72 +134,7 @@ export function StayDetailsView({ listing }: { listing: any }) {
 
           {/* Right Column - Reservation Sticky Card */}
           <div className='w-full lg:w-95 flex-none'>
-            <div className='sticky top-28 bg-white border border-gray-200 rounded-2xl shadow-xl p-6'>
-              <div className='mb-6 flex items-baseline gap-2'>
-                <span className='text-2xl font-bold text-[#1e293b]'>
-                  ${listing.stayDetails?.pricePerNight || 0}
-                </span>
-                <span className='text-gray-500 text-sm font-medium'>per night</span>
-              </div>
-
-              <div className='border border-gray-300 rounded-xl mb-4 overflow-hidden divide-y divide-gray-300'>
-                <div className='flex divide-x divide-gray-300'>
-                  <div className='flex-1 p-3 cursor-pointer hover:bg-gray-50 transition-colors'>
-                    <div className='text-[10px] uppercase font-bold text-gray-700 tracking-wider mb-1'>
-                      Check-in
-                    </div>
-                    <div className='text-sm text-gray-500'>Add date</div>
-                  </div>
-                  <div className='flex-1 p-3 cursor-pointer hover:bg-gray-50 transition-colors'>
-                    <div className='text-[10px] uppercase font-bold text-gray-700 tracking-wider mb-1'>
-                      Check-out
-                    </div>
-                    <div className='text-sm text-gray-500'>Add date</div>
-                  </div>
-                </div>
-                <div className='p-3 cursor-pointer hover:bg-gray-50 transition-colors flex justify-between items-center'>
-                  <div>
-                    <div className='text-[10px] uppercase font-bold text-gray-700 tracking-wider mb-1'>
-                      Guests
-                    </div>
-                    <div className='text-sm text-gray-700 font-medium'>1 guest</div>
-                  </div>
-                  <svg
-                    className='w-5 h-5 text-gray-400'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='2'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                  >
-                    <polyline points='6 9 12 15 18 9'></polyline>
-                  </svg>
-                </div>
-              </div>
-
-              <button className='w-full bg-[#2563eb] text-white py-3.5 rounded-xl font-bold text-[15px] hover:bg-[#1d4ed8] transition-colors shadow-md mb-4 flex items-center justify-center'>
-                Reserve
-              </button>
-
-              <button className='w-full bg-white text-gray-800 border border-gray-300 py-3 rounded-xl font-bold text-[15px] hover:bg-gray-50 transition-colors flex items-center justify-center gap-2'>
-                <svg
-                  width='18'
-                  height='18'
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  stroke='currentColor'
-                  strokeWidth='2'
-                >
-                  <path d='M21 12a8 8 0 0 1-11.5 7.2L4 20l.9-5A8 8 0 1 1 21 12Z' />
-                </svg>
-                Request to chat
-              </button>
-
-              <p className='text-center text-gray-500 text-sm mt-4'>
-                You won&apos;t be charged yet
-              </p>
-            </div>
+            <BookingWidget listing={listing} />
           </div>
         </div>
       </div>

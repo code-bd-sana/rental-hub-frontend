@@ -9,14 +9,14 @@ export const listingApi = {
 
   // Get a specific listing by ID
   getListingById: async (id: string) => {
-    const response = await apiClient.get(`/listings/${id}`);
-    return response.data;
+    const res = await apiClient(`/listings/${id}`);
+    return res.data;
   },
 
   // Get host's own listings
   getMyListings: async () => {
-    const response = await apiClient.get('/listings/my-listings');
-    return response.data;
+    const res = await apiClient('/listings/my-listings');
+    return res.data;
   },
 
   // Create a new listing

@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Edit2, MapPin, Plus, Trash2, Eye, Calendar, Lock } from 'lucide-react';
-import GlobalCard from '../shared/GlobalCard';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Lock } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { listingApi } from '../../lib/api/listings';
+import { paymentApi } from '../../lib/api/payment';
 import ListingFormModal from './ListingFormModal';
 import ListingViewModal from './ListingViewModal';
-import { apiClient } from '../../lib/api/client';
-import { paymentApi } from '../../lib/api/payment';
 
 export function HostOverview() {
   return (
@@ -101,6 +103,7 @@ export function HostOverview() {
 export function HostListings() {
   const [listings, setListings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [paymentRequired, setPaymentRequired] = useState(false);
 
   const fetchListings = async () => {
     try {
@@ -139,17 +142,14 @@ export function HostListings() {
       }
     } catch (error) {
       console.error('Failed to delete listing:', error);
-      alert('Failed to delete listing. Please try again.');
+      toast.error('Failed to delete listing. Please try again.');
     } finally {
       setIsDeleting(false);
       setDeleteListingId(null);
     }
   };
 
-
-
   const isFormOpen = isAdding || !!editListing;
-  const [paymentRequired, setPaymentRequired] = useState(false);
 
   const handlePayNow = async () => {
     try {
@@ -157,11 +157,11 @@ export function HostListings() {
       if (res.success && res.data?.url) {
         window.location.href = res.data.url;
       } else {
-        alert('Failed to initialize payment.');
+        toast.error('Failed to initialize payment.');
       }
     } catch (err) {
       console.error(err);
-      alert('Error initializing payment.');
+      toast.error('Error initializing payment.');
     }
   };
 
@@ -174,9 +174,10 @@ export function HostListings() {
           </div>
           <h2 className='text-2xl font-bold text-[#15201f] mb-3'>Payment Required</h2>
           <p className='text-[#6b7b79] mb-6'>
-            To access your dashboard and manage bookings, please purchase a 1-month access pass. You will need to renew this manually when it expires.
+            To access your dashboard and manage bookings, please purchase a 1-month access pass. You
+            will need to renew this manually when it expires.
           </p>
-          <button 
+          <button
             onClick={handlePayNow}
             className='bg-[#2563eb] text-white px-8 py-3 rounded-xl font-bold text-[16px] hover:bg-[#1e40af] transition-colors w-full'
           >
@@ -248,14 +249,18 @@ export function HostListings() {
                     <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
                       <div className='font-semibold text-[#15201f]'>{lst.title}</div>
                       <div className='text-[12px] text-[#6b7b79]'>
-                        {lst.category === 'SERVICE' ? lst.serviceDetails?.serviceType : lst.category}
+                        {lst.category === 'SERVICE'
+                          ? lst.serviceDetails?.serviceType
+                          : lst.category}
                       </div>
                     </td>
                     <td className='p-[12px_16px] border-b border-[#e7e1d6] text-[#6b7b79]'>
                       {lst.country || 'N/A'}
                     </td>
                     <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
-                      <div className='text-[#15201f] text-xs truncate max-w-[200px]'>{lst.description || 'N/A'}</div>
+                      <div className='text-[#15201f] text-xs truncate max-w-50'>
+                        {lst.description || 'N/A'}
+                      </div>
                     </td>
                     <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
                       {lst.approvalStatus === 'APPROVED' && (
@@ -274,63 +279,72 @@ export function HostListings() {
                         </span>
                       )}
                     </td>
-                  <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
-                    <div className='flex items-center justify-center gap-3'>
-                      <button
-                        onClick={() => setViewListing(lst)}
-                        className='text-[#6b7b79] hover:text-[#2563eb] transition-colors cursor-pointer'
-                        title='View Preview'
-                      >
-                        <svg
-                          width='18'
-                          height='18'
-                          viewBox='0 0 24 24'
-                          fill='none'
-                          stroke='currentColor'
-                          strokeWidth='2'
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
+                    <td className='p-[12px_16px] border-b border-[#e7e1d6]'>
+                      <div className='flex items-center justify-center gap-3'>
+                        <button
+                          onClick={() => setViewListing(lst)}
+                          className='text-[#6b7b79] hover:text-[#2563eb] transition-colors cursor-pointer'
+                          title='View Preview'
                         >
-                          <path d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z' />
-                          <circle cx='12' cy='12' r='3' />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => setEditListing(lst)}
-                        className='text-[#6b7b79] hover:text-[#1e9e72] transition-colors cursor-pointer'
-                        title='Edit'
-                      >
-                        <svg
-                          width='18'
-                          height='18'
-                          viewBox='0 0 24 24'
-                          fill='none'
-                          stroke='currentColor'
-                          strokeWidth='2'
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
+                          <svg
+                            width='18'
+                            height='18'
+                            viewBox='0 0 24 24'
+                            fill='none'
+                            stroke='currentColor'
+                            strokeWidth='2'
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                          >
+                            <path d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z' />
+                            <circle cx='12' cy='12' r='3' />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => setEditListing(lst)}
+                          className='text-[#6b7b79] hover:text-[#1e9e72] transition-colors cursor-pointer'
+                          title='Edit'
                         >
-                          <path d='M12 20h9' />
-                          <path d='M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z' />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => setDeleteListingId(lst.id)}
-                        className='text-[#6b7b79] hover:text-[#dc2626] transition-colors cursor-pointer'
-                        title='Delete'
-                      >
-                        <svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
-                          <path d='M3 6h18' />
-                          <path d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' />
-                          <path d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' />
-                          <line x1='10' y1='11' x2='10' y2='17' />
-                          <line x1='14' y1='11' x2='14' y2='17' />
-                        </svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                          <svg
+                            width='18'
+                            height='18'
+                            viewBox='0 0 24 24'
+                            fill='none'
+                            stroke='currentColor'
+                            strokeWidth='2'
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                          >
+                            <path d='M12 20h9' />
+                            <path d='M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z' />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => setDeleteListingId(lst.id)}
+                          className='text-[#6b7b79] hover:text-[#dc2626] transition-colors cursor-pointer'
+                          title='Delete'
+                        >
+                          <svg
+                            width='18'
+                            height='18'
+                            viewBox='0 0 24 24'
+                            fill='none'
+                            stroke='currentColor'
+                            strokeWidth='2'
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                          >
+                            <path d='M3 6h18' />
+                            <path d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' />
+                            <path d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' />
+                            <line x1='10' y1='11' x2='10' y2='17' />
+                            <line x1='14' y1='11' x2='14' y2='17' />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
               ) : (
                 <tr>
                   <td colSpan={5} className='p-8 text-center text-[#6b7b79]'>
@@ -342,8 +356,6 @@ export function HostListings() {
           </table>
         </div>
       </div>
-
-
 
       <ListingFormModal
         isOpen={isAdding || !!editListing}
@@ -362,10 +374,12 @@ export function HostListings() {
       {/* Delete Confirmation Modal */}
       {deleteListingId && (
         <div className='fixed inset-0 bg-[rgba(21,32,31,0.5)] z-100 flex items-center justify-center p-4 backdrop-blur-sm'>
-          <div className='bg-white rounded-2xl max-w-[400px] w-full shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden animate-in zoom-in-95 duration-200'>
+          <div className='bg-white rounded-2xl max-w-100 w-full shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden animate-in zoom-in-95 duration-200'>
             <div className='p-6'>
               <h3 className='font-bold text-[18px] text-[#15201f] mb-2'>Delete Listing</h3>
-              <p className='text-[14px] text-[#6b7b79]'>Are you sure you want to delete this listing? This action cannot be undone.</p>
+              <p className='text-[14px] text-[#6b7b79]'>
+                Are you sure you want to delete this listing? This action cannot be undone.
+              </p>
             </div>
             <div className='p-4 border-t border-[#e7e1d6] flex justify-end gap-3 bg-[#f8fafc]'>
               <button
@@ -378,7 +392,7 @@ export function HostListings() {
               <button
                 onClick={confirmDelete}
                 disabled={isDeleting}
-                className='px-4 py-2 text-[14px] font-semibold bg-[#ef4444] text-white hover:bg-[#dc2626] rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[70px]'
+                className='px-4 py-2 text-[14px] font-semibold bg-[#ef4444] text-white hover:bg-[#dc2626] rounded-xl transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-17.5'
               >
                 {isDeleting ? 'Deleting...' : 'Delete'}
               </button>

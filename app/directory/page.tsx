@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import GlobalCard from '../../components/shared/GlobalCard';
 import { listingApi } from '../../lib/api/listings';
 import { paymentApi } from '../../lib/api/payment';
+import { countryApi } from '../../lib/api/countries';
 
 function DirectoryContent() {
   const router = useRouter();
@@ -14,12 +15,44 @@ function DirectoryContent() {
 
   const currentCountry = searchParams.get('country') || 'All';
   const currentCategory = searchParams.get('category') || 'All';
+  const currentSearch = searchParams.get('search') || '';
+
+  const currentPage = Number(searchParams.get('page')) || 1;
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authRole, setAuthRole] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [listings, setListings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [availableCountries, setAvailableCountries] = useState<string[]>(['All']);
+  const [searchQuery, setSearchQuery] = useState(currentSearch);
+
+  const availableCategories = ['All', 'STAY', 'CAR', 'FOOD', 'Salon', 'Barber', 'Spa', 'makeup'];
+
+  useEffect(() => {
+    if (currentSearch !== searchQuery) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSearchQuery(currentSearch);
+    }
+  }, [currentSearch]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (searchQuery !== currentSearch) {
+        const params = new URLSearchParams(searchParams.toString());
+        if (!searchQuery) {
+          params.delete('search');
+        } else {
+          params.set('search', searchQuery);
+        }
+        params.set('page', '1');
+        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      }
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [searchQuery, currentSearch, pathname, router, searchParams]);
 
   useEffect(() => {
     const authData = localStorage.getItem('roamly_auth');
@@ -38,12 +71,39 @@ function DirectoryContent() {
   }, []);
 
   useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const res = await countryApi.getAllCountries();
+        if (res.success && res.data) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const names = res.data.map((c: any) => c.name);
+          setAvailableCountries(['All', ...names]);
+        }
+      } catch (err) {
+        console.error('Failed to fetch countries:', err);
+      }
+    };
+    fetchCountries();
+  }, []);
+
+  useEffect(() => {
     const fetchListings = async () => {
       try {
         setIsLoading(true);
-        const res = await listingApi.getAllListings({ status: 'APPROVED' });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const query: any = { status: 'APPROVED', page: currentPage, limit: 20 };
+        if (currentCountry !== 'All') query.country = currentCountry;
+        if (currentCategory !== 'All') query.category = currentCategory;
+        if (currentSearch) query.searchTerm = currentSearch;
+
+        const res = await listingApi.getAllListings(query);
         if (res.success) {
           setListings(res.data);
+          if (res.meta?.totalPages) {
+            setTotalPages(res.meta.totalPages);
+          } else {
+            setTotalPages(1);
+          }
         }
       } catch (err) {
         console.error('Failed to fetch listings:', err);
@@ -52,7 +112,7 @@ function DirectoryContent() {
       }
     };
     fetchListings();
-  }, []);
+  }, [currentPage, currentCountry, currentCategory, currentSearch]);
 
   const handleGuestSubscribe = async () => {
     try {
@@ -68,41 +128,22 @@ function DirectoryContent() {
     }
   };
 
-  // Compute unique filters dynamically
-  const availableCountries = useMemo(() => {
-    const countries = listings.map((l) => l.country).filter(Boolean);
-    return ['All', ...Array.from(new Set(countries))];
-  }, [listings]);
-
-  const availableCategories = useMemo(() => {
-    const categories = listings.map((l) => {
-      if (l.category === 'SERVICE' && l.serviceDetails?.serviceType) {
-        return l.serviceDetails.serviceType;
-      }
-      return l.category;
-    }).filter(Boolean);
-    return ['All', ...Array.from(new Set(categories))];
-  }, [listings]);
-
-  // Apply filters
-  const filteredListings = useMemo(() => {
-    return listings.filter((l) => {
-      const matchCountry = currentCountry === 'All' || l.country === currentCountry;
-      const lCategory = l.category === 'SERVICE' && l.serviceDetails?.serviceType ? l.serviceDetails.serviceType : l.category;
-      const matchCategory = currentCategory === 'All' || lCategory === currentCategory;
-      return matchCountry && matchCategory;
-    });
-  }, [listings, currentCountry, currentCategory]);
+  // Filters are now applied on the backend
+  const filteredListings = listings;
 
   const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams);
-    if (value === 'All') {
+    if (value === 'All' || !value) {
       params.delete(key);
     } else {
       params.set(key, value);
     }
+    if (key !== 'page') {
+      params.set('page', '1');
+    }
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
+
 
   return (
     <div className='min-h-screen bg-[#f8fafc] font-sans pb-16'>
@@ -117,6 +158,19 @@ function DirectoryContent() {
           <span className='text-sm font-semibold text-[#6b7b79] mt-1 sm:mt-0 uppercase tracking-wide'>
             {currentCountry !== 'All' ? currentCountry : 'Global'}
           </span>
+        </div>
+
+        {/* Search Bar */}
+        <div className='mb-6'>
+          <div className='flex w-full md:w-1/2 relative'>
+            <input
+              type='text'
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder='Search listings by title, city, or location...'
+              className='w-full border border-[#e7e1d6] bg-white rounded-[30px] pl-5 pr-5 py-3 text-[15px] text-[#15201f] focus:outline-none focus:border-[#1e40af] focus:ring-1 focus:ring-[#1e40af] transition-all'
+            />
+          </div>
         </div>
 
         {/* Country Filters */}
@@ -186,7 +240,11 @@ function DirectoryContent() {
                 <GlobalCard
                   key={listing.id}
                   title={listing.title}
-                  category={listing.category === 'SERVICE' && listing.serviceDetails?.serviceType ? listing.serviceDetails.serviceType : listing.category}
+                  category={
+                    listing.category === 'SERVICE' && listing.serviceDetails?.serviceType
+                      ? listing.serviceDetails.serviceType
+                      : listing.category
+                  }
                   imageUrl={listing.images?.[0]?.url || ''}
                   status={'CLAIMED'}
                   hours={undefined}
@@ -202,6 +260,29 @@ function DirectoryContent() {
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className='flex items-center justify-center gap-4 mt-10'>
+            <button
+              onClick={() => updateFilter('page', String(currentPage - 1))}
+              disabled={currentPage <= 1 || isLoading}
+              className='px-4 py-2 border border-[#e7e1d6] bg-white rounded-xl font-semibold text-[#15201f] disabled:opacity-50 hover:bg-gray-50 transition-colors cursor-pointer'
+            >
+              Previous
+            </button>
+            <span className='text-[14px] font-semibold text-[#6b7b79]'>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => updateFilter('page', String(currentPage + 1))}
+              disabled={currentPage >= totalPages || isLoading}
+              className='px-4 py-2 border border-[#e7e1d6] bg-white rounded-xl font-semibold text-[#15201f] disabled:opacity-50 hover:bg-gray-50 transition-colors cursor-pointer'
+            >
+              Next
+            </button>
+          </div>
+        )}
 
         {/* Paywall */}
         {!isLoggedIn && (

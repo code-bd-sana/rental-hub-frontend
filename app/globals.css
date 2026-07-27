@@ -3127,6 +3127,7 @@ footer {
   align-items: flex-start;
   transition: 0.15s;
   position: relative;
+  color: #15201f;
 }
 .ins-opt:hover {
   border-color: var(--purple);
@@ -3304,7 +3305,7 @@ footer {
   border-radius: 12px;
   font: inherit;
   background: #fff;
-  color: inherit;
+  color: #15201f;
   cursor: pointer;
 }
 .loc-sel:focus {

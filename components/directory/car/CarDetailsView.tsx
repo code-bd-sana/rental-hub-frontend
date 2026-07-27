@@ -19,84 +19,79 @@ export function CarDetailsView({ listing }: { listing: any }) {
   const heroImage = listing.images?.find((img: any) => img.isHero) || listing.images?.[0];
   const car = listing.carDetails || {};
 
-  const fuelOptions = Array.isArray(car.fuelOptions)
-    ? car.fuelOptions
-    : [
-        {
-          key: 'full-to-full',
-          name: 'Full to Full',
-          desc: 'Return the car with a full tank. No extra upfront charges.',
-          price: 0,
-        },
-        {
-          key: 'prepaid',
-          name: 'Prepaid Fuel',
-          desc: 'Pay for a full tank now and return empty.',
-          price: 65,
-        },
-      ];
-  const protectionPlans = Array.isArray(car.protectionPlans)
-    ? car.protectionPlans
-    : [
-        {
-          key: 'basic',
-          name: 'Basic Cover',
-          desc: 'Standard deposit hold. Basic coverage included.',
-          price: 0,
-          deposit: '900',
-          rec: false,
-        },
-        {
-          key: 'standard',
-          name: 'Standard Cover',
-          desc: 'Reduced deposit hold. Includes window & tire protection.',
-          price: 15,
-          deposit: '400',
-          rec: true,
-        },
-        {
-          key: 'premium',
-          name: 'Premium Cover',
-          desc: 'Zero deposit hold. Full peace of mind.',
-          price: 30,
-          deposit: null,
-          rec: false,
-        },
-      ];
+  const normalize = (arr: any, defaultArr: any) => {
+    if (!Array.isArray(arr) || arr.length === 0) return defaultArr;
+    return arr.map((item: any, i: number) => ({ ...item, key: item.key || item.id || String(i) }));
+  };
+
+  const fuelOptions = normalize(car.fuelOptions, [
+    {
+      key: 'full-to-full',
+      name: 'Full to Full',
+      desc: 'Return the car with a full tank. No extra upfront charges.',
+      price: 0,
+    },
+    {
+      key: 'prepaid',
+      name: 'Prepaid Fuel',
+      desc: 'Pay for a full tank now and return empty.',
+      price: 65,
+    },
+  ]);
+  const protectionPlans = normalize(car.protectionPlans, [
+    {
+      key: 'basic',
+      name: 'Basic Cover',
+      desc: 'Standard deposit hold. Basic coverage included.',
+      price: 0,
+      deposit: '900',
+      rec: false,
+    },
+    {
+      key: 'standard',
+      name: 'Standard Cover',
+      desc: 'Reduced deposit hold. Includes window & tire protection.',
+      price: 15,
+      deposit: '400',
+      rec: true,
+    },
+    {
+      key: 'premium',
+      name: 'Premium Cover',
+      desc: 'Zero deposit hold. Full peace of mind.',
+      price: 30,
+      deposit: null,
+      rec: false,
+    },
+  ]);
   const extraOptions = useMemo(() => {
-    return Array.isArray(car.extras)
-      ? car.extras
-      : [
-          { key: 'gps', name: 'GPS Navigation', sub: 'Keep on track.', price: 8, perDay: true },
-          {
-            key: 'child-seat',
-            name: 'Child Seat',
-            sub: 'For kids up to 4 years.',
-            price: 12,
-            perDay: true,
-          },
-          {
-            key: 'additional-driver',
-            name: 'Additional Driver',
-            sub: 'Share the drive.',
-            price: 30,
-            perDay: false,
-          },
-        ];
+    return normalize(car.extras, [
+      { key: 'gps', name: 'GPS Navigation', sub: 'Keep on track.', price: 8, perDay: true },
+      {
+        key: 'child-seat',
+        name: 'Child Seat',
+        sub: 'For kids up to 4 years.',
+        price: 12,
+        perDay: true,
+      },
+      {
+        key: 'additional-driver',
+        name: 'Additional Driver',
+        sub: 'Share the drive.',
+        price: 30,
+        perDay: false,
+      },
+    ]);
   }, [car.extras]);
-  const pickupLocations = Array.isArray(car.pickupLocations)
-    ? car.pickupLocations
-    : [
-        {
-          key: 'airport',
-          name: 'Johan Adolf Pengel International Airport',
-          note: 'Pick up at the arrivals terminal. Host will meet you there.',
-        },
-        { key: 'city', name: 'City Center', note: 'Pick up at host central office.' },
-      ];
-  const returnLocations = Array.isArray(car.returnLocations)
-    ? car.returnLocations
-    : pickupLocations;
+  const pickupLocations = normalize(car.pickupLocations, [
+    {
+      key: 'airport',
+      name: 'Johan Adolf Pengel International Airport',
+      note: 'Pick up at the arrivals terminal. Host will meet you there.',
+    },
+    { key: 'city', name: 'City Center', note: 'Pick up at host central office.' },
+  ]);
+  const returnLocations = normalize(car.returnLocations, pickupLocations);
 
   const activeProtection =
     protectionPlans.find((p: any) => p.key === protection) || protectionPlans[0];

@@ -3,7 +3,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { BookingWidget } from '../BookingWidget';
+import { CarBookingWidget } from './CarBookingWidget';
 import { useState } from 'react';
 
 export function CarDetailsView({ listing }: { listing: any }) {
@@ -457,7 +457,12 @@ export function CarDetailsView({ listing }: { listing: any }) {
 
           {/* Right Column - Sticky Cards */}
           <div className='w-full lg:w-95 flex-none'>
-            <BookingWidget listing={listing} />
+            <CarBookingWidget 
+              listing={listing} 
+              activeProtection={activeProtection}
+              extrasCost={extrasCost}
+              fuelMode={fuel}
+            />
           </div>
         </div>
       </div>

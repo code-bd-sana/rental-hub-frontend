@@ -19,85 +19,50 @@ export function CarDetailsView({ listing }: { listing: any }) {
   const heroImage = listing.images?.find((img: any) => img.isHero) || listing.images?.[0];
   const car = listing.carDetails || {};
 
-  const normalize = (arr: any, defaultArr: any) => {
-    if (!Array.isArray(arr) || arr.length === 0) return defaultArr;
-    return arr.map((item: any, i: number) => ({ ...item, key: item.key || item.id || String(i) }));
+  const normalize = (arr: any) => {
+    if (!Array.isArray(arr) || arr.length === 0) return [];
+    return arr.map((item: any, i: number) => {
+      if (typeof item === 'string') {
+        return { key: item, name: item, note: '' }; // For location strings
+      }
+      return {
+        ...item,
+        key: item.key || item.id || item.title || item.name || String(i),
+        name: item.name || item.title,
+        desc: item.desc || item.description || item.sub || '',
+        price: item.price ?? item.pricePerDay ?? 0,
+        perDay: item.perDay ?? (item.pricePerDay !== undefined ? true : !item.isOneOff),
+        deposit: item.deposit,
+        rec: item.rec ?? item.isRecommended ?? false,
+      };
+    });
   };
 
-  const fuelOptions = normalize(car.fuelOptions, [
-    {
-      key: 'full-to-full',
-      name: 'Full to Full',
-      desc: 'Return the car with a full tank. No extra upfront charges.',
-      price: 0,
-    },
-    {
-      key: 'prepaid',
-      name: 'Prepaid Fuel',
-      desc: 'Pay for a full tank now and return empty.',
-      price: 65,
-    },
-  ]);
-  const protectionPlans = normalize(car.protectionPlans, [
-    {
-      key: 'basic',
-      name: 'Basic Cover',
-      desc: 'Standard deposit hold. Basic coverage included.',
-      price: 0,
-      deposit: '900',
-      rec: false,
-    },
-    {
-      key: 'standard',
-      name: 'Standard Cover',
-      desc: 'Reduced deposit hold. Includes window & tire protection.',
-      price: 15,
-      deposit: '400',
-      rec: true,
-    },
-    {
-      key: 'premium',
-      name: 'Premium Cover',
-      desc: 'Zero deposit hold. Full peace of mind.',
-      price: 30,
-      deposit: null,
-      rec: false,
-    },
-  ]);
+  const fuelOptions = normalize(car.fuelOptions);
+  const protectionPlans = normalize(car.protectionPlans);
   const extraOptions = useMemo(() => {
-    return normalize(car.extras, [
-      { key: 'gps', name: 'GPS Navigation', sub: 'Keep on track.', price: 8, perDay: true },
-      {
-        key: 'child-seat',
-        name: 'Child Seat',
-        sub: 'For kids up to 4 years.',
-        price: 12,
-        perDay: true,
-      },
-      {
-        key: 'additional-driver',
-        name: 'Additional Driver',
-        sub: 'Share the drive.',
-        price: 30,
-        perDay: false,
-      },
-    ]);
+    return normalize(car.extras);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [car.extras]);
-  const pickupLocations = normalize(car.pickupLocations, [
-    {
-      key: 'airport',
-      name: 'Johan Adolf Pengel International Airport',
-      note: 'Pick up at the arrivals terminal. Host will meet you there.',
-    },
-    { key: 'city', name: 'City Center', note: 'Pick up at host central office.' },
-  ]);
-  const returnLocations = normalize(car.returnLocations, pickupLocations);
+  
+  const pickupLocations = normalize(car.pickupLocations);
+  const returnLocations = normalize(car.returnLocations);
 
   const activeProtection =
     protectionPlans.find((p: any) => p.key === protection) || protectionPlans[0];
   const activeFuel = fuelOptions.find((f: any) => f.key === fuel) || fuelOptions[0];
 
-  const days = 3; // Mock
+  const days = useMemo(() => {
+    if (pickupDate && returnDate) {
+      const start = new Date(pickupDate);
+      const end = new Date(returnDate);
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays > 0 ? diffDays : 1; // Minimum 1 day
+    }
+    return 1; // Default to 1 day if dates are not selected
+  }, [pickupDate, returnDate]);
+  
   const dailyRate = car.dailyRate || 0;
 
   const extrasCost = useMemo(() => {
@@ -211,39 +176,45 @@ export function CarDetailsView({ listing }: { listing: any }) {
                 </div>
 
                 <div className='car-specs' id='carSpecs' style={{ fontSize: '.95rem' }}>
-                  <span>
-                    <svg fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'
-                      />
-                    </svg>
-                    {car.seats || 4} Seats
-                  </span>
-                  <span>
-                    <svg fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4'
-                      />
-                    </svg>
-                    {car.transmission || 'Automatic'}
-                  </span>
-                  <span>
-                    <svg fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth={2}
-                        d='M4 6h16M4 10h16M4 14h16M4 18h16'
-                      />
-                    </svg>
-                    {car.doors || 4} Doors
-                  </span>
+                  {car.seats > 0 && (
+                    <span>
+                      <svg fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'
+                        />
+                      </svg>
+                      {car.seats} Seats
+                    </span>
+                  )}
+                  {car.transmission && (
+                    <span>
+                      <svg fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4'
+                        />
+                      </svg>
+                      {car.transmission}
+                    </span>
+                  )}
+                  {car.doors > 0 && (
+                    <span>
+                      <svg fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth={2}
+                          d='M4 6h16M4 10h16M4 14h16M4 18h16'
+                        />
+                      </svg>
+                      {car.doors} Doors
+                    </span>
+                  )}
                   {car.bags?.large > 0 && <span>👜 {car.bags.large} Large bag</span>}
                 </div>
 
@@ -557,7 +528,6 @@ export function CarDetailsView({ listing }: { listing: any }) {
                     {extraOptions.map((a: any) => (
                       <div key={a.key} className='xtra'>
                         <div className='xi'>
-                          {/* Generic icon since we don't have SVG strings from DB */}
                           <svg
                             viewBox='0 0 24 24'
                             fill='none'
@@ -573,7 +543,7 @@ export function CarDetailsView({ listing }: { listing: any }) {
                         </div>
                         <div className='xt'>
                           <b>{a.name}</b>
-                          <small>{a.sub}</small>
+                          <small>{a.desc}</small>
                         </div>
                         <div className='xp'>
                           USD {a.price}

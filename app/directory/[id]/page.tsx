@@ -1,6 +1,7 @@
 import { CarDetailsView } from '@/components/directory/car/CarDetailsView';
 import { FoodDetailsView } from '@/components/directory/food/FoodDetailsView';
 import { StayDetailsView } from '@/components/directory/stay/StayDetailsView';
+import { ServiceDetailsView } from '@/components/directory/service/ServiceDetailsView';
 import { listingApi } from '@/lib/api/listings';
 import Link from 'next/link';
 
@@ -56,6 +57,11 @@ export default async function ListingDetailsPage({ params }: { params: { id: str
   // Handle Car category
   if (listingData.category === 'CAR') {
     return <CarDetailsView listing={listingData} />;
+  }
+
+  // Handle Service category
+  if (listingData.category === 'SERVICE') {
+    return <ServiceDetailsView listing={listingData} />;
   }
 
   // Placeholder for other categories

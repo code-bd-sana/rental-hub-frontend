@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import GlobalCard from '../../components/shared/GlobalCard';
+import { countryApi } from '../../lib/api/countries';
 import { listingApi } from '../../lib/api/listings';
 import { paymentApi } from '../../lib/api/payment';
-import { countryApi } from '../../lib/api/countries';
 
 function DirectoryContent() {
   const router = useRouter();
@@ -28,14 +28,14 @@ function DirectoryContent() {
   const [availableCountries, setAvailableCountries] = useState<string[]>(['All']);
   const [searchQuery, setSearchQuery] = useState(currentSearch);
 
-  const availableCategories = ['All', 'STAY', 'CAR', 'FOOD', 'Salon', 'Barber', 'Spa', 'makeup'];
+  const availableCategories = ['All', 'STAY', 'CAR', 'FOOD', 'Salon', 'Barber', 'Spa'];
 
   useEffect(() => {
     if (currentSearch !== searchQuery) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchQuery(currentSearch);
     }
-  }, [currentSearch]);
+  }, [currentSearch, searchQuery]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -143,7 +143,6 @@ function DirectoryContent() {
     }
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
-
 
   return (
     <div className='min-h-screen bg-[#f8fafc] font-sans pb-16'>

@@ -5,6 +5,7 @@ import { bookingApi } from '@/lib/api/booking';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Calendar, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function BookingHistoryPage() {
   const [bookings, setBookings] = useState<any[]>([]);
@@ -25,6 +26,21 @@ export default function BookingHistoryPage() {
     };
     fetchBookings();
   }, []);
+
+  const handleCancel = async (id: string) => {
+    if (!confirm('Are you sure you want to cancel this booking?')) return;
+    try {
+      const res = await bookingApi.cancelBooking(id);
+      if (res.success) {
+        toast.success('Booking cancelled successfully');
+        setBookings(bookings.map(b => b.id === id ? { ...b, status: 'CANCELLED' } : b));
+      } else {
+        toast.error(res.message || 'Failed to cancel booking');
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Error cancelling booking');
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -176,6 +192,14 @@ export default function BookingHistoryPage() {
                   >
                     Listing
                   </Link>
+                  {booking.status === 'PENDING' && (
+                    <button
+                      onClick={() => handleCancel(booking.id)}
+                      className="w-full md:w-32 bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 py-2.5 rounded-lg text-sm font-semibold transition-colors text-center"
+                    >
+                      Cancel
+                    </button>
+                  )}
                 </div>
               </div>
             );

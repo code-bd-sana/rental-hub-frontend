@@ -8,6 +8,12 @@ export const bookingApi = {
     });
     return res.data;
   },
+
+  cancelBooking: async (id: string) => {
+    const res = await apiClient.patch(`/bookings/${id}/cancel`);
+    return res.data;
+  },
+
   getMyBookings: async () => {
     const res = await apiClient('/bookings/my-bookings');
     return res.data;

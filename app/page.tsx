@@ -1,5 +1,5 @@
 import DirectorySection from "../components/features/DirectorySection";
-import SearchWidget from "../components/features/SearchWidget";
+
 import Image from "next/image";
 
 export default function Home() {
@@ -35,8 +35,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* SEARCH WIDGET */}
-        <SearchWidget />
 
         <DirectorySection />
       </div>

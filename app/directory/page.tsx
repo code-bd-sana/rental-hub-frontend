@@ -19,7 +19,7 @@ function DirectoryContent() {
 
   const currentPage = Number(searchParams.get('page')) || 1;
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
   const [authRole, setAuthRole] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [listings, setListings] = useState<any[]>([]);
@@ -60,8 +60,9 @@ function DirectoryContent() {
       try {
         const parsed = JSON.parse(authData);
         if (parsed?.isAuthenticated) {
+          const unlocked = parsed.role !== 'GUEST' || parsed.subscriptionStatus === true;
           // eslint-disable-next-line react-hooks/set-state-in-effect
-          setIsLoggedIn(true);
+          setIsUnlocked(unlocked);
           setAuthRole(parsed.role);
         }
       } catch (e) {
@@ -91,7 +92,7 @@ function DirectoryContent() {
       try {
         setIsLoading(true);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const query: any = { status: 'APPROVED', page: currentPage, limit: 20 };
+        const query: any = { status: 'APPROVED', page: currentPage, limit: 12 };
         if (currentCountry !== 'All') query.country = currentCountry;
         if (currentCategory !== 'All') query.category = currentCategory;
         if (currentSearch) query.searchTerm = currentSearch;
@@ -209,7 +210,7 @@ function DirectoryContent() {
         )}
 
         {/* Lock Note */}
-        {!isLoggedIn && (
+        {!isUnlocked && (
           <div className='bg-[#dbeafe] text-[#1e40af] rounded-xl p-4 text-[13px] font-medium mb-6 border border-[#bfdbfe]'>
             Visitor view. Showing preview photos only. Unlock to see full host names, hours, contact
             details, and to book instantly!
@@ -248,7 +249,7 @@ function DirectoryContent() {
                   status={'CLAIMED'}
                   hours={undefined}
                   phone={undefined}
-                  locked={!isLoggedIn}
+                  locked={!isUnlocked}
                   seed={listing.id}
                 />
               );
@@ -284,7 +285,7 @@ function DirectoryContent() {
         )}
 
         {/* Paywall */}
-        {!isLoggedIn && (
+        {!isUnlocked && (
           <div className='bg-[#172554] text-white rounded-[18px] p-6 mt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-[0_15px_40px_rgba(23,37,84,0.15)]'>
             <div>
               <h3

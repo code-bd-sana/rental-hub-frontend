@@ -9,7 +9,7 @@ import GlobalCard from '../shared/GlobalCard';
 export default function DirectorySection() {
   const [availableCountries, setAvailableCountries] = useState<string[]>([]);
   const [currentCountry, setCurrentCountry] = useState<string | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [listings, setListings] = useState<any[]>([]);
   const [isLoadingListings, setIsLoadingListings] = useState(false);
@@ -20,8 +20,9 @@ export default function DirectorySection() {
       try {
         const parsed = JSON.parse(authData);
         if (parsed?.isAuthenticated) {
+          const unlocked = parsed.role !== 'GUEST' || parsed.subscriptionStatus === true;
           // eslint-disable-next-line react-hooks/set-state-in-effect
-          setIsLoggedIn(true);
+          setIsUnlocked(unlocked);
         }
       } catch (e) {
         console.warn('Failed to parse auth data from localStorage', e);
@@ -124,7 +125,7 @@ export default function DirectorySection() {
         ))}
       </div>
 
-      {!isLoggedIn && (
+      {!isUnlocked && (
         <div className='bg-[#dbeafe] text-[#1e40af] rounded-xl p-4 text-[13px] font-medium mb-6'>
           You are browsing as a visitor. You can see photos only. Become a guest and unlock names,
           hours, contacts and booking for every host in every country.
@@ -150,7 +151,7 @@ export default function DirectorySection() {
                 category={item.category}
                 hours={hours}
                 phone={phone}
-                locked={!isLoggedIn}
+                locked={!isUnlocked}
                 seed={item.id}
                 imageUrl={heroImage}
                 status={item.approvalStatus === 'UNCLAIMED' ? 'UNCLAIMED' : undefined}
@@ -165,7 +166,7 @@ export default function DirectorySection() {
         </div>
       )}
 
-      {!isLoggedIn && (
+      {!isUnlocked && (
         <div className='bg-[#172554] text-white rounded-[18px] p-6 mt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-5'>
           <div>
             <h3

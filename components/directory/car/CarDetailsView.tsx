@@ -5,8 +5,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { bookingApi } from '@/lib/api/booking';
+import { Loader2 } from 'lucide-react';
 
 export function CarDetailsView({ listing }: { listing: any }) {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
   const [protection, setProtection] = useState<string>('');
   const [fuel, setFuel] = useState<string>('');
@@ -56,7 +62,12 @@ export function CarDetailsView({ listing }: { listing: any }) {
     if (pickupDate && returnDate) {
       const start = new Date(pickupDate);
       const end = new Date(returnDate);
-      const diffTime = Math.abs(end.getTime() - start.getTime());
+      start.setHours(0,0,0,0);
+      end.setHours(0,0,0,0);
+      const diffTime = end.getTime() - start.getTime();
+      
+      if (diffTime < 0) return 1; // End is before start, validation will catch this later
+      
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       return diffDays > 0 ? diffDays : 1; // Minimum 1 day
     }
@@ -84,11 +95,89 @@ export function CarDetailsView({ listing }: { listing: any }) {
 
   const handleNext = () => {
     if (step === 1) {
+      if (!pickupDate || !returnDate) {
+        toast.error('Please select both pickup and return dates.');
+        return;
+      }
+      
+      const start = new Date(pickupDate);
+      const end = new Date(returnDate);
+      start.setHours(0,0,0,0);
+      end.setHours(0,0,0,0);
+      
+      const today = new Date();
+      today.setHours(0,0,0,0);
+
+      if (start < today) {
+        toast.error('Pickup date cannot be in the past.');
+        return;
+      }
+
+      if (end < start) {
+        toast.error('Return date cannot be before pickup date.');
+        return;
+      }
+
       if (!protection) setProtection(protectionPlans[0]?.key);
       if (!fuel) setFuel(fuelOptions[0]?.key);
       if (!pickupLocation) setPickupLocation(pickupLocations[0]?.key);
+      
       setStep(2);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleRequestToBook = async () => {
+    try {
+      setIsSubmitting(true);
+      
+      const extraItems = Object.keys(selectedExtras)
+        .filter(k => selectedExtras[k])
+        .map(k => {
+          const opt = extraOptions.find((o: any) => o.key === k);
+          return {
+            id: opt?.key,
+            name: opt?.name,
+            price: opt?.price,
+            perDay: opt?.perDay
+          };
+        });
+
+      const totalAmount = dailyRate * days + 
+                          (activeProtection ? activeProtection.price * days : 0) + 
+                          (activeFuel ? activeFuel.price : 0) + 
+                          extrasCost;
+
+      const payload = {
+        listingId: listing.id,
+        totalAmount: totalAmount,
+        depositAmount: 0,
+        bookingData: {
+          checkIn: new Date(pickupDate).toISOString(),
+          checkOut: new Date(returnDate).toISOString(),
+          guests: 1,
+          pickupLocation: pickupLocation,
+          returnLocation: returnLocation === 'same' ? pickupLocation : returnLocation,
+          numberOfDays: days,
+          dailyRate: dailyRate,
+          protectionPlan: activeProtection ? { name: activeProtection.name, price: activeProtection.price, total: activeProtection.price * days } : null,
+          fuelOption: activeFuel ? { name: activeFuel.name, price: activeFuel.price, total: activeFuel.price } : null,
+          extraItems: extraItems,
+          extraItemsCost: extrasCost,
+        }
+      };
+
+      const res = await bookingApi.createBooking(payload);
+      if (res.success) {
+        toast.success('Reservation confirmed!');
+        router.push(`/dashboard/booking-history`);
+      } else {
+        toast.error(res.message || 'Failed to create reservation');
+        setIsSubmitting(false);
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Error creating reservation');
+      setIsSubmitting(false);
     }
   };
 
@@ -593,6 +682,7 @@ export function CarDetailsView({ listing }: { listing: any }) {
                           type='date'
                           className='w-full bg-transparent font-medium mt-1 outline-none'
                           value={pickupDate}
+                          min={new Date().toISOString().split('T')[0]}
                           onChange={(e) => setPickupDate(e.target.value)}
                         />
                       </div>
@@ -604,6 +694,7 @@ export function CarDetailsView({ listing }: { listing: any }) {
                           type='date'
                           className='w-full bg-transparent font-medium mt-1 outline-none'
                           value={returnDate}
+                          min={pickupDate || new Date().toISOString().split('T')[0]}
                           onChange={(e) => setReturnDate(e.target.value)}
                         />
                       </div>
@@ -670,10 +761,11 @@ export function CarDetailsView({ listing }: { listing: any }) {
                     </div>
 
                     <button
-                      className='w-full bg-[#10b981] hover:bg-[#059669] text-white font-bold py-3.5 px-4 rounded-xl mt-6 transition-colors shadow-sm'
-                      onClick={() => alert('Proceed to checkout')}
+                      disabled={isSubmitting}
+                      className='w-full bg-[#10b981] disabled:bg-[#a7f3d0] disabled:cursor-not-allowed hover:bg-[#059669] text-white font-bold py-3.5 px-4 rounded-xl mt-6 transition-colors shadow-sm flex items-center justify-center'
+                      onClick={handleRequestToBook}
                     >
-                      Continue to payment
+                      {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirm Booking'}
                     </button>
                     <button
                       className='w-full mt-3 text-gray-500 font-bold py-3 hover:text-gray-900 transition-colors'

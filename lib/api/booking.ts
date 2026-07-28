@@ -25,5 +25,9 @@ export const bookingApi = {
   getHostBookings: async () => {
     const res = await apiClient('/bookings/host-bookings');
     return res.data;
+  },
+  updateBookingStatus: async (id: string, status: 'CONFIRMED' | 'CANCELLED' | 'COMPLETED') => {
+    const res = await apiClient.patch(`/bookings/${id}/status`, { status });
+    return res.data;
   }
 };

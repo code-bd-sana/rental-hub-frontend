@@ -23,10 +23,7 @@ export function CarBookingWidget({
   const router = useRouter();
   
   const [showCalendar, setShowCalendar] = useState(false);
-  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
-    from: undefined,
-    to: undefined,
-  });
+  const [dateRange, setDateRange] = useState<any>(undefined);
   const [pickUpTime, setPickUpTime] = useState('10:00');
   const [returnTime, setReturnTime] = useState('10:00');
   
@@ -38,7 +35,7 @@ export function CarBookingWidget({
   // Use protection deposit, fallback to default 500
   const securityDeposit = activeProtection?.id === 'premium' ? 0 : 500; 
 
-  const numberOfDays = (dateRange.from && dateRange.to) 
+  const numberOfDays = (dateRange?.from && dateRange?.to) 
     ? Math.max(1, differenceInDays(dateRange.to, dateRange.from)) 
     : 0;
 
@@ -51,7 +48,7 @@ export function CarBookingWidget({
   const totalDueAtPickup = subtotal + vat;
 
   const handleRequestToBook = async () => {
-    if (!dateRange.from || !dateRange.to) {
+    if (!dateRange?.from || !dateRange?.to) {
       toast.error('Please select pick-up and return dates.');
       return;
     }
@@ -143,9 +140,9 @@ export function CarBookingWidget({
             <div className='flex-1'>
               <div className='text-[10px] uppercase font-bold text-gray-500 tracking-wider mb-0.5'>Pick-up. Return</div>
               <div className='text-[14px] font-bold text-[#111827]'>
-                {dateRange.from ? format(dateRange.from, 'dd-MM-yyyy') : 'Add date'} 
+                {dateRange?.from ? format(dateRange.from, 'dd-MM-yyyy') : 'Add date'} 
                 {' - '} 
-                {dateRange.to ? format(dateRange.to, 'dd-MM-yyyy') : 'Add date'}
+                {dateRange?.to ? format(dateRange.to, 'dd-MM-yyyy') : 'Add date'}
               </div>
             </div>
           </div>
@@ -165,8 +162,15 @@ export function CarBookingWidget({
                 mode="range"
                 selected={dateRange}
                 onSelect={(range: any) => {
+                  if (!range) {
+                    setDateRange(undefined);
+                    return;
+                  }
                   setDateRange(range);
-                  if (range?.from && range?.to) {
+                  
+                  // Only close the calendar if we ALREADY had a 'from' date selected in the previous state.
+                  // This ensures the calendar doesn't close on the first click, even if DayPicker sets 'to'.
+                  if (range.from && range.to && dateRange?.from) {
                     setShowCalendar(false);
                   }
                 }}

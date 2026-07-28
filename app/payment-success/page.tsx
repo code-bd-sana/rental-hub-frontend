@@ -1,8 +1,25 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { CheckCircle2 } from 'lucide-react';
 
 export default function GuestPaymentSuccessPage() {
+  useEffect(() => {
+    const authData = localStorage.getItem('roamly_auth');
+    if (authData) {
+      try {
+        const parsed = JSON.parse(authData);
+        if (parsed && parsed.role === 'GUEST') {
+          parsed.subscriptionStatus = true;
+          localStorage.setItem('roamly_auth', JSON.stringify(parsed));
+        }
+      } catch (e) {
+        console.warn('Failed to parse auth data on payment success', e);
+      }
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#f7f5f0] flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-[#e7e1d6] max-w-md text-center">

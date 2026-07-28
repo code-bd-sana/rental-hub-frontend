@@ -1,178 +1,232 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import React, { useState } from 'react';
+import { MessageSquare } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
-import { format } from 'date-fns';
-import { DayPicker } from 'react-day-picker';
-import 'react-day-picker/dist/style.css';
-import { ServiceBookingWidget } from './ServiceBookingWidget';
+import { useState } from 'react';
 
 export function ServiceDetailsView({ listing }: { listing: any }) {
-  const serviceDetails = listing.serviceDetails || {};
-  const packages = serviceDetails.packages || [];
-  
-  // Generate time slots from 10:00 to 20:30 with 90-min intervals
-  const timeSlots = Array.from({ length: 8 }, (_, i) => {
-    const totalMinutes = 10 * 60 + i * 90;
-    const hour = Math.floor(totalMinutes / 60);
-    const min = totalMinutes % 60 === 0 ? '00' : '30';
-    return `${hour}:${min}`;
-  });
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [selectedTime, setSelectedTime] = useState<string>('');
+  const [activeImage, setActiveImage] = useState<string>(
+    listing.images?.find((img: any) => img.isHero)?.url || listing.images?.[0]?.url,
+  );
 
   const images = listing.images || [];
 
-  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(packages[0]?.id || null);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const formatTime = (hourString: string) => {
+    const hour = parseInt(hourString, 10);
+    if (isNaN(hour)) return hourString;
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const formattedHour = hour % 12 || 12;
+    return `${formattedHour.toString().padStart(2, '0')}:00 ${ampm}`;
+  };
 
-  const selectedPackage = packages.find((p: any) => p.id === selectedPackageId);
+  const availableSlots = listing.serviceDetails?.availableTimeSlots || [];
+  const displayTimeSlots =
+    availableSlots.length > 0
+      ? availableSlots.map(formatTime)
+      : [
+          '09:00 AM',
+          '10:00 AM',
+          '11:00 AM',
+          '12:00 PM',
+          '01:00 PM',
+          '02:00 PM',
+          '03:00 PM',
+          '04:00 PM',
+        ];
+
+  const today = new Date();
+  const dateString = `Today, ${today.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}`;
 
   return (
-    <div className='min-h-screen bg-white'>
-      {/* Breadcrumb */}
-      <div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4'>
-        <div className='flex items-center text-sm text-gray-500'>
-          <Link href='/' className='hover:text-gray-900 transition-colors font-medium'>Home</Link>
-          <ChevronRight className='w-4 h-4 mx-2 text-gray-400' />
-          <span className='text-gray-900'>{listing.title}</span>
+    <div className='min-h-screen bg-white pb-20'>
+      <div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+        {/* Breadcrumbs */}
+        <div className='text-sm text-gray-500 mb-6 flex items-center gap-2'>
+          <Link href='/' className='hover:text-gray-900 transition-colors'>
+            Home
+          </Link>
+          <span>›</span>
+          <Link href='/directory' className='hover:text-gray-900 transition-colors'>
+            Directory
+          </Link>
+          <span>›</span>
+          <Link
+            href={`/directory?category=${listing.serviceDetails?.serviceType || 'SERVICE'}`}
+            className='hover:text-gray-900 transition-colors capitalize'
+          >
+            {listing.serviceDetails?.serviceType?.toLowerCase() || 'Service'}
+          </Link>
+          <span>›</span>
+          <span className='font-medium text-gray-900 truncate'>{listing.title}</span>
         </div>
-      </div>
 
-      <div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
-        
         {/* Header */}
-        <div className='mb-8'>
-          <div className='text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2'>Reserve and Confirm</div>
-          <h1 className='text-4xl md:text-5xl font-extrabold text-[#111827] tracking-tight mb-4'>{listing.title}</h1>
-          <p className='text-lg text-gray-500 max-w-2xl leading-relaxed'>
-            {listing.description || 'Enjoy premium services delivered by our highly skilled professionals.'}
+        <div className='mb-8 border-b border-gray-100 pb-8'>
+          <div className='text-sm font-bold text-[#e85d04] uppercase tracking-wider mb-2'>
+            Reserve and confirm
+          </div>
+          <h2 className='text-3xl sm:text-4xl font-bold text-[#1e293b] mb-3'>Book a session</h2>
+          <p className='text-gray-500 text-[15px] max-w-2xl'>
+            Pick a service, choose a time, and confirm your booking with the host.
           </p>
         </div>
 
+        {/* Split Layout */}
         <div className='flex flex-col lg:flex-row gap-12'>
-          
-          {/* Left Column - Details */}
+          {/* Left Column */}
           <div className='flex-1'>
-            
-            {/* Images Grid */}
-            <div className='mb-8'>
-              {images.length > 0 ? (
-                <div className='rounded-2xl overflow-hidden mb-4 bg-gray-100 relative h-[400px] shadow-sm'>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={images[0].url} alt="Hero" className='w-full h-full object-cover' />
-                </div>
+            {/* Hero Image */}
+            <div className='relative w-full aspect-video sm:aspect-21/9 rounded-2xl overflow-hidden mb-4 bg-gray-100'>
+              {activeImage ? (
+                <Image
+                  src={activeImage}
+                  alt={listing.title}
+                  fill
+                  priority
+                  sizes='(max-width: 1024px) 100vw, 66vw'
+                  className='object-cover'
+                />
               ) : (
-                <div className='rounded-2xl overflow-hidden mb-4 bg-gray-100 h-[400px] flex items-center justify-center text-gray-400'>
-                  No Image Available
-                </div>
-              )}
-              
-              {images.length > 1 && (
-                <div className='grid grid-cols-4 gap-4'>
-                  {images.slice(1, 5).map((img: any, idx: number) => (
-                    <div key={idx} className='rounded-xl overflow-hidden bg-gray-100 relative h-24 shadow-sm'>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={img.url} alt={`Thumbnail ${idx + 1}`} className='w-full h-full object-cover' />
-                    </div>
-                  ))}
+                <div className='w-full h-full flex items-center justify-center text-gray-400'>
+                  No image available
                 </div>
               )}
             </div>
 
-            {/* Host / Location Info */}
-            <div className='mb-10'>
-              <h2 className='text-2xl font-bold text-[#111827]'>
-                {listing.host?.businessName || listing.host?.user?.name || 'Unknown Host'} · {listing.city || 'Unknown Location'}
-              </h2>
-            </div>
-
-            {/* Service Packages */}
-            <div className='mb-10'>
-              <div className='space-y-4'>
-                {packages.map((pkg: any) => (
-                  <label 
-                    key={pkg.id} 
-                    className={`flex items-center p-4 border rounded-2xl cursor-pointer transition-all ${selectedPackageId === pkg.id ? 'border-[#111827] ring-1 ring-[#111827] shadow-sm bg-gray-50/50' : 'border-gray-200 hover:border-gray-300'}`}
+            {/* Gallery Thumbnails */}
+            {images.length > 1 && (
+              <div className='flex gap-3 overflow-x-auto pb-4 mb-4 no-scrollbar'>
+                {images.map((img: any, idx: number) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveImage(img.url)}
+                    className={`relative w-20 h-20 rounded-xl overflow-hidden flex-none transition-all ${activeImage === img.url ? 'ring-2 ring-[#2563eb] ring-offset-2' : 'opacity-70 hover:opacity-100'}`}
                   >
-                    {pkg.imageUrl && (
-                      <div className='w-14 h-14 bg-gray-100 rounded-xl overflow-hidden mr-4 flex-none border border-gray-100'>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={pkg.imageUrl} alt={pkg.name} className='w-full h-full object-cover' />
-                      </div>
-                    )}
-                    <div className='flex items-center flex-1'>
-                      <input 
-                        type="radio" 
-                        name="service_package"
-                        value={pkg.id}
-                        checked={selectedPackageId === pkg.id}
-                        onChange={() => setSelectedPackageId(pkg.id)}
-                        className="w-5 h-5 text-[#111827] border-gray-300 focus:ring-[#111827]"
-                      />
-                      <span className='ml-4 font-semibold text-[#111827] text-[15px]'>{pkg.name}</span>
-                    </div>
-                    <div className='font-bold text-[#111827]'>
-                      USD {pkg.price}
-                    </div>
-                  </label>
+                    <Image
+                      src={img.url}
+                      alt={`Gallery ${idx}`}
+                      fill
+                      sizes='80px'
+                      className='object-cover'
+                    />
+                  </button>
                 ))}
               </div>
+            )}
+
+            <h3 className='text-2xl font-bold text-[#1e293b] mb-6'>
+              {listing.title}{' '}
+              <span className='text-gray-400 text-lg font-medium'>· {listing.city}</span>
+            </h3>
+
+            {/* Service List */}
+            <div className='flex flex-col gap-3 mb-10'>
+              {listing.serviceDetails?.packages?.map((item: any) => (
+                <label
+                  key={item.id}
+                  className={`flex items-center justify-between p-4 border rounded-2xl cursor-pointer transition-colors ${selectedService?.id === item.id ? 'border-[#2563eb] bg-[#eff6ff]' : 'border-gray-200 bg-white hover:border-gray-300'}`}
+                >
+                  <div className='flex items-center gap-4'>
+                    {item.imageUrl && (
+                      <div className='relative w-13.5 h-13.5 rounded-xl overflow-hidden bg-gray-100 flex-none'>
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.name}
+                          fill
+                          sizes='54px'
+                          className='object-cover'
+                        />
+                      </div>
+                    )}
+                    <div className='flex items-center gap-3'>
+                      <input
+                        type='radio'
+                        name='service_selection'
+                        className='w-4.5 h-4.5 accent-[#2563eb] cursor-pointer'
+                        checked={selectedService?.id === item.id}
+                        onChange={() => setSelectedService(item)}
+                      />
+                      <div className='font-bold text-[#1e293b]'>{item.name}</div>
+                    </div>
+                  </div>
+                  <div className='font-extrabold text-[#1e293b] ml-4'>${item.price}</div>
+                </label>
+              ))}
+              {(!listing.serviceDetails?.packages ||
+                listing.serviceDetails.packages.length === 0) && (
+                <div className='text-center text-gray-500 py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-300'>
+                  No services listed yet.
+                </div>
+              )}
             </div>
 
-            {/* Date and Time Picker */}
-            <div className='mb-12'>
-              <h3 className='text-2xl font-bold text-[#111827] mb-2'>Pick a date and time</h3>
-              
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-8 mt-6'>
-                {/* Date Picker */}
-                <div className='bg-white border border-gray-200 rounded-2xl p-4 shadow-sm inline-block'>
-                  <DayPicker
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    disabled={{ before: new Date() }}
-                    className="font-sans m-0"
-                  />
-                </div>
+            {/* Time Slots */}
+            <h3 className='text-2xl font-bold text-[#1e293b] mb-2'>Pick a time</h3>
+            <p className='text-gray-500 text-[15px] mb-4'>{dateString}</p>
+            <div className='flex flex-wrap gap-2.5 mb-10'>
+              {displayTimeSlots.map((time: string, idx: number) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedTime(time)}
+                  className={`px-4 py-2.5 border-2 rounded-xl font-bold text-[14px] transition-colors ${selectedTime === time ? 'bg-[#e85d04] border-[#e85d04] text-white shadow-md' : 'bg-white border-gray-200 text-gray-700 hover:border-[#2563eb] hover:text-[#2563eb]'}`}
+                >
+                  {time}
+                </button>
+              ))}
+            </div>
+          </div>
 
-                {/* Time Slots */}
-                <div>
-                  <div className='text-sm text-gray-500 mb-4'>
-                    {selectedDate ? format(selectedDate, 'EEEE, d MMMM') : 'Select a date first'}
+          {/* Right Column - Sticky Reservation Panel */}
+          <div className='w-full lg:w-95 flex-none'>
+            <div className='sticky top-28 bg-white border border-gray-200 rounded-[20px] shadow-[0_12px_40px_rgba(0,0,0,0.08)] overflow-hidden mb-6'>
+              <div className='bg-[#fcfbf9] px-6 py-5 border-b border-gray-200'>
+                <h3 className='font-bold text-xl text-[#1e293b]'>Your reservation</h3>
+              </div>
+
+              <div className='p-6'>
+                {!selectedService && !selectedTime ? (
+                  <div className='text-gray-500 text-[15px] mb-6'>
+                    Select a service and a time to continue.
                   </div>
-                  <div className='grid grid-cols-4 gap-3'>
-                    {timeSlots.map((time: string) => (
-                      <button
-                        key={time}
-                        onClick={() => setSelectedTime(time)}
-                        className={`py-2 px-1 text-[13px] sm:text-sm font-bold rounded-xl transition-colors border ${
-                          selectedTime === time 
-                            ? 'bg-[#111827] text-white border-[#111827] shadow-md' 
-                            : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
-                        }`}
+                ) : (
+                  <div className='flex flex-col gap-4 mb-8'>
+                    <div className='flex justify-between items-center pb-4 border-b border-gray-100'>
+                      <span className='text-gray-600 font-medium'>
+                        {selectedService?.name || 'Pick a service'}
+                      </span>
+                      <span className='font-bold text-[#1e293b]'>
+                        {selectedService ? `$${selectedService.price}` : 'Reserve'}
+                      </span>
+                    </div>
+                    <div className='flex justify-between items-center'>
+                      <span className='text-gray-600 font-medium'>Time slot</span>
+                      <span
+                        className={`font-bold ${selectedTime ? 'text-[#e85d04]' : 'text-gray-400'}`}
                       >
-                        {time}
-                      </button>
-                    ))}
+                        {selectedTime || 'Pick a slot'}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                <button
+                  disabled={!selectedService || !selectedTime}
+                  className='w-full bg-[#2563eb] disabled:bg-[#93c5fd] disabled:cursor-not-allowed text-white py-4 rounded-xl font-bold text-[15px] hover:bg-[#1d4ed8] transition-colors shadow-sm mb-3'
+                >
+                  Confirm with payment
+                </button>
+
+                <button className='w-full bg-white text-gray-800 border border-gray-300 py-3.5 rounded-xl font-bold text-[15px] hover:bg-gray-50 transition-colors flex items-center justify-center gap-2'>
+                  <MessageSquare className='w-4 h-4' />
+                  Request to chat
+                </button>
               </div>
             </div>
-
           </div>
-
-          {/* Right Column - Booking Widget */}
-          <div className='w-full lg:w-[380px] flex-none'>
-            <ServiceBookingWidget 
-              listing={listing}
-              selectedPackage={selectedPackage}
-              selectedDate={selectedDate}
-              selectedTime={selectedTime}
-            />
-          </div>
-
         </div>
       </div>
     </div>

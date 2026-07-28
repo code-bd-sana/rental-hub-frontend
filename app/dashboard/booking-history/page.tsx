@@ -136,7 +136,10 @@ export default function BookingHistoryPage() {
                       </span>
                     </div>
                     <p className="text-gray-500 text-sm mb-4">
-                      {booking.listing?.category} • {data.guests || 1} Guests
+                      {booking.listing?.category === 'SERVICE' 
+                        ? `${booking.listing?.category} • ${data.packageName || 'Service'}`
+                        : `${booking.listing?.category} • ${data.guests || 1} Guests`
+                      }
                     </p>
                   </div>
 
@@ -153,6 +156,25 @@ export default function BookingHistoryPage() {
                       </div>
                       <div>
                         <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Order Code</div>
+                        <div className="font-bold text-[#e85d04]">{booking.otpCode || '-'}</div>
+                      </div>
+                    </div>
+                  ) : booking.listing?.category === 'SERVICE' ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-xl">
+                      <div>
+                        <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Date</div>
+                        <div className="font-semibold text-gray-900">{data.date ? format(new Date(data.date), 'MMM d, yyyy') : '-'}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Time</div>
+                        <div className="font-semibold text-gray-900">{data.time || '-'}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Total</div>
+                        <div className="font-semibold text-gray-900">${booking.totalAmount?.toFixed(2) || '0.00'}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">OTP Code</div>
                         <div className="font-bold text-[#e85d04]">{booking.otpCode || '-'}</div>
                       </div>
                     </div>

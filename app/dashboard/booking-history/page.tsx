@@ -202,18 +202,22 @@ export default function BookingHistoryPage() {
 
                 {/* Actions */}
                 <div className="flex flex-col gap-2 justify-center border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6 w-full md:w-auto">
-                  <Link 
-                    href={`/bookings/${booking.id}/confirmation`}
-                    className="w-full md:w-32 bg-[#2563eb] text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1d4ed8] transition-colors text-center"
-                  >
-                    View Details
-                  </Link>
-                  <Link 
-                    href={`/directory/${booking.listingId}`}
-                    className="w-full md:w-32 bg-white border border-gray-300 text-gray-700 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors text-center"
-                  >
-                    Listing
-                  </Link>
+                  {booking.status === 'CONFIRMED' || booking.status === 'COMPLETED' ? (
+                    <button 
+                      disabled
+                      className="w-full md:w-32 bg-green-50 text-green-700 border border-green-200 py-2.5 rounded-lg text-sm font-semibold cursor-not-allowed text-center"
+                    >
+                      Paid
+                    </button>
+                  ) : (
+                    <Link 
+                      href={`/bookings/${booking.id}/confirmation`}
+                      className="w-full md:w-32 bg-[#2563eb] text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1d4ed8] transition-colors text-center"
+                    >
+                      Payment
+                    </Link>
+                  )}
+                  
                   {booking.status === 'PENDING' && (
                     <button
                       onClick={() => handleCancel(booking.id)}

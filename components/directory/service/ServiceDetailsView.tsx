@@ -1,12 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { bookingApi } from '@/lib/api/booking';
+import { toast } from 'sonner';
 
 export function ServiceDetailsView({ listing }: { listing: any }) {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedService, setSelectedService] = useState<any>(null);
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [activeImage, setActiveImage] = useState<string>(
@@ -40,6 +45,46 @@ export function ServiceDetailsView({ listing }: { listing: any }) {
 
   const today = new Date();
   const dateString = `Today, ${today.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}`;
+
+  const handleRequestToBook = async () => {
+    if (!selectedService) {
+      toast.error('Please select a service package.');
+      return;
+    }
+    if (!selectedTime) {
+      toast.error('Please select a time.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const payload = {
+        listingId: listing.id,
+        totalAmount: selectedService.price,
+        depositAmount: 0,
+        bookingData: {
+          packageId: selectedService.id,
+          packageName: selectedService.name,
+          date: today.toISOString(),
+          time: selectedTime,
+          basePrice: selectedService.price,
+          vat: 0,
+        }
+      };
+
+      const res = await bookingApi.createBooking(payload);
+      if (res.success) {
+        toast.success('Reservation confirmed!');
+        router.push(`/dashboard/booking-history`);
+      } else {
+        toast.error(res.message || 'Failed to create reservation');
+        setIsSubmitting(false);
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Error creating reservation');
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className='min-h-screen bg-white pb-20'>
@@ -214,10 +259,11 @@ export function ServiceDetailsView({ listing }: { listing: any }) {
                 )}
 
                 <button
-                  disabled={!selectedService || !selectedTime}
-                  className='w-full bg-[#2563eb] disabled:bg-[#93c5fd] disabled:cursor-not-allowed text-white py-4 rounded-xl font-bold text-[15px] hover:bg-[#1d4ed8] transition-colors shadow-sm mb-3'
+                  disabled={isSubmitting || !selectedService || !selectedTime}
+                  onClick={handleRequestToBook}
+                  className='w-full bg-[#2563eb] disabled:bg-[#93c5fd] disabled:cursor-not-allowed text-white py-4 rounded-xl font-bold text-[15px] hover:bg-[#1d4ed8] transition-colors shadow-sm mb-3 flex items-center justify-center'
                 >
-                  Confirm with payment
+                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirm Booking'}
                 </button>
 
                 <button className='w-full bg-white text-gray-800 border border-gray-300 py-3.5 rounded-xl font-bold text-[15px] hover:bg-gray-50 transition-colors flex items-center justify-center gap-2'>

@@ -6,8 +6,10 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { Calendar, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useModal } from '@/components/shared/ModalProvider';
 
 export default function HostBookingsPage() {
+  const { confirm } = useModal();
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'CONFIRMED' | 'CANCELLED'>('ALL');
@@ -34,7 +36,8 @@ export default function HostBookingsPage() {
 
   const handleStatusChange = async (id: string, newStatus: 'CONFIRMED' | 'CANCELLED') => {
     const action = newStatus === 'CONFIRMED' ? 'accept' : 'reject';
-    if (!confirm(`Are you sure you want to ${action} this booking?`)) return;
+    const isConfirmed = await confirm("Confirm Action", `Are you sure you want to ${action} this booking?`);
+    if (!isConfirmed) return;
     
     try {
       setProcessingId(id);

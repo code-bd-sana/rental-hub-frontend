@@ -6,8 +6,10 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { Calendar, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useModal } from '@/components/shared/ModalProvider';
 
 export default function BookingHistoryPage() {
+  const { confirm } = useModal();
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,7 +30,8 @@ export default function BookingHistoryPage() {
   }, []);
 
   const handleCancel = async (id: string) => {
-    if (!confirm('Are you sure you want to cancel this booking?')) return;
+    const isConfirmed = await confirm("Cancel Booking", "Are you sure you want to cancel this booking?");
+    if (!isConfirmed) return;
     try {
       const res = await bookingApi.cancelBooking(id);
       if (res.success) {

@@ -2,11 +2,12 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 
-type ModalType = "list" | "info" | "payment" | "receipt" | null;
+type ModalType = "list" | "info" | "payment" | "receipt" | "confirm" | null;
 
 interface ModalContextType {
   openModal: (type: ModalType, payload?: Record<string, unknown>) => void;
   closeModal: () => void;
+  confirm: (title: string, message: string) => Promise<boolean>;
 }
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
@@ -14,6 +15,7 @@ const ModalContext = createContext<ModalContextType | undefined>(undefined);
 export function ModalProvider({ children }: { children: ReactNode }) {
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [modalPayload, setModalPayload] = useState<Record<string, unknown> | null>(null);
+  const [confirmResolve, setConfirmResolve] = useState<((value: boolean) => void) | null>(null);
 
   const openModal = (type: ModalType, payload?: Record<string, unknown> | null) => {
     setActiveModal(type);
@@ -23,10 +25,21 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   const closeModal = () => {
     setActiveModal(null);
     setModalPayload(null);
+    if (confirmResolve) {
+      confirmResolve(false);
+      setConfirmResolve(null);
+    }
+  };
+
+  const confirm = (title: string, message: string): Promise<boolean> => {
+    return new Promise<boolean>((resolve) => {
+      setConfirmResolve(() => resolve);
+      openModal("confirm", { title, message });
+    });
   };
 
   return (
-    <ModalContext.Provider value={{ openModal, closeModal }}>
+    <ModalContext.Provider value={{ openModal, closeModal, confirm }}>
       {children}
       
       {activeModal === "list" && (
@@ -106,6 +119,36 @@ export function ModalProvider({ children }: { children: ReactNode }) {
                     <tr><td className="py-3 text-[#1e40af] font-semibold">{modalPayload.status === 'pay_at_location' ? 'Amount due at location' : 'Amount paid'}</td><td className="py-3 text-right font-bold text-[#1e40af]">{modalPayload.currency as string} {modalPayload.status === 'pay_at_location' ? (modalPayload.amount as number) : (modalPayload.hold as number)}</td></tr>
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeModal === "confirm" && modalPayload && (
+        <div className="overlay open" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', inset: 0, backgroundColor: 'rgba(21,32,31,0.5)', zIndex: 100 }}>
+          <div className="modal" style={{ maxWidth: 400, padding: 0, width: '100%', backgroundColor: '#fff', borderRadius: 16, overflow: 'hidden' }}>
+            <div className="m-head" style={{ padding: '20px', borderBottom: '1px solid #e7e1d6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 className="text-[18px] font-bold text-[#15201f]">{(modalPayload.title as string) || "Confirm"}</h3>
+              </div>
+              <button className="text-xl leading-none px-2 py-1 text-[#6b7b79] hover:text-[#15201f]" onClick={closeModal}>✕</button>
+            </div>
+            <div className="m-body" style={{ padding: '24px' }}>
+              <p className="text-muted leading-relaxed mb-6">{(modalPayload.message as string)}</p>
+              <div className="flex justify-end gap-3">
+                <button 
+                  className="px-4 py-2 rounded-lg font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors" 
+                  onClick={() => { confirmResolve?.(false); closeModal(); }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="px-4 py-2 rounded-lg font-bold text-white bg-[#2563eb] hover:bg-[#1d4ed8] transition-colors" 
+                  onClick={() => { confirmResolve?.(true); closeModal(); }}
+                >
+                  Confirm
+                </button>
               </div>
             </div>
           </div>

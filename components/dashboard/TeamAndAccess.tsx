@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { apiClient } from '../../lib/api/client';
 import { countryApi } from '../../lib/api/countries';
+import { useModal } from '../shared/ModalProvider';
 
 type AdminPermission =
   | 'LOAD_DIRECTORY'
@@ -27,6 +28,7 @@ interface TeamMember {
 }
 
 export function TeamAndAccess() {
+  const { confirm } = useModal();
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -163,7 +165,8 @@ export function TeamAndAccess() {
   };
 
   const handleRemove = async (id: string) => {
-    if (!confirm('Are you sure you want to remove this team member?')) return;
+    const isConfirmed = await confirm("Remove Team Member", "Are you sure you want to remove this team member?");
+    if (!isConfirmed) return;
     try {
       await apiClient.delete(`/admin/team/${id}`);
       fetchMembers();

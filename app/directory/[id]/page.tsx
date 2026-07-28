@@ -6,9 +6,10 @@ import { listingApi } from '@/lib/api/listings';
 import Link from 'next/link';
 
 // Generate Metadata for SEO
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   try {
-    const data = await listingApi.getListingById(params.id);
+    const { id } = await params;
+    const data = await listingApi.getListingById(id);
     const listing = data.success ? data.data : data;
     if (listing) {
       return {
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   }
 }
 
-export default async function ListingDetailsPage({ params }: { params: { id: string } }) {
+export default async function ListingDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   let listingData = null;
 

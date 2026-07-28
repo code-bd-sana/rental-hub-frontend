@@ -48,6 +48,7 @@ export default function LoginPage() {
           email: user.email,
           name: user.name,
           permissions: user.permissions || [],
+          subscriptionStatus: user.subscriptionStatus || false,
           isAuthenticated: true,
         }),
       );
